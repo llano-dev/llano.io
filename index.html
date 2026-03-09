@@ -161,19 +161,19 @@ ul.task-list li input[type="checkbox"] {
         <div class="t-line">
           <span class="t-key" style="min-width:10px">  A</span>
           <span class="t-dim" style="min-width:148px">via TX-130/45&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-          <span class="t-val-low">31/100 ● LOW &nbsp;</span>
+          <span class="t-val-low">69/100 ● GOOD &nbsp;</span>
           <span class="t-val-low">✓ Go</span>
         </div>
         <div class="t-line">
           <span class="t-key" style="min-width:10px">  B</span>
           <span class="t-dim" style="min-width:148px">via I-35 thru Austin</span>
-          <span class="t-val-med">58/100 ● MED &nbsp;</span>
+          <span class="t-val-med">42/100 ● FAIR &nbsp;</span>
           <span class="t-val-med">⚠ Monitor</span>
         </div>
         <div class="t-line">
           <span class="t-key" style="min-width:10px">  C</span>
           <span class="t-dim" style="min-width:148px">via US-183 East&nbsp;&nbsp;&nbsp;&nbsp;</span>
-          <span class="t-val-high">79/100 ● HIGH </span>
+          <span class="t-val-high">21/100 ● POOR </span>
           <span class="t-val-high">✕ Delay</span>
         </div>
         <div class="t-line">&nbsp;</div>
@@ -216,8 +216,8 @@ ul.task-list li input[type="checkbox"] {
     <div class="step-arrow">→</div>
     <div class="step">
       <div class="step-num">03</div>
-      <h3 class="anchored">Risk Returned</h3>
-      <p>Receive a 0–100 score, grade, confidence interval, and weighted contributing factors.</p>
+      <h3 class="anchored">Safety Score Returned</h3>
+      <p>Receive a 0–100 safety score, grade, confidence interval, contributing factors, and hotspot locations.</p>
     </div>
   </div>
 </section>
@@ -232,13 +232,13 @@ ul.task-list li input[type="checkbox"] {
     <div class="route-card route-low">
       <div class="route-header">
         <span class="route-badge">Route A</span>
-        <span class="route-grade grade-low">LOW</span>
+        <span class="route-grade grade-low">GOOD</span>
       </div>
       <div class="route-path">San Antonio → <span class="route-waypoint">TX-130/45 via Lockhart</span> → Round Rock</div>
       <div class="route-score-display">
-        <div class="route-score-num">31</div>
+        <div class="route-score-num">69</div>
         <div class="route-score-bar">
-          <div class="route-score-fill" style="width:31%; background: var(--green)"></div>
+          <div class="route-score-fill" style="width:69%; background: var(--green)"></div>
         </div>
       </div>
       <div class="route-factors-mini">
@@ -252,13 +252,13 @@ ul.task-list li input[type="checkbox"] {
     <div class="route-card route-med">
       <div class="route-header">
         <span class="route-badge">Route B</span>
-        <span class="route-grade grade-med">MEDIUM</span>
+        <span class="route-grade grade-med">FAIR</span>
       </div>
       <div class="route-path">San Antonio → <span class="route-waypoint">I-35 through Austin</span> → Round Rock</div>
       <div class="route-score-display">
-        <div class="route-score-num">58</div>
+        <div class="route-score-num">42</div>
         <div class="route-score-bar">
-          <div class="route-score-fill" style="width:58%; background: var(--yellow)"></div>
+          <div class="route-score-fill" style="width:42%; background: var(--yellow)"></div>
         </div>
       </div>
       <div class="route-factors-mini">
@@ -272,13 +272,13 @@ ul.task-list li input[type="checkbox"] {
     <div class="route-card route-high">
       <div class="route-header">
         <span class="route-badge">Route C</span>
-        <span class="route-grade grade-high">HIGH</span>
+        <span class="route-grade grade-high">POOR</span>
       </div>
       <div class="route-path">San Antonio → <span class="route-waypoint">US-183 East via Gonzales</span> → Round Rock</div>
       <div class="route-score-display">
-        <div class="route-score-num">79</div>
+        <div class="route-score-num">21</div>
         <div class="route-score-bar">
-          <div class="route-score-fill" style="width:79%; background: var(--coral)"></div>
+          <div class="route-score-fill" style="width:21%; background: var(--coral)"></div>
         </div>
       </div>
       <div class="route-factors-mini">
@@ -325,7 +325,7 @@ ul.task-list li input[type="checkbox"] {
 <section class="api-preview">
   <div class="section-label">API PREVIEW</div>
   <h2 class="anchored">Simple to Call. Rich in Detail.</h2>
-  <p class="section-sub">One endpoint. A full risk picture.</p>
+  <p class="section-sub">One endpoint. Bring your own route or let us plan it.</p>
   <div class="api-grid">
 
     <div class="code-window">
@@ -337,24 +337,30 @@ ul.task-list li input[type="checkbox"] {
 
 client <span class="c-op">=</span> llano<span class="c-op">.</span><span class="c-fn">Client</span>(api_key<span class="c-op">=</span><span class="c-str">"sk_live_••••••••"</span>)
 
-risk <span class="c-op">=</span> client<span class="c-op">.</span>routes<span class="c-op">.</span><span class="c-fn">score</span>(
-    origin        <span class="c-op">=</span> <span class="c-str">"Houston, TX"</span>,
-    destination   <span class="c-op">=</span> <span class="c-str">"El Paso, TX"</span>,
+<span class="c-cm"># Option A — pass a geometry from Samsara, TomTom, etc.</span>
+result <span class="c-op">=</span> client<span class="c-op">.</span>routes<span class="c-op">.</span><span class="c-fn">score</span>(
+    geometry      <span class="c-op">=</span> route_geojson,
     vehicle_class <span class="c-op">=</span> <span class="c-str">"class_8"</span>,
     depart_at     <span class="c-op">=</span> <span class="c-str">"2026-03-15T06:00"</span>
 )
 
-<span class="c-cm"># Core score</span>
-<span class="c-fn">print</span>(risk<span class="c-op">.</span>score)       <span class="c-cm"># 72.4</span>
-<span class="c-fn">print</span>(risk<span class="c-op">.</span>grade)       <span class="c-cm"># "HIGH"</span>
-<span class="c-fn">print</span>(risk<span class="c-op">.</span>confidence)  <span class="c-cm"># 0.94</span>
+<span class="c-cm"># Option B — just give us O&amp;D, we'll route it</span>
+result <span class="c-op">=</span> client<span class="c-op">.</span>routes<span class="c-op">.</span><span class="c-fn">score</span>(
+    origin        <span class="c-op">=</span> <span class="c-str">"4710 N PanAm Expy, San Antonio, TX"</span>,
+    destination   <span class="c-op">=</span> <span class="c-str">"250 University, Round Rock, TX"</span>,
+    vehicle_class <span class="c-op">=</span> <span class="c-str">"class_8"</span>,
+    depart_at     <span class="c-op">=</span> <span class="c-str">"2026-03-15T06:00"</span>
+)
 
-<span class="c-cm"># Contributing factors</span>
-<span class="c-kw">for</span> f <span class="c-kw">in</span> risk<span class="c-op">.</span>factors:
-    <span class="c-fn">print</span>(f<span class="c-op">.</span>type, f<span class="c-op">.</span>weight)
-<span class="c-cm"># weather       0.38</span>
-<span class="c-cm"># construction  0.24</span>
-<span class="c-cm"># traffic       0.19</span></code></pre>
+<span class="c-cm"># Same response either way</span>
+<span class="c-fn">print</span>(result<span class="c-op">.</span>score)       <span class="c-cm"># 41.2</span>
+<span class="c-fn">print</span>(result<span class="c-op">.</span>grade)       <span class="c-cm"># "FAIR"</span>
+<span class="c-fn">print</span>(result<span class="c-op">.</span>routing)     <span class="c-cm"># "provided" | "llano"</span>
+
+<span class="c-kw">for</span> h <span class="c-kw">in</span> result<span class="c-op">.</span>hotspots:
+    <span class="c-fn">print</span>(h<span class="c-op">.</span>score, h<span class="c-op">.</span>reason)
+<span class="c-cm"># 28  "construction"</span>
+<span class="c-cm"># 35  "weather"</span></code></pre>
     </div>
 
     <div class="response-panel">
@@ -362,24 +368,25 @@ risk <span class="c-op">=</span> client<span class="c-op">.</span>routes<span cl
         <svg viewbox="0 0 200 115" width="190">
           <defs>
             <lineargradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#c8503e"></stop>
-              <stop offset="100%" stop-color="#ff7261"></stop>
+              <stop offset="0%" stop-color="#ff7261"></stop>
+              <stop offset="50%" stop-color="#fbbf24"></stop>
+              <stop offset="100%" stop-color="#34d399"></stop>
             </lineargradient>
           </defs>
           <path d="M 15,105 A 90,90 0 0 1 185,105" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="13" stroke-linecap="round"></path>
-          <path d="M 15,105 A 90,90 0 0 1 185,105" fill="none" stroke="url(#gaugeGrad)" stroke-width="13" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="78"></path>
-          <text x="100" y="88" text-anchor="middle" fill="white" font-family="system-ui,sans-serif" font-size="36" font-weight="800">72.4</text>
-          <text x="100" y="108" text-anchor="middle" fill="#ff7261" font-family="system-ui,sans-serif" font-size="10" font-weight="700" letter-spacing="1.5">HIGH RISK</text>
+          <path d="M 15,105 A 90,90 0 0 1 185,105" fill="none" stroke="url(#gaugeGrad)" stroke-width="13" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="166"></path>
+          <text x="100" y="88" text-anchor="middle" fill="white" font-family="system-ui,sans-serif" font-size="36" font-weight="800">41.2</text>
+          <text x="100" y="108" text-anchor="middle" fill="#fbbf24" font-family="system-ui,sans-serif" font-size="10" font-weight="700" letter-spacing="1.5">FAIR SAFETY</text>
         </svg>
       </div>
       <div class="risk-factors">
         <div class="factor-row">
-          <span class="factor-label">Weather</span>
+          <span class="factor-label">Construction</span>
           <div class="factor-bar"><div class="factor-fill" style="width:38%"></div></div>
           <span class="factor-pct">0.38</span>
         </div>
         <div class="factor-row">
-          <span class="factor-label">Construction</span>
+          <span class="factor-label">Weather</span>
           <div class="factor-bar"><div class="factor-fill" style="width:24%; opacity:0.8"></div></div>
           <span class="factor-pct">0.24</span>
         </div>
@@ -391,7 +398,7 @@ risk <span class="c-op">=</span> client<span class="c-op">.</span>routes<span cl
       </div>
       <div class="response-meta">
         <div class="meta-item"><span class="meta-key">route_id</span><span class="meta-val">rt_8xK2mNpQ</span></div>
-        <div class="meta-item"><span class="meta-key">confidence</span><span class="meta-val">0.94</span></div>
+        <div class="meta-item"><span class="meta-key">confidence</span><span class="meta-val">0.91</span></div>
         <div class="meta-item"><span class="meta-key">latency</span><span class="meta-val">148ms</span></div>
       </div>
     </div>
@@ -460,15 +467,15 @@ risk <span class="c-op">=</span> client<span class="c-op">.</span>routes<span cl
     ];
 
     L.polyline(routeA, { color: "#34d399", weight: 3.5, opacity: 0.85 })
-      .bindPopup("<b>Route A</b> · via TX-130/45<br><span style='color:#34d399'>Score: 31 · LOW</span>")
+      .bindPopup("<b>Route A</b> · via TX-130/45<br><span style='color:#34d399'>Safety: 69 · GOOD</span>")
       .addTo(map);
 
     L.polyline(routeB, { color: "#fbbf24", weight: 3.5, opacity: 0.85 })
-      .bindPopup("<b>Route B</b> · via I-35 through Austin<br><span style='color:#fbbf24'>Score: 58 · MEDIUM</span>")
+      .bindPopup("<b>Route B</b> · via I-35 through Austin<br><span style='color:#fbbf24'>Safety: 42 · FAIR</span>")
       .addTo(map);
 
     L.polyline(routeC, { color: "#ff7261", weight: 3.5, opacity: 0.85 })
-      .bindPopup("<b>Route C</b> · via US-183 East<br><span style='color:#ff7261'>Score: 79 · HIGH</span>")
+      .bindPopup("<b>Route C</b> · via US-183 East<br><span style='color:#ff7261'>Safety: 21 · POOR</span>")
       .addTo(map);
 
     // Origin marker
@@ -905,8 +912,8 @@ risk <span class="c-op">=</span> client<span class="c-op">.</span>routes<span cl
     <div class="nav-footer-right">
       <ul class="footer-items list-unstyled">
     <li class="nav-item">
-    <a class="nav-link" href="mailto:contact@llano.io">
-<p>contact@llano.io</p>
+    <a class="nav-link" href="mailto:hello@llano.io">
+<p>hello@llano.io</p>
 </a>
   </li>  
 </ul>
