@@ -131,18 +131,171 @@ ul.task-list li input[type="checkbox"] {
 
 
 
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet">
+
 <!-- Hero -->
 <section class="hero">
-  <img src="logo.png" alt="Llano">
-  <h1>Know the Risk Before You Route</h1>
-  <p>Llano is a risk quantification API for fleet truck routes — giving logistics teams real-time, data-driven risk scores to make smarter dispatch decisions.</p>
-  <a class="hero-cta" href="#">Request Early Access</a>
+  <div class="hero-left">
+    <img src="logo.png" alt="Llano">
+    <h1>Know the Risk Before You Route</h1>
+    <p>A risk quantification API for fleet truck routes — real-time scores, contributing factors, and confidence intervals in a single call.</p>
+    <div class="hero-actions">
+      <a class="hero-cta" href="#">Request Early Access</a>
+      <a class="hero-secondary" href="#">Read the Docs →</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="terminal">
+      <div class="terminal-header">
+        <div class="t-dots"><span></span><span></span><span></span></div>
+        <span class="t-title">terminal</span>
+      </div>
+      <div class="terminal-body">
+        <div class="t-line"><span class="t-prompt">$</span>&nbsp;<span class="t-str">llano compare</span> \</div>
+        <div class="t-line t-indent"><span class="t-str">"Houston, TX"</span> <span class="t-str">"Dallas, TX"</span> \</div>
+        <div class="t-line t-indent">--waypoints <span class="t-str">"I-45 N"</span> <span class="t-str">"US-290"</span> <span class="t-str">"I-10 W"</span></div>
+        <div class="t-line">&nbsp;</div>
+        <div class="t-line t-dim">Scoring 3 routes...</div>
+        <div class="t-line">&nbsp;</div>
+        <div class="t-line">
+          <span class="t-key" style="min-width:10px">  A</span>
+          <span class="t-dim" style="min-width:140px">via I-45 N &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+          <span class="t-val-low">28/100 ● LOW &nbsp;</span>
+          <span class="t-val-low">✓ Go</span>
+        </div>
+        <div class="t-line">
+          <span class="t-key" style="min-width:10px">  B</span>
+          <span class="t-dim" style="min-width:140px">via US-290 Brenham&nbsp;</span>
+          <span class="t-val-med">61/100 ● MED &nbsp;</span>
+          <span class="t-val-med">⚠ Monitor</span>
+        </div>
+        <div class="t-line">
+          <span class="t-key" style="min-width:10px">  C</span>
+          <span class="t-dim" style="min-width:140px">via I-10 W Columbus</span>
+          <span class="t-val-high">84/100 ● HIGH </span>
+          <span class="t-val-high">✕ Delay</span>
+        </div>
+        <div class="t-line">&nbsp;</div>
+        <div class="t-line t-dim">  Recommendation: Route A</div>
+        <div class="t-line t-dim">  Batch response: 312ms</div>
+        <div class="t-line">&nbsp;</div>
+        <div class="t-cursor"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats Bar -->
+<section class="stats-bar">
+  <div class="stat"><div class="stat-num">2.4M+</div><div class="stat-label">Routes Scored</div></div>
+  <div class="stat-divider"></div>
+  <div class="stat"><div class="stat-num">48</div><div class="stat-label">States Covered</div></div>
+  <div class="stat-divider"></div>
+  <div class="stat"><div class="stat-num">94%</div><div class="stat-label">Prediction Accuracy</div></div>
+  <div class="stat-divider"></div>
+  <div class="stat"><div class="stat-num">&lt;200ms</div><div class="stat-label">Avg Response Time</div></div>
+</section>
+
+<!-- How It Works -->
+<section class="how-it-works">
+  <div class="section-label">HOW IT WORKS</div>
+  <h2 class="anchored">From Route to Risk in Milliseconds</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <h3 class="anchored">Submit a Route</h3>
+      <p>Send origin, destination, vehicle class, and departure time to the API.</p>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <h3 class="anchored">Score Computed</h3>
+      <p>Our model ingests real-time weather, traffic, road quality, and historical incident data.</p>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <h3 class="anchored">Risk Returned</h3>
+      <p>Receive a 0–100 score, grade, confidence interval, and weighted contributing factors.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Route Comparison -->
+<section class="route-comparison">
+  <div class="section-label">ROUTE COMPARISON</div>
+  <h2 class="anchored">Score Before You Dispatch</h2>
+  <p class="section-sub">Evaluate multiple options in parallel. Route smarter, not harder.</p>
+  <div class="routes-grid">
+
+    <div class="route-card route-low">
+      <div class="route-header">
+        <span class="route-badge">Route A</span>
+        <span class="route-grade grade-low">LOW</span>
+      </div>
+      <div class="route-path">Houston → <span class="route-waypoint">I-45 N (direct)</span> → Dallas</div>
+      <div class="route-score-display">
+        <div class="route-score-num">28</div>
+        <div class="route-score-bar">
+          <div class="route-score-fill" style="width:28%; background: var(--green)"></div>
+        </div>
+      </div>
+      <div class="route-factors-mini">
+        <div class="rfm-row"><span>Light traffic</span><span>0.31</span></div>
+        <div class="rfm-row"><span>Clear weather</span><span>0.18</span></div>
+        <div class="rfm-row"><span>Good visibility</span><span>0.11</span></div>
+      </div>
+      <div class="route-recommendation rec-go">✓ &nbsp;Recommended</div>
+    </div>
+
+    <div class="route-card route-med">
+      <div class="route-header">
+        <span class="route-badge">Route B</span>
+        <span class="route-grade grade-med">MEDIUM</span>
+      </div>
+      <div class="route-path">Houston → <span class="route-waypoint">US-290 via Brenham</span> → Dallas</div>
+      <div class="route-score-display">
+        <div class="route-score-num">61</div>
+        <div class="route-score-bar">
+          <div class="route-score-fill" style="width:61%; background: var(--yellow)"></div>
+        </div>
+      </div>
+      <div class="route-factors-mini">
+        <div class="rfm-row"><span>Construction zones</span><span>0.38</span></div>
+        <div class="rfm-row"><span>Heavy traffic</span><span>0.29</span></div>
+        <div class="rfm-row"><span>Partial fog</span><span>0.14</span></div>
+      </div>
+      <div class="route-recommendation rec-caution">⚠ &nbsp;Monitor Conditions</div>
+    </div>
+
+    <div class="route-card route-high">
+      <div class="route-header">
+        <span class="route-badge">Route C</span>
+        <span class="route-grade grade-high">HIGH</span>
+      </div>
+      <div class="route-path">Houston → <span class="route-waypoint">I-10 W via Columbus</span> → Dallas</div>
+      <div class="route-score-display">
+        <div class="route-score-num">84</div>
+        <div class="route-score-bar">
+          <div class="route-score-fill" style="width:84%; background: var(--coral)"></div>
+        </div>
+      </div>
+      <div class="route-factors-mini">
+        <div class="rfm-row"><span>Severe weather</span><span>0.52</span></div>
+        <div class="rfm-row"><span>Road hazards</span><span>0.31</span></div>
+        <div class="rfm-row"><span>High wind advisory</span><span>0.22</span></div>
+      </div>
+      <div class="route-recommendation rec-avoid">✕ &nbsp;Delay Recommended</div>
+    </div>
+
+  </div>
 </section>
 
 <!-- Features -->
 <section class="features">
-  <h2 class="anchored">What Llano Does</h2>
-  <p class="section-sub">Everything your fleet needs to route smarter and respond faster.</p>
+  <div class="section-label">CAPABILITIES</div>
+  <h2 class="anchored">Built for the Fleet Stack</h2>
+  <p class="section-sub">Everything your logistics platform needs to route smarter.</p>
   <div class="features-grid">
     <div class="feature-card">
       <div class="icon">🛣️</div>
@@ -151,24 +304,103 @@ ul.task-list li input[type="checkbox"] {
     </div>
     <div class="feature-card">
       <div class="icon">⚡</div>
-      <h3 class="anchored">Real-Time Analysis</h3>
-      <p>Live risk updates as conditions change — weather, construction, and traffic events reflected instantly.</p>
+      <h3 class="anchored">Real-Time Conditions</h3>
+      <p>Live risk updates as conditions change — weather events, active construction, and traffic incidents reflected instantly.</p>
     </div>
     <div class="feature-card">
       <div class="icon">🔌</div>
-      <h3 class="anchored">Simple API Integration</h3>
-      <p>RESTful API designed for easy integration with TMS, dispatch, and fleet management platforms.</p>
+      <h3 class="anchored">REST API</h3>
+      <p>Clean RESTful endpoints designed for easy integration with TMS, dispatch, and fleet management platforms.</p>
     </div>
     <div class="feature-card">
       <div class="icon">📊</div>
-      <h3 class="anchored">Fleet-Level Insights</h3>
-      <p>Aggregate risk metrics across your entire fleet to identify patterns and reduce incident rates over time.</p>
+      <h3 class="anchored">Fleet Analytics</h3>
+      <p>Aggregate risk metrics across your entire fleet to surface patterns and benchmark route safety over time.</p>
     </div>
+  </div>
+</section>
+
+<!-- API Preview -->
+<section class="api-preview">
+  <div class="section-label">API PREVIEW</div>
+  <h2 class="anchored">Simple to Call. Rich in Detail.</h2>
+  <p class="section-sub">One endpoint. A full risk picture.</p>
+  <div class="api-grid">
+
+    <div class="code-window">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-label">route_score.py</span>
+      </div>
+      <pre class="code-body"><code><span class="c-kw">import</span> llano
+
+client <span class="c-op">=</span> llano<span class="c-op">.</span><span class="c-fn">Client</span>(api_key<span class="c-op">=</span><span class="c-str">"sk_live_••••••••"</span>)
+
+risk <span class="c-op">=</span> client<span class="c-op">.</span>routes<span class="c-op">.</span><span class="c-fn">score</span>(
+    origin        <span class="c-op">=</span> <span class="c-str">"Houston, TX"</span>,
+    destination   <span class="c-op">=</span> <span class="c-str">"El Paso, TX"</span>,
+    vehicle_class <span class="c-op">=</span> <span class="c-str">"class_8"</span>,
+    depart_at     <span class="c-op">=</span> <span class="c-str">"2026-03-15T06:00"</span>
+)
+
+<span class="c-cm"># Core score</span>
+<span class="c-fn">print</span>(risk<span class="c-op">.</span>score)       <span class="c-cm"># 72.4</span>
+<span class="c-fn">print</span>(risk<span class="c-op">.</span>grade)       <span class="c-cm"># "HIGH"</span>
+<span class="c-fn">print</span>(risk<span class="c-op">.</span>confidence)  <span class="c-cm"># 0.94</span>
+
+<span class="c-cm"># Contributing factors</span>
+<span class="c-kw">for</span> f <span class="c-kw">in</span> risk<span class="c-op">.</span>factors:
+    <span class="c-fn">print</span>(f<span class="c-op">.</span>type, f<span class="c-op">.</span>weight)
+<span class="c-cm"># weather       0.38</span>
+<span class="c-cm"># construction  0.24</span>
+<span class="c-cm"># traffic       0.19</span></code></pre>
+    </div>
+
+    <div class="response-panel">
+      <div class="risk-gauge">
+        <svg viewbox="0 0 200 115" width="190">
+          <defs>
+            <lineargradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#c8503e"></stop>
+              <stop offset="100%" stop-color="#ff7261"></stop>
+            </lineargradient>
+          </defs>
+          <path d="M 15,105 A 90,90 0 0 1 185,105" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="13" stroke-linecap="round"></path>
+          <path d="M 15,105 A 90,90 0 0 1 185,105" fill="none" stroke="url(#gaugeGrad)" stroke-width="13" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="78"></path>
+          <text x="100" y="88" text-anchor="middle" fill="white" font-family="system-ui,sans-serif" font-size="36" font-weight="800">72.4</text>
+          <text x="100" y="108" text-anchor="middle" fill="#ff7261" font-family="system-ui,sans-serif" font-size="10" font-weight="700" letter-spacing="1.5">HIGH RISK</text>
+        </svg>
+      </div>
+      <div class="risk-factors">
+        <div class="factor-row">
+          <span class="factor-label">Weather</span>
+          <div class="factor-bar"><div class="factor-fill" style="width:38%"></div></div>
+          <span class="factor-pct">0.38</span>
+        </div>
+        <div class="factor-row">
+          <span class="factor-label">Construction</span>
+          <div class="factor-bar"><div class="factor-fill" style="width:24%; opacity:0.8"></div></div>
+          <span class="factor-pct">0.24</span>
+        </div>
+        <div class="factor-row">
+          <span class="factor-label">Traffic</span>
+          <div class="factor-bar"><div class="factor-fill" style="width:19%; opacity:0.6"></div></div>
+          <span class="factor-pct">0.19</span>
+        </div>
+      </div>
+      <div class="response-meta">
+        <div class="meta-item"><span class="meta-key">route_id</span><span class="meta-val">rt_8xK2mNpQ</span></div>
+        <div class="meta-item"><span class="meta-key">confidence</span><span class="meta-val">0.94</span></div>
+        <div class="meta-item"><span class="meta-key">latency</span><span class="meta-val">148ms</span></div>
+      </div>
+    </div>
+
   </div>
 </section>
 
 <!-- Map -->
 <section class="map-section">
+  <div class="section-label">COVERAGE</div>
   <h2 class="anchored">Built for the Roads That Matter</h2>
   <p>From major interstates to rural corridors, Llano covers the routes your fleet depends on.</p>
   <div id="map"></div>
@@ -180,7 +412,7 @@ ul.task-list li input[type="checkbox"] {
   document.addEventListener("DOMContentLoaded", function () {
     var map = L.map("map", { zoomControl: true, scrollWheelZoom: false }).setView([31.0, -100.0], 6);
     map.attributionControl.setPrefix('');
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
       subdomains: "abcd",
       maxZoom: 19
