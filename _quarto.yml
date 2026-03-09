@@ -1,0 +1,31 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "Llano"
+  favicon: logo.png
+  navbar:
+    left:
+      - text: "API"
+        href: "#"
+      - text: "Docs"
+        href: "#"
+      - text: "About"
+        href: "#"
+      - text: "Pricing"
+        href: "#"
+    right:
+      - text: "Get Access"
+        href: "#"
+  page-footer:
+    left: "© 2026 Llano. All rights reserved. &nbsp;|&nbsp; Made with ❤️ in Texas"
+    right:
+      - text: "contact@llano.io"
+        href: "mailto:contact@llano.io"
+
+format:
+  html:
+    theme: flatly
+    css: styles.css
+    toc: false

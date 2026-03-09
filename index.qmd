@@ -1,0 +1,48 @@
+---
+title: ""
+page-layout: full
+---
+
+```{=html}
+<!-- Hero -->
+<section class="hero">
+  <img src="logo.png" alt="Llano Logo" />
+  <h1>Know the Risk Before You Route</h1>
+  <p>Llano is a risk quantification API for fleet truck routes — giving logistics teams real-time, data-driven risk scores to make smarter dispatch decisions.</p>
+  <a class="hero-cta" href="#">Request Early Access</a>
+</section>
+
+<!-- Features -->
+<section class="features">
+  <h2>What Llano Does</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="icon">🛣️</div>
+      <h3>Route Risk Scoring</h3>
+      <p>Get a composite risk score for any truck route based on road conditions, traffic patterns, and historical incident data.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">⚡</div>
+      <h3>Real-Time Analysis</h3>
+      <p>Live risk updates as conditions change — weather, construction, and traffic events reflected instantly.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🔌</div>
+      <h3>Simple API Integration</h3>
+      <p>RESTful API designed for easy integration with TMS, dispatch, and fleet management platforms.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">📊</div>
+      <h3>Fleet-Level Insights</h3>
+      <p>Aggregate risk metrics across your entire fleet to identify patterns and reduce incident rates over time.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Banner -->
+<section class="cta-banner">
+  <h2>Ready to de-risk your routes?</h2>
+  <p>Llano is currently in early access. Join the waitlist and be first to integrate.</p>
+  <a href="#">Get Early Access</a>
+</section>
+```
