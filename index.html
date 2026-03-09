@@ -321,6 +321,130 @@ ul.task-list li input[type="checkbox"] {
   </div>
 </section>
 
+<!-- Safety Audit -->
+<section class="audit-section">
+  <div class="section-label">SAFETY AUDIT</div>
+  <h2 class="anchored">Built for the Boardroom and the Broker</h2>
+  <p class="section-sub">Auto-generated safety reports your fleet can hand directly to insurers.</p>
+  <div class="audit-grid">
+
+    <div class="pdf-viewer">
+      <div class="pdf-viewer-chrome">
+        <div class="pdf-viewer-dot"></div>
+        <div class="pdf-viewer-dot"></div>
+        <div class="pdf-viewer-dot"></div>
+        <span class="pdf-viewer-title">acme-logistics-safety-audit-q1-2026.pdf</span>
+      </div>
+      <div class="audit-report">
+
+        <div class="audit-report-header">
+          <div class="audit-report-wordmark">Llano</div>
+          <div class="audit-report-title-block">
+            <span class="audit-report-title">Fleet Safety Audit Report</span>
+            <span class="audit-report-period">Q1 2026 · January 1 – March 31</span>
+          </div>
+        </div>
+
+        <div class="audit-client-strip">
+          <span class="audit-client-name">Acme Logistics Inc.</span>
+          <span class="audit-client-period">Report generated April 2, 2026</span>
+        </div>
+
+        <div class="audit-score-row">
+          <div class="audit-score-left">
+            <div class="audit-big-score">71<span>/100</span></div>
+          </div>
+          <div class="audit-score-meta">
+            <span class="audit-grade-badge">Good</span>
+            <span class="audit-trend">↑ +4 pts vs Q4 2025</span>
+          </div>
+          <span class="audit-score-label">Overall Safety Score</span>
+        </div>
+
+        <div class="audit-kpis">
+          <div class="audit-kpi">
+            <div class="audit-kpi-num">4,821</div>
+            <div class="audit-kpi-label">Routes Scored</div>
+          </div>
+          <div class="audit-kpi">
+            <div class="audit-kpi-num">87%</div>
+            <div class="audit-kpi-label">Compliance Rate</div>
+          </div>
+          <div class="audit-kpi">
+            <div class="audit-kpi-num">2.1M</div>
+            <div class="audit-kpi-label">Miles Covered</div>
+          </div>
+        </div>
+
+        <div class="audit-factor-section-label">Factor Breakdown</div>
+        <div class="audit-factors">
+          <div class="audit-factor-row">
+            <span class="audit-factor-label">Weather Exposure</span>
+            <div class="audit-factor-bar"><div style="width:74%; background:#1a6b47"></div></div>
+            <span class="audit-factor-score">74</span>
+          </div>
+          <div class="audit-factor-row">
+            <span class="audit-factor-label">Road Quality</span>
+            <div class="audit-factor-bar"><div style="width:81%; background:#1a6b47"></div></div>
+            <span class="audit-factor-score">81</span>
+          </div>
+          <div class="audit-factor-row">
+            <span class="audit-factor-label">Traffic</span>
+            <div class="audit-factor-bar"><div style="width:58%; background:#b45309"></div></div>
+            <span class="audit-factor-score">58</span>
+          </div>
+          <div class="audit-factor-row">
+            <span class="audit-factor-label">Incident History</span>
+            <div class="audit-factor-bar"><div style="width:79%; background:#1a6b47"></div></div>
+            <span class="audit-factor-score">79</span>
+          </div>
+        </div>
+
+        <div class="audit-certified">
+          <div class="audit-certified-left">
+            <div class="audit-certified-dot"></div>
+            <span>Certified by Llano · Third-party scored · Not self-reported</span>
+          </div>
+          <span class="audit-page-num">p. 1 of 8</span>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="audit-props">
+      <div class="audit-prop">
+        <div class="audit-prop-icon">📋</div>
+        <div>
+          <h3 class="anchored">Insurer-Ready Format</h3>
+          <p>Third-party certified scores and methodology summaries designed to satisfy underwriter requirements — not self-reported safety claims.</p>
+        </div>
+      </div>
+      <div class="audit-prop">
+        <div class="audit-prop-icon">📈</div>
+        <div>
+          <h3 class="anchored">Trend Over Time</h3>
+          <p>Quarterly safety score history and period-over-period improvement give insurers the longitudinal data they need to price risk accurately.</p>
+        </div>
+      </div>
+      <div class="audit-prop">
+        <div class="audit-prop-icon">✅</div>
+        <div>
+          <h3 class="anchored">Compliance Tracking</h3>
+          <p>Track how often dispatchers act on Llano recommendations. Demonstrated safety culture is more credible than any self-reported metric.</p>
+        </div>
+      </div>
+      <div class="audit-prop">
+        <div class="audit-prop-icon">📍</div>
+        <div>
+          <h3 class="anchored">Hotspot Attribution</h3>
+          <p>Recurring risk concentrations mapped across your full route network — with incident correlation that builds actuarial credibility over time.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
 <!-- API Preview -->
 <section class="api-preview">
   <div class="section-label">API PREVIEW</div>
@@ -333,7 +457,13 @@ ul.task-list li input[type="checkbox"] {
         <div class="code-dots"><span></span><span></span><span></span></div>
         <span class="code-label">route_score.py</span>
       </div>
-      <pre class="code-body"><code><span class="c-kw">import</span> llano
+      <div class="code-tabs">
+        <button class="code-tab active" onclick="showTab('single', this)">Single Route</button>
+        <button class="code-tab" onclick="showTab('batch', this)">Batch</button>
+      </div>
+
+      <div id="pane-single" class="code-pane active">
+        <pre class="code-body"><code><span class="c-kw">import</span> llano
 
 client <span class="c-op">=</span> llano<span class="c-op">.</span><span class="c-fn">Client</span>(api_key<span class="c-op">=</span><span class="c-str">"sk_live_••••••••"</span>)
 
@@ -361,6 +491,31 @@ result <span class="c-op">=</span> client<span class="c-op">.</span>routes<span 
     <span class="c-fn">print</span>(h<span class="c-op">.</span>score, h<span class="c-op">.</span>reason)
 <span class="c-cm"># 28  "construction"</span>
 <span class="c-cm"># 35  "weather"</span></code></pre>
+      </div>
+
+      <div id="pane-batch" class="code-pane">
+        <pre class="code-body"><code><span class="c-kw">import</span> llano
+
+client <span class="c-op">=</span> llano<span class="c-op">.</span><span class="c-fn">Client</span>(api_key<span class="c-op">=</span><span class="c-str">"sk_live_••••••••"</span>)
+
+<span class="c-cm"># Mix geometries and O&amp;D in the same batch</span>
+results <span class="c-op">=</span> client<span class="c-op">.</span>routes<span class="c-op">.</span><span class="c-fn">batch</span>(
+    routes <span class="c-op">=</span> [
+        {<span class="c-str">"geometry"</span>: route_a_geojson},
+        {<span class="c-str">"geometry"</span>: route_b_geojson},
+        {<span class="c-str">"origin"</span>: <span class="c-str">"Houston, TX"</span>, <span class="c-str">"destination"</span>: <span class="c-str">"Dallas, TX"</span>},
+    ],
+    vehicle_class <span class="c-op">=</span> <span class="c-str">"class_8"</span>,
+    depart_at     <span class="c-op">=</span> <span class="c-str">"2026-03-15T06:00"</span>
+)
+
+<span class="c-cm"># Ranked by safety score, highest first</span>
+<span class="c-kw">for</span> r <span class="c-kw">in</span> results<span class="c-op">.</span><span class="c-fn">ranked</span>():
+    <span class="c-fn">print</span>(r<span class="c-op">.</span>score, r<span class="c-op">.</span>grade, r<span class="c-op">.</span>routing)
+<span class="c-cm"># 69  GOOD   provided</span>
+<span class="c-cm"># 52  FAIR   provided</span>
+<span class="c-cm"># 38  FAIR   llano</span></code></pre>
+      </div>
     </div>
 
     <div class="response-panel">
@@ -488,6 +643,15 @@ result <span class="c-op">=</span> client<span class="c-op">.</span>routes<span 
       .bindPopup("<b>Destination</b><br>250 University, Round Rock")
       .addTo(map);
   });
+</script>
+
+<script>
+  function showTab(name, btn) {
+    document.querySelectorAll('.code-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('pane-' + name).classList.add('active');
+    btn.classList.add('active');
+  }
 </script>
 
 <!-- CTA -->
