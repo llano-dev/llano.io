@@ -1,0 +1,9 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Know the Risk Before You Route",
+    "section": "",
+    "text": "Know the Risk Before You Route\n  Llano is a risk quantification API for fleet truck routes — giving logistics teams real-time, data-driven risk scores to make smarter dispatch decisions.\n  Request Early Access\n\n\n\n\n  What Llano Does\n  \n    \n      🛣️\n      Route Risk Scoring\n      Get a composite risk score for any truck route based on road conditions, traffic patterns, and historical incident data.\n    \n    \n      ⚡\n      Real-Time Analysis\n      Live risk updates as conditions change — weather, construction, and traffic events reflected instantly.\n    \n    \n      🔌\n      Simple API Integration\n      RESTful API designed for easy integration with TMS, dispatch, and fleet management platforms.\n    \n    \n      📊\n      Fleet-Level Insights\n      Aggregate risk metrics across your entire fleet to identify patterns and reduce incident rates over time.\n    \n  \n\n\n\n\n  Ready to de-risk your routes?\n  Llano is currently in early access. Join the waitlist and be first to integrate.\n  Get Early Access"
+  }
+]

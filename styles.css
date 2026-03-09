@@ -1,0 +1,169 @@
+/* Colors */
+:root {
+  --llano-blue-dark: #1a5fa8;
+  --llano-blue-light: #4a9fd4;
+  --llano-gradient: linear-gradient(135deg, #1a5fa8, #4a9fd4);
+}
+
+/* Navbar */
+.navbar {
+  background: var(--llano-gradient) !important;
+  padding: 0.75rem 2rem;
+}
+
+.navbar-brand, .nav-link {
+  color: white !important;
+}
+
+.nav-link:hover {
+  opacity: 0.8;
+}
+
+.navbar .nav-link.get-access,
+.navbar-nav .nav-item:last-child .nav-link {
+  background: white;
+  color: var(--llano-blue-dark) !important;
+  border-radius: 6px;
+  padding: 0.4rem 1rem !important;
+  font-weight: 600;
+}
+
+/* Hero */
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6rem 2rem 4rem;
+  background: linear-gradient(180deg, #f0f6fc 0%, #ffffff 100%);
+}
+
+.hero img {
+  width: 260px;
+  margin-bottom: 2rem;
+}
+
+.hero h1 {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 1rem;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  color: #555;
+  max-width: 600px;
+  margin-bottom: 2rem;
+}
+
+.hero-cta {
+  display: inline-block;
+  background: var(--llano-gradient);
+  color: white !important;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.hero-cta:hover {
+  opacity: 0.85;
+  text-decoration: none;
+}
+
+/* Features */
+.features {
+  padding: 5rem 2rem;
+  background: #ffffff;
+}
+
+.features h2 {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 3rem;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.feature-card {
+  background: #f8fafd;
+  border: 1px solid #e0eaf5;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.feature-card .icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.feature-card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--llano-blue-dark);
+  margin-bottom: 0.5rem;
+}
+
+.feature-card p {
+  font-size: 0.95rem;
+  color: #666;
+}
+
+/* CTA Banner */
+.cta-banner {
+  background: var(--llano-gradient);
+  color: white;
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.cta-banner h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.cta-banner p {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.cta-banner a {
+  background: white;
+  color: var(--llano-blue-dark) !important;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.cta-banner a:hover {
+  opacity: 0.85;
+  text-decoration: none;
+}
+
+/* Footer */
+.nav-footer {
+  background: #1a1a2e;
+  color: #aaa;
+  padding: 1.5rem 2rem;
+}
+
+.nav-footer a {
+  color: #aaa !important;
+}
