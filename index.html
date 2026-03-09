@@ -152,32 +152,33 @@ ul.task-list li input[type="checkbox"] {
       </div>
       <div class="terminal-body">
         <div class="t-line"><span class="t-prompt">$</span>&nbsp;<span class="t-str">llano compare</span> \</div>
-        <div class="t-line t-indent"><span class="t-str">"Houston, TX"</span> <span class="t-str">"Dallas, TX"</span> \</div>
-        <div class="t-line t-indent">--waypoints <span class="t-str">"I-45 N"</span> <span class="t-str">"US-290"</span> <span class="t-str">"I-10 W"</span></div>
+        <div class="t-line t-indent"><span class="t-str">"4710 N PanAm Expy, San Antonio"</span> \</div>
+        <div class="t-line t-indent"><span class="t-str">"250 University, Round Rock"</span> \</div>
+        <div class="t-line t-indent">--waypoints <span class="t-str">"TX-130"</span> <span class="t-str">"I-35"</span> <span class="t-str">"US-183"</span></div>
         <div class="t-line">&nbsp;</div>
         <div class="t-line t-dim">Scoring 3 routes...</div>
         <div class="t-line">&nbsp;</div>
         <div class="t-line">
           <span class="t-key" style="min-width:10px">  A</span>
-          <span class="t-dim" style="min-width:140px">via I-45 N &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-          <span class="t-val-low">28/100 ● LOW &nbsp;</span>
+          <span class="t-dim" style="min-width:148px">via TX-130/45&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+          <span class="t-val-low">31/100 ● LOW &nbsp;</span>
           <span class="t-val-low">✓ Go</span>
         </div>
         <div class="t-line">
           <span class="t-key" style="min-width:10px">  B</span>
-          <span class="t-dim" style="min-width:140px">via US-290 Brenham&nbsp;</span>
-          <span class="t-val-med">61/100 ● MED &nbsp;</span>
+          <span class="t-dim" style="min-width:148px">via I-35 thru Austin</span>
+          <span class="t-val-med">58/100 ● MED &nbsp;</span>
           <span class="t-val-med">⚠ Monitor</span>
         </div>
         <div class="t-line">
           <span class="t-key" style="min-width:10px">  C</span>
-          <span class="t-dim" style="min-width:140px">via I-10 W Columbus</span>
-          <span class="t-val-high">84/100 ● HIGH </span>
+          <span class="t-dim" style="min-width:148px">via US-183 East&nbsp;&nbsp;&nbsp;&nbsp;</span>
+          <span class="t-val-high">79/100 ● HIGH </span>
           <span class="t-val-high">✕ Delay</span>
         </div>
         <div class="t-line">&nbsp;</div>
         <div class="t-line t-dim">  Recommendation: Route A</div>
-        <div class="t-line t-dim">  Batch response: 312ms</div>
+        <div class="t-line t-dim">  Batch response: 287ms</div>
         <div class="t-line">&nbsp;</div>
         <div class="t-cursor"></div>
       </div>
@@ -233,19 +234,19 @@ ul.task-list li input[type="checkbox"] {
         <span class="route-badge">Route A</span>
         <span class="route-grade grade-low">LOW</span>
       </div>
-      <div class="route-path">Houston → <span class="route-waypoint">I-45 N (direct)</span> → Dallas</div>
+      <div class="route-path">San Antonio → <span class="route-waypoint">TX-130/45 via Lockhart</span> → Round Rock</div>
       <div class="route-score-display">
-        <div class="route-score-num">28</div>
+        <div class="route-score-num">31</div>
         <div class="route-score-bar">
-          <div class="route-score-fill" style="width:28%; background: var(--green)"></div>
+          <div class="route-score-fill" style="width:31%; background: var(--green)"></div>
         </div>
       </div>
       <div class="route-factors-mini">
-        <div class="rfm-row"><span>Light traffic</span><span>0.31</span></div>
-        <div class="rfm-row"><span>Clear weather</span><span>0.18</span></div>
-        <div class="rfm-row"><span>Good visibility</span><span>0.11</span></div>
+        <div class="rfm-row"><span>Light toll road traffic</span><span>0.19</span></div>
+        <div class="rfm-row"><span>Clear weather</span><span>0.15</span></div>
+        <div class="rfm-row"><span>Well-maintained surface</span><span>0.10</span></div>
       </div>
-      <div class="route-recommendation rec-go">✓ &nbsp;Recommended</div>
+      <div class="route-recommendation rec-go">✓ &nbsp;Recommended · Fewest Delays</div>
     </div>
 
     <div class="route-card route-med">
@@ -253,17 +254,17 @@ ul.task-list li input[type="checkbox"] {
         <span class="route-badge">Route B</span>
         <span class="route-grade grade-med">MEDIUM</span>
       </div>
-      <div class="route-path">Houston → <span class="route-waypoint">US-290 via Brenham</span> → Dallas</div>
+      <div class="route-path">San Antonio → <span class="route-waypoint">I-35 through Austin</span> → Round Rock</div>
       <div class="route-score-display">
-        <div class="route-score-num">61</div>
+        <div class="route-score-num">58</div>
         <div class="route-score-bar">
-          <div class="route-score-fill" style="width:61%; background: var(--yellow)"></div>
+          <div class="route-score-fill" style="width:58%; background: var(--yellow)"></div>
         </div>
       </div>
       <div class="route-factors-mini">
-        <div class="rfm-row"><span>Construction zones</span><span>0.38</span></div>
-        <div class="rfm-row"><span>Heavy traffic</span><span>0.29</span></div>
-        <div class="rfm-row"><span>Partial fog</span><span>0.14</span></div>
+        <div class="rfm-row"><span>Austin urban congestion</span><span>0.41</span></div>
+        <div class="rfm-row"><span>Active I-35 construction</span><span>0.27</span></div>
+        <div class="rfm-row"><span>Moderate weather risk</span><span>0.12</span></div>
       </div>
       <div class="route-recommendation rec-caution">⚠ &nbsp;Monitor Conditions</div>
     </div>
@@ -273,17 +274,17 @@ ul.task-list li input[type="checkbox"] {
         <span class="route-badge">Route C</span>
         <span class="route-grade grade-high">HIGH</span>
       </div>
-      <div class="route-path">Houston → <span class="route-waypoint">I-10 W via Columbus</span> → Dallas</div>
+      <div class="route-path">San Antonio → <span class="route-waypoint">US-183 East via Gonzales</span> → Round Rock</div>
       <div class="route-score-display">
-        <div class="route-score-num">84</div>
+        <div class="route-score-num">79</div>
         <div class="route-score-bar">
-          <div class="route-score-fill" style="width:84%; background: var(--coral)"></div>
+          <div class="route-score-fill" style="width:79%; background: var(--coral)"></div>
         </div>
       </div>
       <div class="route-factors-mini">
-        <div class="rfm-row"><span>Severe weather</span><span>0.52</span></div>
-        <div class="rfm-row"><span>Road hazards</span><span>0.31</span></div>
-        <div class="rfm-row"><span>High wind advisory</span><span>0.22</span></div>
+        <div class="rfm-row"><span>Rural road conditions</span><span>0.44</span></div>
+        <div class="rfm-row"><span>Crosswind advisory</span><span>0.33</span></div>
+        <div class="rfm-row"><span>Limited rest stops</span><span>0.21</span></div>
       </div>
       <div class="route-recommendation rec-avoid">✕ &nbsp;Delay Recommended</div>
     </div>
@@ -410,13 +411,75 @@ risk <span class="c-op">=</span> client<span class="c-op">.</span>routes<span cl
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    var map = L.map("map", { zoomControl: true, scrollWheelZoom: false }).setView([31.0, -100.0], 6);
+    var map = L.map("map", { zoomControl: true, scrollWheelZoom: false }).setView([30.0, -97.95], 8);
     map.attributionControl.setPrefix('');
+
     L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
       subdomains: "abcd",
       maxZoom: 19
     }).addTo(map);
+
+    // Route A — via TX-130/45 through Lockhart (LOW)
+    var routeA = [
+      [29.4968, -98.4265],
+      [29.530, -98.250],
+      [29.571, -97.965],
+      [29.709, -97.825],
+      [29.885, -97.670],
+      [30.120, -97.620],
+      [30.340, -97.530],
+      [30.570, -97.410],
+      [30.530, -97.530],
+      [30.5076, -97.6789]
+    ];
+
+    // Route B — via I-35 through Austin (MEDIUM)
+    var routeB = [
+      [29.4968, -98.4265],
+      [29.600, -98.310],
+      [29.703, -98.124],
+      [29.883, -97.941],
+      [30.030, -97.860],
+      [30.267, -97.743],
+      [30.390, -97.720],
+      [30.5076, -97.6789]
+    ];
+
+    // Route C — via US-183 East through Gonzales (HIGH)
+    var routeC = [
+      [29.4968, -98.4265],
+      [29.490, -98.200],
+      [29.505, -97.745],
+      [29.672, -97.648],
+      [29.885, -97.670],
+      [30.050, -97.710],
+      [30.220, -97.720],
+      [30.380, -97.700],
+      [30.5076, -97.6789]
+    ];
+
+    L.polyline(routeA, { color: "#34d399", weight: 3.5, opacity: 0.85 })
+      .bindPopup("<b>Route A</b> · via TX-130/45<br><span style='color:#34d399'>Score: 31 · LOW</span>")
+      .addTo(map);
+
+    L.polyline(routeB, { color: "#fbbf24", weight: 3.5, opacity: 0.85 })
+      .bindPopup("<b>Route B</b> · via I-35 through Austin<br><span style='color:#fbbf24'>Score: 58 · MEDIUM</span>")
+      .addTo(map);
+
+    L.polyline(routeC, { color: "#ff7261", weight: 3.5, opacity: 0.85 })
+      .bindPopup("<b>Route C</b> · via US-183 East<br><span style='color:#ff7261'>Score: 79 · HIGH</span>")
+      .addTo(map);
+
+    // Origin marker
+    L.circleMarker([29.4968, -98.4265], { radius: 7, color: "#fff", fillColor: "#fff", fillOpacity: 0.9, weight: 2 })
+      .bindPopup("<b>Origin</b><br>4710 N PanAm Expy, San Antonio")
+      .addTo(map);
+
+    // Destination marker
+    L.circleMarker([30.5076, -97.6789], { radius: 7, color: "#fff", fillColor: "#ff7261", fillOpacity: 0.9, weight: 2 })
+      .bindPopup("<b>Destination</b><br>250 University, Round Rock")
+      .addTo(map);
   });
 </script>
 
