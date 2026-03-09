@@ -133,7 +133,7 @@ ul.task-list li input[type="checkbox"] {
 
 <!-- Hero -->
 <section class="hero">
-  <img src="logo.png" alt="Llano Logo">
+  <img src="logo.png" alt="Llano">
   <h1>Know the Risk Before You Route</h1>
   <p>Llano is a risk quantification API for fleet truck routes — giving logistics teams real-time, data-driven risk scores to make smarter dispatch decisions.</p>
   <a class="hero-cta" href="#">Request Early Access</a>
@@ -142,11 +142,12 @@ ul.task-list li input[type="checkbox"] {
 <!-- Features -->
 <section class="features">
   <h2 class="anchored">What Llano Does</h2>
+  <p class="section-sub">Everything your fleet needs to route smarter and respond faster.</p>
   <div class="features-grid">
     <div class="feature-card">
       <div class="icon">🛣️</div>
       <h3 class="anchored">Route Risk Scoring</h3>
-      <p>Get a composite risk score for any truck route based on road conditions, traffic patterns, and historical incident data.</p>
+      <p>Composite risk scores for any truck route based on road conditions, traffic patterns, and historical incident data.</p>
     </div>
     <div class="feature-card">
       <div class="icon">⚡</div>
@@ -166,10 +167,31 @@ ul.task-list li input[type="checkbox"] {
   </div>
 </section>
 
-<!-- CTA Banner -->
+<!-- Map -->
+<section class="map-section">
+  <h2 class="anchored">Built for the Roads That Matter</h2>
+  <p>From major interstates to rural corridors, Llano covers the routes your fleet depends on.</p>
+  <div id="map"></div>
+</section>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var map = L.map("map", { zoomControl: true, scrollWheelZoom: false }).setView([31.0, -100.0], 6);
+    map.attributionControl.setPrefix('');
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      subdomains: "abcd",
+      maxZoom: 19
+    }).addTo(map);
+  });
+</script>
+
+<!-- CTA -->
 <section class="cta-banner">
   <h2 class="anchored">Ready to de-risk your routes?</h2>
-  <p>Llano is currently in early access. Join the waitlist and be first to integrate.</p>
+  <p>Llano is in early access. Join the waitlist and be first to integrate.</p>
   <a href="#">Get Early Access</a>
 </section>
 
@@ -249,7 +271,7 @@ ul.task-list li input[type="checkbox"] {
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/llano\.io");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
@@ -580,7 +602,7 @@ ul.task-list li input[type="checkbox"] {
 <footer class="footer">
   <div class="nav-footer">
     <div class="nav-footer-left">
-<p>© 2026 Llano. All rights reserved. &nbsp;|&nbsp; Made with ❤️ in Texas</p>
+<p>© 2026 Llano. All rights reserved. &nbsp;|&nbsp; Made Deep in the ❤️</p>
 </div>   
     <div class="nav-footer-center">
       &nbsp;
