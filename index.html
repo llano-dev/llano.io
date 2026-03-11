@@ -654,6 +654,99 @@ results <span class="c-op">=</span> client<span class="c-op">.</span>routes<span
   }
 </script>
 
+<!-- CLI -->
+<section class="cli-section">
+  <div class="section-label">CLI</div>
+  <h2 class="anchored">Score Routes from the Command Line</h2>
+  <p class="section-sub">A native CLI for fleet safety managers. No API integration required — just install, configure once, and go.</p>
+
+  <div class="cli-grid">
+
+    <div class="cli-terminal">
+      <div class="terminal-header">
+        <div class="t-dots"><span></span><span></span><span></span></div>
+        <span class="t-title">terminal</span>
+      </div>
+      <div class="terminal-body">
+        <div class="t-line"><span class="t-prompt">$</span>&nbsp;<span class="t-str">llano setup</span></div>
+        <div class="t-line t-dim">Welcome to Llano. Let's get you configured.</div>
+        <div class="t-line">&nbsp;</div>
+        <div class="t-line"><span class="t-dim">API key:</span> <span class="t-val">••••••••••••</span></div>
+        <div class="t-line"><span class="t-dim">Router [valhalla]:</span> <span class="t-val">tomtom</span></div>
+        <div class="t-line"><span class="t-dim">TomTom API key:</span> <span class="t-val">••••••••••••</span></div>
+        <div class="t-line t-dim">Config saved to ~/.llano/config.yml ✓</div>
+        <div class="t-line">&nbsp;</div>
+        <div class="t-line"><span class="t-prompt">$</span>&nbsp;<span class="t-str">llano score</span> \</div>
+        <div class="t-line t-indent"><span class="t-dim">--from</span> <span class="t-str">"Dallas, TX"</span> \</div>
+        <div class="t-line t-indent"><span class="t-dim">--to</span> <span class="t-str">"Laredo, TX"</span> \</div>
+        <div class="t-line t-indent"><span class="t-dim">--depart</span> <span class="t-str">"2026-03-15 08:00"</span> \</div>
+        <div class="t-line t-indent"><span class="t-dim">--profile</span> <span class="t-str">"18-wheeler"</span></div>
+        <div class="t-line">&nbsp;</div>
+        <div class="t-line t-dim">  Fetching routes...  ✓</div>
+        <div class="t-line t-dim">  Scoring segments... ✓</div>
+        <div class="t-line">&nbsp;</div>
+        <div class="t-line"><span class="t-val-low">  Route 1 ★  I-35 S &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2h 47m &nbsp;&nbsp;1 crash per 2,841 trips</span></div>
+        <div class="t-line"><span class="t-val-med">  Route 2 &nbsp;&nbsp;&nbsp;US-83 via Cotulla &nbsp;3h 02m &nbsp;&nbsp;1 crash per 1,654 trips</span></div>
+        <div class="t-line">&nbsp;</div>
+        <div class="t-line t-dim">  Generate report? (y/n): <span class="t-cursor"></span></div>
+      </div>
+    </div>
+
+    <div class="cli-right">
+      <div class="cli-features">
+        <div class="cli-feature">
+          <span class="cli-feature-icon">🔌</span>
+          <div>
+            <h4 class="anchored">Works with your router</h4>
+            <p>Plug in your PC*Miler, TomTom, or HERE API key. No new routing software required.</p>
+          </div>
+        </div>
+        <div class="cli-feature">
+          <span class="cli-feature-icon">🚛</span>
+          <div>
+            <h4 class="anchored">Vehicle profiles</h4>
+            <p>Save height, weight, axle load, and hazmat settings per vehicle class. Reference by name on every run.</p>
+          </div>
+        </div>
+        <div class="cli-feature">
+          <span class="cli-feature-icon">📄</span>
+          <div>
+            <h4 class="anchored">PDF reports</h4>
+            <p>Route map, hotspots, and safety score in an insurer-ready PDF — generated with a single flag.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="download-box">
+        <div class="download-header">
+          <span class="download-title">Download Llano CLI</span>
+          <span class="download-version">v0.1.0-beta</span>
+        </div>
+        <div class="download-grid">
+          <a class="download-btn" href="#">
+            <span class="dl-icon">🍎</span>
+            <div><div class="dl-os">macOS</div><div class="dl-arch">Apple Silicon</div></div>
+          </a>
+          <a class="download-btn" href="#">
+            <span class="dl-icon">🍎</span>
+            <div><div class="dl-os">macOS</div><div class="dl-arch">Intel</div></div>
+          </a>
+          <a class="download-btn" href="#">
+            <span class="dl-icon">🖥️</span>
+            <div><div class="dl-os">Windows</div><div class="dl-arch">x86-64</div></div>
+          </a>
+          <a class="download-btn" href="#">
+            <span class="dl-icon">🐧</span>
+            <div><div class="dl-os">Linux</div><div class="dl-arch">x86-64</div></div>
+          </a>
+        </div>
+        <div class="download-note">Early access — <a href="#">request a key</a> to get started</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
 <!-- CTA -->
 <section class="cta-banner">
   <h2 class="anchored">Ready to de-risk your routes?</h2>
