@@ -181,7 +181,7 @@ h2 { letter-spacing: -0.02em; }
   white-space: nowrap;
 }
 
-.t-line { display: flex; align-items: baseline; gap: 0.4rem; }
+.t-line { display: flex; align-items: baseline; gap: 0.4rem; min-width: max-content; }
 .t-prompt { color: var(--coral); font-weight: 600; }
 .t-str { color: #fbbf24; }
 .t-key { color: var(--muted); }
