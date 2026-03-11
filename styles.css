@@ -971,7 +971,6 @@ h2 { letter-spacing: -0.02em; }
   -webkit-backdrop-filter: blur(20px) saturate(1.2);
   border: 1px solid var(--glass-border-hi);
   border-radius: 14px;
-  overflow: hidden;
   box-shadow: var(--glass-shadow-lg);
 }
 
