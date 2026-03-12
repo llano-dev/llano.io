@@ -148,7 +148,7 @@ ul.task-list li input[type="checkbox"] {
     <div class="terminal">
       <div class="terminal-header">
         <div class="t-dots"><span></span><span></span><span></span></div>
-        <span class="t-title">terminal</span>
+        <span class="t-title"><span class="t-brand">|:|</span> llano</span>
       </div>
       <div class="terminal-body">
         <div class="t-line"><span class="t-prompt">$</span>&nbsp;<span class="t-str">llano compare</span> \</div>
@@ -292,33 +292,12 @@ ul.task-list li input[type="checkbox"] {
   </div>
 </section>
 
-<!-- Features -->
-<section class="features">
-  <div class="section-label">CAPABILITIES</div>
-  <h2 class="anchored">Built for the Fleet Stack</h2>
-  <p class="section-sub">Everything your logistics platform needs to route smarter.</p>
-  <div class="features-grid">
-    <div class="feature-card">
-      <div class="icon">🛣️</div>
-      <h3 class="anchored">Route Risk Scoring</h3>
-      <p>Composite risk scores for any truck route based on road conditions, traffic patterns, and historical incident data.</p>
-    </div>
-    <div class="feature-card">
-      <div class="icon">⚡</div>
-      <h3 class="anchored">Real-Time Conditions</h3>
-      <p>Live risk updates as conditions change — weather events, active construction, and traffic incidents reflected instantly.</p>
-    </div>
-    <div class="feature-card">
-      <div class="icon">🔌</div>
-      <h3 class="anchored">REST API</h3>
-      <p>Clean RESTful endpoints designed for easy integration with TMS, dispatch, and fleet management platforms.</p>
-    </div>
-    <div class="feature-card">
-      <div class="icon">📊</div>
-      <h3 class="anchored">Fleet Analytics</h3>
-      <p>Aggregate risk metrics across your entire fleet to surface patterns and benchmark route safety over time.</p>
-    </div>
-  </div>
+<!-- Map -->
+<section class="map-section">
+  <div class="section-label">COVERAGE</div>
+  <h2 class="anchored">Built for the Roads That Matter</h2>
+  <p>From major interstates to rural corridors, Llano covers the routes your fleet depends on.</p>
+  <div id="map"></div>
 </section>
 
 <!-- Safety Audit -->
@@ -561,99 +540,6 @@ results <span class="c-op">=</span> client<span class="c-op">.</span>routes<span
   </div>
 </section>
 
-<!-- Map -->
-<section class="map-section">
-  <div class="section-label">COVERAGE</div>
-  <h2 class="anchored">Built for the Roads That Matter</h2>
-  <p>From major interstates to rural corridors, Llano covers the routes your fleet depends on.</p>
-  <div id="map"></div>
-</section>
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    var map = L.map("map", { zoomControl: true, scrollWheelZoom: false }).setView([30.0, -97.95], 8);
-    map.attributionControl.setPrefix('');
-
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
-      subdomains: "abcd",
-      maxZoom: 19
-    }).addTo(map);
-
-    // Route A — via TX-130/45 through Lockhart (LOW)
-    var routeA = [
-      [29.4968, -98.4265],
-      [29.530, -98.250],
-      [29.571, -97.965],
-      [29.709, -97.825],
-      [29.885, -97.670],
-      [30.120, -97.620],
-      [30.340, -97.530],
-      [30.570, -97.410],
-      [30.530, -97.530],
-      [30.5076, -97.6789]
-    ];
-
-    // Route B — via I-35 through Austin (MEDIUM)
-    var routeB = [
-      [29.4968, -98.4265],
-      [29.600, -98.310],
-      [29.703, -98.124],
-      [29.883, -97.941],
-      [30.030, -97.860],
-      [30.267, -97.743],
-      [30.390, -97.720],
-      [30.5076, -97.6789]
-    ];
-
-    // Route C — via US-183 East through Gonzales (HIGH)
-    var routeC = [
-      [29.4968, -98.4265],
-      [29.490, -98.200],
-      [29.505, -97.745],
-      [29.672, -97.648],
-      [29.885, -97.670],
-      [30.050, -97.710],
-      [30.220, -97.720],
-      [30.380, -97.700],
-      [30.5076, -97.6789]
-    ];
-
-    L.polyline(routeA, { color: "#34d399", weight: 3.5, opacity: 0.85 })
-      .bindPopup("<b>Route A</b> · via TX-130/45<br><span style='color:#34d399'>Safety: 69 · GOOD</span>")
-      .addTo(map);
-
-    L.polyline(routeB, { color: "#fbbf24", weight: 3.5, opacity: 0.85 })
-      .bindPopup("<b>Route B</b> · via I-35 through Austin<br><span style='color:#fbbf24'>Safety: 42 · FAIR</span>")
-      .addTo(map);
-
-    L.polyline(routeC, { color: "#ff7261", weight: 3.5, opacity: 0.85 })
-      .bindPopup("<b>Route C</b> · via US-183 East<br><span style='color:#ff7261'>Safety: 21 · POOR</span>")
-      .addTo(map);
-
-    // Origin marker
-    L.circleMarker([29.4968, -98.4265], { radius: 7, color: "#fff", fillColor: "#fff", fillOpacity: 0.9, weight: 2 })
-      .bindPopup("<b>Origin</b><br>4710 N PanAm Expy, San Antonio")
-      .addTo(map);
-
-    // Destination marker
-    L.circleMarker([30.5076, -97.6789], { radius: 7, color: "#fff", fillColor: "#ff7261", fillOpacity: 0.9, weight: 2 })
-      .bindPopup("<b>Destination</b><br>250 University, Round Rock")
-      .addTo(map);
-  });
-</script>
-
-<script>
-  function showTab(name, btn) {
-    document.querySelectorAll('.code-pane').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('pane-' + name).classList.add('active');
-    btn.classList.add('active');
-  }
-</script>
-
 <!-- CLI -->
 <section class="cli-section">
   <div class="section-label">CLI</div>
@@ -665,7 +551,7 @@ results <span class="c-op">=</span> client<span class="c-op">.</span>routes<span
     <div class="cli-terminal">
       <div class="terminal-header">
         <div class="t-dots"><span></span><span></span><span></span></div>
-        <span class="t-title">terminal</span>
+        <span class="t-title"><span class="t-brand">|:|</span> llano</span>
       </div>
       <div class="terminal-body">
       <div class="terminal-inner">
@@ -776,6 +662,91 @@ results <span class="c-op">=</span> client<span class="c-op">.</span>routes<span
   <p>Llano is in early access. Join the waitlist and be first to integrate.</p>
   <a href="#">Get Early Access</a>
 </section>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var map = L.map("map", { zoomControl: true, scrollWheelZoom: false }).setView([30.0, -97.95], 8);
+    map.attributionControl.setPrefix('');
+
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      subdomains: "abcd",
+      maxZoom: 19
+    }).addTo(map);
+
+    // Route A — via TX-130/45 through Lockhart (LOW)
+    var routeA = [
+      [29.4968, -98.4265],
+      [29.530, -98.250],
+      [29.571, -97.965],
+      [29.709, -97.825],
+      [29.885, -97.670],
+      [30.120, -97.620],
+      [30.340, -97.530],
+      [30.570, -97.410],
+      [30.530, -97.530],
+      [30.5076, -97.6789]
+    ];
+
+    // Route B — via I-35 through Austin (MEDIUM)
+    var routeB = [
+      [29.4968, -98.4265],
+      [29.600, -98.310],
+      [29.703, -98.124],
+      [29.883, -97.941],
+      [30.030, -97.860],
+      [30.267, -97.743],
+      [30.390, -97.720],
+      [30.5076, -97.6789]
+    ];
+
+    // Route C — via US-183 East through Gonzales (HIGH)
+    var routeC = [
+      [29.4968, -98.4265],
+      [29.490, -98.200],
+      [29.505, -97.745],
+      [29.672, -97.648],
+      [29.885, -97.670],
+      [30.050, -97.710],
+      [30.220, -97.720],
+      [30.380, -97.700],
+      [30.5076, -97.6789]
+    ];
+
+    L.polyline(routeA, { color: "#34d399", weight: 3.5, opacity: 0.85 })
+      .bindPopup("<b>Route A</b> · via TX-130/45<br><span style='color:#34d399'>Safety: 69 · GOOD</span>")
+      .addTo(map);
+
+    L.polyline(routeB, { color: "#fbbf24", weight: 3.5, opacity: 0.85 })
+      .bindPopup("<b>Route B</b> · via I-35 through Austin<br><span style='color:#fbbf24'>Safety: 42 · FAIR</span>")
+      .addTo(map);
+
+    L.polyline(routeC, { color: "#ff7261", weight: 3.5, opacity: 0.85 })
+      .bindPopup("<b>Route C</b> · via US-183 East<br><span style='color:#ff7261'>Safety: 21 · POOR</span>")
+      .addTo(map);
+
+    // Origin marker
+    L.circleMarker([29.4968, -98.4265], { radius: 7, color: "#fff", fillColor: "#fff", fillOpacity: 0.9, weight: 2 })
+      .bindPopup("<b>Origin</b><br>4710 N PanAm Expy, San Antonio")
+      .addTo(map);
+
+    // Destination marker
+    L.circleMarker([30.5076, -97.6789], { radius: 7, color: "#fff", fillColor: "#ff7261", fillOpacity: 0.9, weight: 2 })
+      .bindPopup("<b>Destination</b><br>250 University, Round Rock")
+      .addTo(map);
+  });
+</script>
+
+<script>
+  function showTab(name, btn) {
+    document.querySelectorAll('.code-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('pane-' + name).classList.add('active');
+    btn.classList.add('active');
+  }
+</script>
 
 
 
