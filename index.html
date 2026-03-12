@@ -555,8 +555,8 @@ results <span class="c-op">=</span> client<span class="c-op">.</span>routes<span
         <span class="t-title"><span class="t-brand">|:|</span> llano</span>
       </div>
       <div class="terminal-body">
-      <div class="terminal-inner">
-        <div class="t-line"><span class="t-prompt">$</span>&nbsp;<span class="t-str">llano setup</span></div>
+      <div class="terminal-inner" id="cli-terminal-inner">
+        <div class="t-line cli-line"><span class="t-prompt">$</span>&nbsp;<span class="t-str">llano setup</span></div>
         <div class="t-line t-dim">Welcome to Llano. Let's get you configured.</div>
         <div class="t-line">&nbsp;</div>
         <div class="t-line"><span class="t-dim">API key:</span> <span class="t-val">••••••••••••</span></div>
@@ -601,6 +601,46 @@ results <span class="c-op">=</span> client<span class="c-op">.</span>routes<span
       </div>
       </div>
     </div>
+
+<script>
+(function () {
+  var delays = [
+    0, 80, 120, 160, 200,          // llano setup + config lines
+    300, 400,                       // blank + llano score command
+    480, 560, 640, 720,             // flags
+    820,                            // blank
+    1400, 2100,                     // fetching / scoring (feel like work)
+    2200,                           // blank
+    2300,                           // table header
+    2500, 2700,                     // table rows
+    2900,                           // blank
+    3100                            // generate report
+  ];
+
+  function init() {
+    var inner = document.getElementById("cli-terminal-inner");
+    if (!inner) return;
+    var children = Array.from(inner.children);
+    children.forEach(function(el) { el.style.visibility = "hidden"; });
+
+    var observer = new IntersectionObserver(function(entries) {
+      if (!entries[0].isIntersecting) return;
+      observer.disconnect();
+      children.forEach(function(el, i) {
+        setTimeout(function() { el.style.visibility = "visible"; }, delays[i] || i * 120);
+      });
+    }, { threshold: 0.3 });
+
+    observer.observe(inner);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+</script>
 
     <div class="cli-right">
       <div class="cli-features">
