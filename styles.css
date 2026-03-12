@@ -177,6 +177,12 @@ h2 { letter-spacing: -0.02em; }
   font-family: var(--mono);
   font-size: 0.78rem;
   line-height: 1.9;
+  overflow-x: auto;
+}
+
+.terminal-inner {
+  width: max-content;
+  min-width: 100%;
 }
 
 .t-line { display: flex; align-items: baseline; gap: 0.4rem; }
