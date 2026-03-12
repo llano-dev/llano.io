@@ -552,7 +552,7 @@ results <span class="c-op">=</span> client<span class="c-op">.</span>routes<span
     <div class="cli-terminal">
       <div class="terminal-header">
         <div class="t-dots"><span></span><span></span><span></span></div>
-        <span class="t-title"><span class="t-brand" id="cli-brand">|:|</span> llano</span>
+        <span class="t-title"><span class="t-brand">|:|</span> llano</span>
       </div>
       <div class="terminal-body">
       <div class="terminal-inner" id="cli-terminal-inner">
@@ -570,8 +570,8 @@ results <span class="c-op">=</span> client<span class="c-op">.</span>routes<span
         <div class="t-line t-indent"><span class="t-dim">--depart</span> <span class="t-str">"2026-03-15 08:00"</span> \</div>
         <div class="t-line t-indent"><span class="t-dim">--profile</span> <span class="t-str">"18-wheeler"</span></div>
         <div class="t-line">&nbsp;</div>
-        <div class="t-line t-dim">  Fetching routes...  ✓</div>
-        <div class="t-line t-dim">  Scoring segments... ✓</div>
+        <div class="t-line t-dim">  <span id="cli-spin-1">|:|</span> Fetching routes...</div>
+        <div class="t-line t-dim">  <span id="cli-spin-2">|:|</span> Scoring segments...</div>
         <div class="t-line">&nbsp;</div>
         <div class="t-table">
           <div class="t-table-head">
@@ -623,22 +623,26 @@ results <span class="c-op">=</span> client<span class="c-op">.</span>routes<span
     var children = Array.from(inner.children);
     children.forEach(function(el) { el.style.visibility = "hidden"; });
 
-    var brand = document.getElementById("cli-brand");
     var frames = ["|:|", "|.|", "|-|", "|.|"];
     var frameIndex = 0;
     var ticker = null;
 
     function startTicker() {
-      if (!brand) return;
+      var s1 = document.getElementById("cli-spin-1");
+      var s2 = document.getElementById("cli-spin-2");
       ticker = setInterval(function() {
         frameIndex = (frameIndex + 1) % frames.length;
-        brand.textContent = frames[frameIndex];
+        if (s1) s1.textContent = frames[frameIndex];
+        if (s2) s2.textContent = frames[frameIndex];
       }, 180);
     }
 
     function stopTicker() {
       clearInterval(ticker);
-      if (brand) brand.textContent = "|:|";
+      var s1 = document.getElementById("cli-spin-1");
+      var s2 = document.getElementById("cli-spin-2");
+      if (s1) s1.textContent = "✓";
+      if (s2) s2.textContent = "✓";
     }
 
     var observer = new IntersectionObserver(function(entries) {
@@ -647,7 +651,6 @@ results <span class="c-op">=</span> client<span class="c-op">.</span>routes<span
       children.forEach(function(el, i) {
         setTimeout(function() { el.style.visibility = "visible"; }, delays[i] || i * 120);
       });
-      // animate during the "working" window
       setTimeout(startTicker, 820);
       setTimeout(stopTicker, 2200);
     }, { threshold: 0.3 });
