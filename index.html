@@ -312,8 +312,15 @@ h2 {
   margin-top: 2rem;
 }
 @media (max-width: 768px) {
-  .demo-split { grid-template-columns: 1fr; height: auto; }
-  .demo-map-wrap { height: 320px; }
+  .demo-split {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  /* Map above terminal on mobile so results are visible without scrolling */
+  .demo-map-wrap { order: -1; height: 280px; }
+  /* Remove scroll trap — let the page scroll naturally on mobile */
+  .demo-terminal-wrap { height: auto; }
+  .terminal-output { overflow-y: visible; height: auto; min-height: 120px; }
 }
 
 /* Terminal panel */
@@ -617,7 +624,7 @@ h2 {
       <div class="method-step">
         <div class="method-step-num">01 — BASELINE</div>
         <h3 class="anchored">Crash rate per segment</h3>
-        <p>A mixed-effects negative binomial model estimates expected crashes per vehicle-mile on every road segment in Texas — controlling for road class, geometry, and urban density.</p>
+        <p>A mixed-effects negative binomial model estimates expected crashes per vehicle-mile on every road segment in Texas — controlling for road class, curvature, grade, traffic volume, and urban density.</p>
       </div>
       <div class="method-step">
         <div class="method-step-num">02 — WEATHER</div>
@@ -1042,6 +1049,13 @@ function renderResults(routes, flags) {
   blank();
 
   renderMap(ranked);
+
+  // On mobile, map is above the terminal — scroll it into view after render
+  if (isMobile) {
+    setTimeout(function() {
+      document.getElementById("demo-map").scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 150);
+  }
 }
 
 // ── Map update (no layout shift — map is always visible) ──────────────────────
@@ -1232,9 +1246,13 @@ input.addEventListener("keydown", function(e) {
 });
 
 // ── Init ──────────────────────────────────────────────────────────────────────
+var isMobile = window.innerWidth < 769;
+if (isMobile) {
+  input.placeholder = 'llano score --from "..." --to "..."';
+}
 welcome();
 initMap();
-setTimeout(function() { input.focus(); }, 100);
+setTimeout(function() { if (!isMobile) input.focus(); }, 100);
 
 })();
 </script>
