@@ -753,7 +753,9 @@ function execute(cmd) {
           waypoints:    coords,
           timestamp:    timestamp,
           arrive:       arrive,
-          alternatives: alts
+          alternatives: alts,
+          origin_label: addresses[0],
+          dest_label:   addresses[addresses.length - 1]
         })
       })
       .then(function(r) {
