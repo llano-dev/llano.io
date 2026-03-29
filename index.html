@@ -404,12 +404,13 @@ h2 {
 }
 
 /* Route table */
-.route-table { width: 100%; border-collapse: collapse; font-size: 1em; margin: .4rem 0; }
+.route-table { width: 100%; border-collapse: collapse; font-size: 1em; margin: .4rem 0; background: transparent; }
+.route-table thead, .route-table tbody, .route-table tr { background: transparent; }
 .route-table th {
   color: #8b8fa8; font-weight: 400; padding: .12rem .5rem;
-  text-align: left; border-bottom: 1px solid #2e3140;
+  text-align: left; border-bottom: 1px solid #2e3140; background: transparent;
 }
-.route-table td { padding: .22rem .5rem; border-bottom: 1px solid #1e2026; color: #e2e4e9; }
+.route-table td { padding: .22rem .5rem; border-bottom: 1px solid #1e2026; color: #e2e4e9; background: transparent; }
 .route-table tr:last-child td { border-bottom: none; }
 .td-rank { color: #F97316 !important; text-align: center; }
 .td-muted { color: #8b8fa8 !important; text-align: right; }
@@ -1007,7 +1008,7 @@ function renderResults(routes, flags) {
     row.style.opacity = isBest ? "1" : "0.7";
     [
       { text: isBest ? "\u2605" : String(i+1), cls: "td-rank" },
-      { text: lbl },
+      { text: lbl, color: COLORS[i % COLORS.length] },
       { text: fmtDur(dur) },
       { text: extra > 0 ? "+" + fmtDur(extra) : "", cls: "td-muted" },
       { text: tpc > 0 ? "1 in " + fmtNum(tpc) + " trips" : "\u2014" },
@@ -1015,7 +1016,8 @@ function renderResults(routes, flags) {
     ].forEach(function(c) {
       var td = document.createElement("td");
       td.textContent = c.text;
-      if (c.cls) td.className = c.cls;
+      if (c.cls)   td.className = c.cls;
+      if (c.color) td.style.color = c.color;
       row.appendChild(td);
     });
   });
@@ -1119,24 +1121,6 @@ function renderMap(ranked) {
         permanent: true, direction: "center", offset: [0,0]
       }).addTo(leafMap);
     });
-  }
-
-  // Legend
-  if (ranked.length) {
-    var legendItems = ranked.map(function(r, i) {
-      var lbl = scalar(r.name) || scalar(r.label) || ("Route " + (i+1));
-      var tpc = scalar(r.trips_per_crash) || 0;
-      return "<i style='background:" + COLORS[i%COLORS.length] +
-             ";display:inline-block;width:18px;height:3px;margin-right:6px;vertical-align:middle'></i>" +
-             lbl + " — 1 in " + fmtNum(tpc);
-    }).join("<br>");
-    var legend = L.control({ position: "bottomright" });
-    legend.onAdd = function() {
-      var d = L.DomUtil.create("div", "info legend");
-      d.innerHTML = "<b style='color:#8b8fa8;font-size:.75em'>ROUTES</b><br>" + legendItems;
-      return d;
-    };
-    legend.addTo(leafMap);
   }
 
   if (allLngs.length) {
