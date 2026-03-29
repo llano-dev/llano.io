@@ -437,24 +437,23 @@ function scalar(v) {
   return Array.isArray(v) ? v[0] : v;
 }
 
-// ── Spinner — vertical lane marker (braille dots cycling top→bottom) ──────────
+// ── Spinner — |:| logo with colon sliding down like a passing lane marker ─────
 function spinner(msg) {
-  // ⠉ dots at top, ⠒ middle, ⠤ bottom — simulates marker passing under you
-  var FRAMES = ["\u2809", "\u2812", "\u2824"];
+  var OFFSETS = ["-0.35em", "-0.18em", "0em", "0.18em", "0.35em", "0.18em", "0em", "-0.18em"];
   var fi = 0;
 
   function frame(f) {
     return '<span style="color:#3a3d4a">|</span>' +
-           '<span style="color:#F97316;font-weight:700">' + FRAMES[f] + '</span>' +
+           '<span style="color:#F97316;font-weight:700;display:inline-block;transform:translateY(' + OFFSETS[f] + ')">:</span>' +
            '<span style="color:#3a3d4a">|</span>';
   }
 
   var el = lineHTML(frame(fi) + '  <span style="color:#8b8fa8">' + msg + "</span>");
 
   var tid = setInterval(function () {
-    fi = (fi + 1) % FRAMES.length;
+    fi = (fi + 1) % OFFSETS.length;
     el.innerHTML = frame(fi) + '  <span style="color:#8b8fa8">' + msg + "</span>";
-  }, 160);
+  }, 120);
 
   return function (done) {
     clearInterval(tid);
