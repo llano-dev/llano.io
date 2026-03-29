@@ -537,6 +537,20 @@ h2 {
 }
 .code-dot { width: 10px; height: 10px; border-radius: 50%; background: #2e3140; }
 .code-label { font-size: .75em; color: #8b8fa8; margin-left: .4rem; }
+.code-tabs { display: flex; gap: 0; margin-left: .6rem; }
+.code-tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #8b8fa8;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .75em;
+  padding: .2rem .7rem;
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.code-tab:hover { color: #e2e4e9; }
+.code-tab.active { color: #F97316; border-bottom-color: #F97316; }
 .code-body { padding: 1.1rem 1.2rem; font-size: .78em; line-height: 1.7; color: #e2e4e9; overflow-x: auto; }
 .c-kw { color: #F97316; }
 .c-str { color: #34d399; }
@@ -799,33 +813,46 @@ h2 {
   <div class="page-section">
     <div class="section-label">API</div>
     <h2 class="anchored">Bring Your Own Router</h2>
-    <p class="section-sub">Already using PC*Miler, TomTom, HERE, or a custom routing engine? Pass the coordinates straight through. Llano scores the geometry — it doesn't care where it came from. Or skip routing entirely and let us plan the alternatives.</p>
+    <p class="section-sub">Already on PC*Miler, TomTom, or HERE? Pass us your API key — we'll call your router on your behalf and score the result. No geometry extraction, no workflow change. Or pass raw coordinates, or let Llano route from scratch.</p>
     <div class="docs-grid">
       <div class="code-block">
         <div class="code-chrome">
           <div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div>
-          <span class="code-label">POST api.llano.io/score</span>
+          <div class="code-tabs">
+            <button class="code-tab active" onclick="docsTab('json',this)">JSON</button>
+            <button class="code-tab" onclick="docsTab('python',this)">Python</button>
+            <button class="code-tab" onclick="docsTab('r',this)">R</button>
+          </div>
         </div>
-        <pre class="code-body"><code><span class="c-cm">// Option A — score coordinates from your router</span>
+
+        <pre class="code-body" id="docs-pane-json"><code><span class="c-cm">// Option A — pass your router key, we call it on your behalf</span>
+{
+  <span class="c-key">"waypoints"</span>:    [[-99.5075, 27.5035], [-98.4936, 29.4241]],
+  <span class="c-key">"arrive"</span>:       <span class="c-str">"2026-04-20T18:00"</span>,
+  <span class="c-key">"alternatives"</span>: 3,
+  <span class="c-key">"router"</span>: {
+    <span class="c-key">"provider"</span>: <span class="c-str">"tomtom"</span>,  <span class="c-cm">// "tomtom" | "pcmiler" | "here"</span>
+    <span class="c-key">"api_key"</span>:  <span class="c-str">"YOUR_TOMTOM_KEY"</span>
+  }
+}
+
+<span class="c-cm">// Option B — pass raw GeoJSON coordinates directly</span>
 {
   <span class="c-key">"route"</span>: {
-    <span class="c-key">"type"</span>: <span class="c-str">"LineString"</span>,
-    <span class="c-key">"coordinates"</span>: [ <span class="c-cm">/* PC*Miler / TomTom / HERE output */</span> ]
+    <span class="c-key">"type"</span>:        <span class="c-str">"LineString"</span>,
+    <span class="c-key">"coordinates"</span>: [ <span class="c-cm">/* your existing geometry */</span> ]
   },
   <span class="c-key">"arrive"</span>: <span class="c-str">"2026-04-20T18:00"</span>
 }
 
-<span class="c-cm">// Option B — pass waypoints, Llano routes and scores</span>
+<span class="c-cm">// Option C — no router, Llano plans and scores alternatives</span>
 {
-  <span class="c-key">"waypoints"</span>: [
-    [-99.5075, 27.5035],  <span class="c-cm">// Laredo</span>
-    [-98.4936, 29.4241]   <span class="c-cm">// San Antonio</span>
-  ],
-  <span class="c-key">"arrive"</span>: <span class="c-str">"2026-04-20T18:00"</span>,
+  <span class="c-key">"waypoints"</span>:    [[-99.5075, 27.5035], [-98.4936, 29.4241]],
+  <span class="c-key">"arrive"</span>:       <span class="c-str">"2026-04-20T18:00"</span>,
   <span class="c-key">"alternatives"</span>: 3
 }
 
-<span class="c-cm">// Response (array, safest first)</span>
+<span class="c-cm">// Response is identical regardless of option (array, safest first)</span>
 [{
   <span class="c-key">"name"</span>:           <span class="c-str">"I-35 N"</span>,
   <span class="c-key">"trips_per_crash"</span>: 2841,
@@ -833,12 +860,73 @@ h2 {
   <span class="c-key">"hotspots"</span>:        [...],
   <span class="c-key">"route"</span>:           { <span class="c-cm">/* GeoJSON */</span> }
 }, ...]</code></pre>
+
+        <pre class="code-body" id="docs-pane-python" style="display:none"><code><span class="c-kw">import</span> requests
+
+<span class="c-cm"># Option A — pass your router key, Llano calls it on your behalf</span>
+resp = requests.<span class="c-fn">post</span>(
+    <span class="c-str">"https://api.llano.io/score"</span>,
+    headers={<span class="c-str">"X-API-Key"</span>: <span class="c-str">"lno_..."</span>},
+    json={
+        <span class="c-str">"waypoints"</span>:    [[-99.5075, 27.5035], [-98.4936, 29.4241]],
+        <span class="c-str">"arrive"</span>:       <span class="c-str">"2026-04-20T18:00"</span>,
+        <span class="c-str">"alternatives"</span>: 3,
+        <span class="c-str">"router"</span>: {
+            <span class="c-str">"provider"</span>: <span class="c-str">"tomtom"</span>,  <span class="c-cm"># "tomtom" | "pcmiler" | "here"</span>
+            <span class="c-str">"api_key"</span>:  <span class="c-str">"YOUR_TOMTOM_KEY"</span>
+        }
+    }
+)
+
+<span class="c-cm"># Option B — pass raw GeoJSON from your existing pipeline</span>
+resp = requests.<span class="c-fn">post</span>(
+    <span class="c-str">"https://api.llano.io/score"</span>,
+    headers={<span class="c-str">"X-API-Key"</span>: <span class="c-str">"lno_..."</span>},
+    json={<span class="c-str">"route"</span>: your_linestring_geojson,
+          <span class="c-str">"arrive"</span>: <span class="c-str">"2026-04-20T18:00"</span>}
+)
+
+routes = resp.<span class="c-fn">json</span>()   <span class="c-cm"># sorted safest first</span>
+best   = routes[0]
+
+<span class="c-fn">print</span>(<span class="c-str">f"</span>{best[<span class="c-str">'name'</span>]}<span class="c-str">"</span>)
+<span class="c-fn">print</span>(<span class="c-str">f"1 in </span>{best[<span class="c-str">'trips_per_crash'</span>]:,}<span class="c-str"> trips"</span>)
+<span class="c-fn">print</span>(<span class="c-str">f"weather mult: </span>{best[<span class="c-str">'wx_mult'</span>]}<span class="c-str">"</span>)</code></pre>
+
+        <pre class="code-body" id="docs-pane-r" style="display:none"><code><span class="c-kw">library</span>(httr2)
+
+<span class="c-cm"># Option A — pass your router key, Llano calls it on your behalf</span>
+resp <span class="c-kw">&lt;-</span> <span class="c-fn">request</span>(<span class="c-str">"https://api.llano.io/score"</span>) |&gt;
+  <span class="c-fn">req_headers</span>(<span class="c-str">"X-API-Key"</span> = <span class="c-str">"lno_..."</span>) |&gt;
+  <span class="c-fn">req_body_json</span>(<span class="c-fn">list</span>(
+    waypoints    = <span class="c-fn">list</span>(<span class="c-fn">c</span>(-99.5075, 27.5035), <span class="c-fn">c</span>(-98.4936, 29.4241)),
+    arrive       = <span class="c-str">"2026-04-20T18:00"</span>,
+    alternatives = 3L,
+    router       = <span class="c-fn">list</span>(provider = <span class="c-str">"tomtom"</span>,  <span class="c-cm"># "tomtom" | "pcmiler" | "here"</span>
+                        api_key  = <span class="c-str">"YOUR_TOMTOM_KEY"</span>)
+  )) |&gt;
+  <span class="c-fn">req_perform</span>() |&gt;
+  <span class="c-fn">resp_body_json</span>()
+
+<span class="c-cm"># Option B — pass raw GeoJSON from your existing pipeline</span>
+resp <span class="c-kw">&lt;-</span> <span class="c-fn">request</span>(<span class="c-str">"https://api.llano.io/score"</span>) |&gt;
+  <span class="c-fn">req_headers</span>(<span class="c-str">"X-API-Key"</span> = <span class="c-str">"lno_..."</span>) |&gt;
+  <span class="c-fn">req_body_json</span>(<span class="c-fn">list</span>(route  = your_linestring_geojson,
+                     arrive = <span class="c-str">"2026-04-20T18:00"</span>)) |&gt;
+  <span class="c-fn">req_perform</span>() |&gt;
+  <span class="c-fn">resp_body_json</span>()
+
+best <span class="c-kw">&lt;-</span> resp[[1]]   <span class="c-cm"># sorted safest first</span>
+
+<span class="c-fn">cat</span>(best$name, <span class="c-str">"\n"</span>)
+<span class="c-fn">cat</span>(<span class="c-str">"1 in"</span>, <span class="c-fn">format</span>(best$trips_per_crash, big.mark=<span class="c-str">","</span>), <span class="c-str">"trips\n"</span>)
+<span class="c-fn">cat</span>(<span class="c-str">"weather mult:"</span>, best$wx_mult, <span class="c-str">"\n"</span>)</code></pre>
       </div>
 
       <div class="docs-fields">
         <div style="font-size:.78em;color:#F97316;margin-bottom:1rem;letter-spacing:.06em">ROUTER AGNOSTIC</div>
         <div style="font-size:.82em;color:#8b8fa8;line-height:1.7;margin-bottom:1.5rem">
-          Llano scores geometry, not routing decisions. If your TMS already plans routes via PC*Miler or TomTom, pipe those coordinates directly — no rerouting, no conflict with existing workflows.
+          Pass your PC*Miler, TomTom, or HERE API key and we'll call your router on your behalf — no geometry extraction, no changes to your TMS. Or pass coordinates directly, or let Llano route from scratch. The response is identical either way.
         </div>
         <div style="font-size:.78em;color:#8b8fa8;margin-bottom:.75rem;letter-spacing:.06em">RESPONSE FIELDS</div>
         <div class="docs-field">
@@ -1244,6 +1332,17 @@ input.addEventListener("keydown", function(e) {
     else             { histIdx = -1; input.value = ""; }
   }
 });
+
+// ── Docs tabs ─────────────────────────────────────────────────────────────────
+window.docsTab = function(lang, btn) {
+  ["json","python","r"].forEach(function(l) {
+    var pane = document.getElementById("docs-pane-" + l);
+    if (pane) pane.style.display = l === lang ? "block" : "none";
+  });
+  var tabs = btn.parentElement.querySelectorAll(".code-tab");
+  tabs.forEach(function(t) { t.classList.remove("active"); });
+  btn.classList.add("active");
+};
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 var isMobile = window.innerWidth < 769;
