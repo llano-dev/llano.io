@@ -403,15 +403,20 @@ h2 {
   transition: opacity .3s;
 }
 
-/* Route table */
-.route-table { width: 100%; border-collapse: collapse; font-size: 1em; margin: .4rem 0; background: transparent; }
-.route-table thead, .route-table tbody, .route-table tr { background: transparent; }
+/* Route table — !important to override Bootstrap/Quarto theme defaults */
+.terminal-output table,
+.terminal-output thead,
+.terminal-output tbody,
+.terminal-output tr,
+.terminal-output th,
+.terminal-output td { background: transparent !important; background-color: transparent !important; border-color: transparent !important; }
+.route-table { width: 100%; border-collapse: collapse; font-size: 1em; margin: .4rem 0; }
 .route-table th {
   color: #8b8fa8; font-weight: 400; padding: .12rem .5rem;
-  text-align: left; border-bottom: 1px solid #2e3140; background: transparent;
+  text-align: left; border-bottom: 1px solid #2e3140 !important;
 }
-.route-table td { padding: .22rem .5rem; border-bottom: 1px solid #1e2026; color: #e2e4e9; background: transparent; }
-.route-table tr:last-child td { border-bottom: none; }
+.route-table td { padding: .22rem .5rem; border-bottom: 1px solid #1e2026 !important; color: #e2e4e9; }
+.route-table tr:last-child td { border-bottom: none !important; }
 .td-rank { color: #F97316 !important; text-align: center; }
 .td-muted { color: #8b8fa8 !important; text-align: right; }
 .td-rr   { color: #8b8fa8 !important; text-align: right; }
@@ -665,7 +670,7 @@ h2 {
     <div class="demo-hint">
       Flags: &nbsp;<span>--from</span> &nbsp;<span>--to</span> &nbsp;<span>--via</span>
       &nbsp;<span>--arrive "YYYY-MM-DD HH:MM"</span> &nbsp;<span>--depart "YYYY-MM-DD HH:MM"</span>
-      &nbsp;<span>--alts N</span>
+      &nbsp;<span>--alts N</span> &nbsp;·&nbsp; type <span>clear</span> to reset
     </div>
   </div>
 </section>
@@ -1137,6 +1142,17 @@ function execute(cmd) {
   if (!cmd) return;
 
   lineHTML('<span style="color:#F97316">$</span> <span style="color:#e2e4e9">' + cmd.replace(/</g,"&lt;") + '</span>');
+
+  if (cmd === "clear" || cmd === "llano clear") {
+    output.innerHTML = "";
+    if (placeholder) placeholder.style.opacity = "1";
+    leafMap.eachLayer(function(layer) {
+      if (!(layer instanceof L.TileLayer)) leafMap.removeLayer(layer);
+    });
+    leafMap.setView([31.0, -99.5], 6);
+    welcome();
+    return;
+  }
 
   if (!cmd.startsWith("llano score")) {
     line("Unknown command. Try: llano score --from \"Laredo, TX\" --to \"San Antonio, TX\"", "t-out-err");
