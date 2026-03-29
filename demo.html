@@ -437,18 +437,46 @@ function scalar(v) {
   return Array.isArray(v) ? v[0] : v;
 }
 
-// ── Spinner ───────────────────────────────────────────────────────────────────
+// ── Spinner — road lane markers passing by ────────────────────────────────────
 function spinner(msg) {
-  var el = line("  |:|  " + msg, "t-out-muted");
-  var frames = ["|:|","|.|","|-|","|.|"];
-  var i = 0;
-  var tid = setInterval(function() {
-    i = (i + 1) % frames.length;
-    el.textContent = "  " + frames[i] + "  " + msg;
-  }, 180);
-  return function(done) {
+  var SLOTS = 9;   // number of dash positions in the road strip
+  var pos   = 0;   // lit position, advances left→right
+
+  function road(p) {
+    var inner = "";
+    for (var i = 0; i < SLOTS; i++) {
+      if (i === p) {
+        inner += '<span style="color:#F97316;font-weight:600">─</span>';
+      } else if (i === (p - 1 + SLOTS) % SLOTS) {
+        // trailing glow — dim orange
+        inner += '<span style="color:#7c3a12">─</span>';
+      } else {
+        inner += '<span style="color:#22252e">·</span>';
+      }
+      if (i < SLOTS - 1) inner += " ";
+    }
+    return (
+      '<span style="color:#3a3d4a">|</span> ' +
+      inner +
+      ' <span style="color:#3a3d4a">|</span>'
+    );
+  }
+
+  var el = lineHTML(
+    road(pos) + '  <span style="color:#8b8fa8">' + msg + "</span>"
+  );
+
+  var tid = setInterval(function () {
+    pos = (pos + 1) % SLOTS;
+    el.innerHTML =
+      road(pos) + '  <span style="color:#8b8fa8">' + msg + "</span>";
+  }, 110);
+
+  return function (done) {
     clearInterval(tid);
-    el.textContent = "  ✓  " + (done || msg);
+    el.innerHTML =
+      '  <span style="color:#34d399">✓</span>  ' +
+      '<span style="color:#8b8fa8">' + (done || msg) + "</span>";
   };
 }
 
