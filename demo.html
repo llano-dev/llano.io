@@ -437,45 +437,51 @@ function scalar(v) {
   return Array.isArray(v) ? v[0] : v;
 }
 
-// ── Spinner — road lane markers passing by ────────────────────────────────────
+// ── Spinner — vertical road lane markers scrolling toward you ─────────────────
 function spinner(msg) {
-  var SLOTS = 9;   // number of dash positions in the road strip
-  var pos   = 0;   // lit position, advances left→right
+  var ROWS = 6;   // height of the road strip
+  var STEP = 3;   // offset of the second (leading) marker
+  var pos  = 0;   // row index of the bright marker
 
+  // Build the vertical road block HTML
   function road(p) {
-    var inner = "";
-    for (var i = 0; i < SLOTS; i++) {
-      if (i === p) {
-        inner += '<span style="color:#F97316;font-weight:600">─</span>';
-      } else if (i === (p - 1 + SLOTS) % SLOTS) {
-        // trailing glow — dim orange
-        inner += '<span style="color:#7c3a12">─</span>';
-      } else {
-        inner += '<span style="color:#22252e">·</span>';
-      }
-      if (i < SLOTS - 1) inner += " ";
+    var html = "";
+    for (var i = 0; i < ROWS; i++) {
+      var d = ((i - p) % ROWS + ROWS) % ROWS;
+      var dot;
+      if      (d === 0)    dot = '<span style="color:#F97316;font-weight:700">\u00b7</span>';
+      else if (d === 1)    dot = '<span style="color:#7c3a12">\u00b7</span>';
+      else if (d === STEP) dot = '<span style="color:#444860">\u00b7</span>';
+      else                 dot = '\u00a0';
+      html += '<div class="t-out-line" style="line-height:1.3">' +
+              '<span style="color:#3a3d4a">\u2502</span>\u00a0' +
+              dot +
+              '\u00a0<span style="color:#3a3d4a">\u2502</span></div>';
     }
-    return (
-      '<span style="color:#3a3d4a">|</span> ' +
-      inner +
-      ' <span style="color:#3a3d4a">|</span>'
-    );
+    return html;
   }
 
-  var el = lineHTML(
-    road(pos) + '  <span style="color:#8b8fa8">' + msg + "</span>"
-  );
+  // Road block element (multi-line, updated in place)
+  var roadEl = document.createElement("div");
+  roadEl.innerHTML = road(pos);
+  output.appendChild(roadEl);
+
+  // Message line below the road block
+  var msgEl = lineHTML('  <span style="color:#8b8fa8">' + msg + "</span>");
+
+  output.scrollTop = output.scrollHeight;
 
   var tid = setInterval(function () {
-    pos = (pos + 1) % SLOTS;
-    el.innerHTML =
-      road(pos) + '  <span style="color:#8b8fa8">' + msg + "</span>";
-  }, 110);
+    pos = (pos + 1) % ROWS;
+    roadEl.innerHTML = road(pos);
+    output.scrollTop = output.scrollHeight;
+  }, 130);
 
   return function (done) {
     clearInterval(tid);
-    el.innerHTML =
-      '  <span style="color:#34d399">✓</span>  ' +
+    roadEl.remove();
+    msgEl.innerHTML =
+      '  <span style="color:#34d399">\u2713</span>  ' +
       '<span style="color:#8b8fa8">' + (done || msg) + "</span>";
   };
 }
