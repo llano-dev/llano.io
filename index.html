@@ -636,7 +636,7 @@ h2, .page-section h2, .hero h2, section h2 {
   <div class="page-section">
     <div class="section-label">HOW IT WORKS</div>
     <h2 class="anchored">From Route to Risk Score</h2>
-    <p class="section-sub">A statistical model fit to a decade of TXDOT crash records, adjusted in real time for weather and departure time.</p>
+    <p class="section-sub">A statistical model fit to years of TXDOT crash records, adjusted in real time for weather and departure time.</p>
     <div class="method-steps">
       <div class="method-step">
         <div class="method-step-num">01 — BASELINE</div>
@@ -674,7 +674,7 @@ h2, .page-section h2, .hero h2, section h2 {
           <div class="t-dot t-dot-r"></div>
           <div class="t-dot t-dot-y"></div>
           <div class="t-dot t-dot-g"></div>
-          <span class="chrome-title"><span class="chrome-brand">|:|</span> llano — demo</span>
+          <span class="chrome-title"><span class="chrome-brand">|:|</span> llano — route safety scoring</span>
         </div>
         <div class="terminal-output" id="term-output"></div>
         <div class="terminal-input-row">
@@ -1034,14 +1034,13 @@ function lineHTML(html) {
 
 // ── Welcome ───────────────────────────────────────────────────────────────────
 function welcome() {
-  lineHTML('<span style="color:#F97316">|:|</span> <span style="color:#e2e4e9">llano</span> <span style="color:#8b8fa8">— route safety scoring (demo)</span>');
   blank();
 }
 
 // ── Spinner ───────────────────────────────────────────────────────────────────
 function spinner(msg) {
   var OFFSETS = ["-0.35em","-0.18em","0em","0.18em","0.35em","0.18em","0em","-0.18em"];
-  var fi = 0;
+  var fi = 2;  // start and rest at center (0em = standard |:|)
   function frame(f) {
     return '<span style="color:#3a3d4a">|</span>' +
            '<span style="color:#F97316;font-weight:700;display:inline-block;transform:translateY(' + OFFSETS[f] + ')">:</span>' +
@@ -1059,7 +1058,7 @@ function spinner(msg) {
     var step = 0;
     function slowTick() {
       if (step >= delays.length) {
-        el.innerHTML = frame(0) + '  <span style="color:#8b8fa8">' + (done || msg) + "</span>";
+        el.innerHTML = frame(2) + '  <span style="color:#8b8fa8">' + (done || msg) + "</span>";
         return;
       }
       fi = (fi + 1) % OFFSETS.length;
