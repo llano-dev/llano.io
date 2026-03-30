@@ -355,7 +355,7 @@ h2, .page-section h2, .hero h2, section h2 {
 .terminal-output {
   flex: 1;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto;
   padding: .9rem 1.1rem .4rem;
   font-size: .8em;
   line-height: 1.65;
@@ -364,7 +364,7 @@ h2, .page-section h2, .hero h2, section h2 {
 .terminal-output::-webkit-scrollbar { width: 4px; }
 .terminal-output::-webkit-scrollbar-track { background: transparent; }
 .terminal-output::-webkit-scrollbar-thumb { background: #2e3140; border-radius: 2px; }
-.t-out-line { white-space: pre-wrap; word-break: break-all; color: #e2e4e9; }
+.t-out-line { white-space: pre; color: #e2e4e9; }
 .terminal-input-row {
   display: flex;
   align-items: center;
@@ -1010,7 +1010,7 @@ function initMap() {
     attribution: '\u00a9 <a href="https://openstreetmap.org">OSM</a> \u00a9 <a href="https://carto.com">CARTO</a>',
     subdomains: "abcd", maxZoom: 19
   }).addTo(leafMap);
-  leafMap.setView([31.0, -99.5], 6);
+  leafMap.setView([31.0, -99.5], 5);
 }
 
 // ── Output helpers ────────────────────────────────────────────────────────────
@@ -1159,7 +1159,6 @@ function renderResults(routes, flags) {
   });
   var wrap = document.createElement("div");
   wrap.className = "t-out-line";
-  wrap.style.overflowX = "auto";
   wrap.appendChild(tbl);
   output.appendChild(wrap);
   output.scrollTop = output.scrollHeight;
@@ -1267,10 +1266,14 @@ function renderMap(ranked) {
   }
 
   if (allLngs.length) {
-    leafMap.fitBounds([
+    var bounds = [
       [Math.min.apply(null,allLats), Math.min.apply(null,allLngs)],
       [Math.max.apply(null,allLats), Math.max.apply(null,allLngs)]
-    ], { padding: [30,30] });
+    ];
+    setTimeout(function() {
+      leafMap.invalidateSize();
+      leafMap.fitBounds(bounds, { padding: [40, 40], animate: true });
+    }, 50);
   }
 }
 
@@ -1289,7 +1292,7 @@ function execute(cmd) {
     leafMap.eachLayer(function(layer) {
       if (!(layer instanceof L.TileLayer)) leafMap.removeLayer(layer);
     });
-    leafMap.setView([31.0, -99.5], 6);
+    leafMap.setView([31.0, -99.5], 5);
     welcome();
     return;
   }
@@ -1354,7 +1357,17 @@ input.addEventListener("keydown", function(e) {
     input.value = "";
     updateGhost();
     execute(cmd);
-  } else if ((e.key === "Tab" || e.key === "ArrowRight") && input.value === "") {
+  } else if (e.key === "Tab") {
+    e.preventDefault();
+    output.innerHTML = "";
+    input.value = "";
+    updateGhost();
+    if (placeholder) placeholder.style.opacity = "1";
+    leafMap.eachLayer(function(layer) {
+      if (!(layer instanceof L.TileLayer)) leafMap.removeLayer(layer);
+    });
+    leafMap.setView([31.0, -99.5], 5);
+  } else if (e.key === "ArrowRight" && input.value === "") {
     e.preventDefault();
     input.value = SUGGESTION;
     updateGhost();
