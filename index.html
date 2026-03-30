@@ -437,6 +437,7 @@ h2, .page-section h2, .hero h2, section h2 {
 .leaflet-control-zoom a { background:#1a1c22 !important; color:#e2e4e9 !important; border-color:#2e3140 !important; }
 .leaflet-control-attribution { background:rgba(14,16,19,.85) !important; color:#8b8fa8 !important; }
 .leaflet-control-attribution a { color:#8b8fa8 !important; }
+.leaflet-control-attribution svg { display: none !important; }
 .info.legend {
   background:rgba(26,28,34,.95) !important; color:#e2e4e9 !important;
   border:1px solid #2e3140; border-radius:6px; padding:.5rem .8rem;
@@ -646,7 +647,7 @@ h2, .page-section h2, .hero h2, section h2 {
       <div class="method-step">
         <div class="method-step-num">02 — DYNAMIC</div>
         <h3 class="anchored">Real-time multiplier</h3>
-        <p>An XGBoost case-crossover model estimates how current conditions (wind, precipitation, congestion) elevate crash probability relative to the same segment on a clear day.</p>
+        <p>An XGBoost case-crossover model estimates how current conditions (wind, precipitation, congestion) elevate crash probability relative to the same segment on a clear, free-flow traffic day.</p>
       </div>
       <div class="method-step">
         <div class="method-step-num">03 — OUTPUT</div>
@@ -697,7 +698,7 @@ h2, .page-section h2, .hero h2, section h2 {
     <div class="demo-hint">
       Flags: &nbsp;<span>--from</span> &nbsp;<span>--to</span> &nbsp;<span>--via</span>
       &nbsp;<span>--arrive "YYYY-MM-DD HH:MM"</span> &nbsp;<span>--depart "YYYY-MM-DD HH:MM"</span>
-      &nbsp;<span>--alts N</span> &nbsp;·&nbsp; type <span>clear</span> to reset
+      &nbsp;·&nbsp; <span>→</span> to accept suggestion &nbsp;·&nbsp; <span>⇥</span> to reset
     </div>
   </div>
 </section>
@@ -1052,13 +1053,14 @@ function spinner(msg) {
     el.innerHTML = frame(fi) + '  <span style="color:#8b8fa8">' + msg + "</span>";
   }, 120);
 
-  function stop(done) {
+  function stop(done, callback) {
     clearInterval(tid);
     var delays = [150, 210, 290, 390, 510];
     var step = 0;
     function slowTick() {
       if (step >= delays.length) {
         el.innerHTML = frame(2) + '  <span style="color:#8b8fa8">' + (done || msg) + "</span>";
+        if (callback) callback();
         return;
       }
       fi = (fi + 1) % OFFSETS.length;
@@ -1117,6 +1119,7 @@ function renderResults(routes, flags) {
   });
   var durVals = ranked.map(function(r) { return scalar(r.duration)||scalar(r.duration_secs)||0; });
   var fastestDur = Math.min.apply(null, durVals);
+  var fastestTpc = scalar(ranked[durVals.indexOf(fastestDur)].trips_per_crash) || 0;
 
   blank();
   var fromTo = (flags.from||"") + "  \u2192  " + (flags.to||"");
@@ -1137,9 +1140,11 @@ function renderResults(routes, flags) {
     var lbl  = scalar(r.name) || scalar(r.label) || ("Route " + (i+1));
     var extra = dur - fastestDur;
     var isBest = i === 0;
-    var rr = (tpc > 0 && !isBest)
-      ? (scalar(ranked[0].trips_per_crash) / tpc).toFixed(2) + "\u00d7"
+    var isFastest = (dur === fastestDur);
+    var rr = (tpc > 0 && fastestTpc > 0)
+      ? (fastestTpc / tpc).toFixed(2) + "\u00d7"
       : "\u2014";
+    if (isFastest) rr = "1.0\u00d7";
     var row = tbody.insertRow();
     row.style.opacity = isBest ? "1" : "0.7";
     [
@@ -1334,8 +1339,9 @@ function execute(cmd) {
         if (!r.ok) throw new Error("API error " + r.status);
         return r.json();
       }).then(function(routes) {
-        stop("Scored " + routes.length + " route" + (routes.length !== 1 ? "s" : ""));
-        renderResults(routes, flags);
+        stop("Scored " + routes.length + " route" + (routes.length !== 1 ? "s" : ""), function() {
+          renderResults(routes, flags);
+        });
       });
     })
     .catch(function(err) {
