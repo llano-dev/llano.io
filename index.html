@@ -481,6 +481,7 @@ h2, .page-section h2, .hero h2, section h2 {
   align-items: start;
 }
 @media (max-width: 700px) { .docs-grid { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { #example .page-section > div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; } }
 .code-block {
   background: #0e1013;
   border: 1px solid #2e3140;
@@ -934,6 +935,57 @@ best <span class="c-kw">&lt;-</span> resp[[1]]   <span class="c-cm"># sorted saf
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ── Example Response ─────────────────────────────────────────────────── -->
+<section id="example" style="border-top:1px solid #1e2026;">
+  <div class="page-section">
+    <div class="section-label">Example</div>
+    <h2 class="anchored">Laredo → Dallas</h2>
+    <p class="section-sub">Two alternatives scored and ranked by safety. The faster route carries meaningfully higher risk — a trade-off Llano makes explicit before dispatch.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-top:2rem;">
+
+      <!-- Route 1 — safest -->
+      <div class="code-block" style="border:1px solid #22C55E33;">
+        <div class="code-chrome" style="gap:.75rem;">
+          <div style="display:flex;gap:.4rem;"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+          <span style="color:#22C55E;font-size:.72em;font-weight:600;">★ RECOMMENDED</span>
+        </div>
+        <pre class="code-body" style="font-size:.75em;padding:1.1rem 1.25rem;"><code><span class="c-key">"name"</span>:            <span class="c-str">"I-35 N via San Antonio"</span>,
+<span class="c-key">"duration_secs"</span>:   <span class="c-num">20880</span>,        <span class="c-cm">// 5h 48m</span>
+<span class="c-key">"trips_per_crash"</span>: <span class="c-num">3241</span>,
+<span class="c-key">"dynamic_mult"</span>:    <span class="c-num">1.02</span>,
+<span class="c-key">"hotspots"</span>: [
+  { <span class="c-key">"route_fraction"</span>: <span class="c-num">0.31</span>,
+    <span class="c-key">"factor"</span>: <span class="c-str">"urban interchange"</span> }
+]</code></pre>
+      </div>
+
+      <!-- Route 2 — faster but riskier -->
+      <div class="code-block" style="border:1px solid #3a3d4a;">
+        <div class="code-chrome" style="gap:.75rem;">
+          <div style="display:flex;gap:.4rem;"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+          <span style="color:#8b8fa8;font-size:.72em;">ALTERNATIVE</span>
+        </div>
+        <pre class="code-body" style="font-size:.75em;padding:1.1rem 1.25rem;"><code><span class="c-key">"name"</span>:            <span class="c-str">"US-281 N cutoff"</span>,
+<span class="c-key">"duration_secs"</span>:   <span class="c-num">19440</span>,        <span class="c-cm">// 5h 24m  ↑ 24m faster</span>
+<span class="c-key">"trips_per_crash"</span>: <span class="c-num">1876</span>,         <span class="c-cm">// 42% more risk</span>
+<span class="c-key">"dynamic_mult"</span>:    <span class="c-num">1.08</span>,
+<span class="c-key">"hotspots"</span>: [
+  { <span class="c-key">"route_fraction"</span>: <span class="c-num">0.14</span>,
+    <span class="c-key">"factor"</span>: <span class="c-str">"rural two-lane"</span> },
+  { <span class="c-key">"route_fraction"</span>: <span class="c-num">0.67</span>,
+    <span class="c-key">"factor"</span>: <span class="c-str">"night visibility"</span> }
+]</code></pre>
+      </div>
+
+    </div>
+
+    <p style="margin-top:1rem;font-size:.75em;color:#5a5f72;text-align:center;">
+      Placeholder values — live response shape from the actual API
+    </p>
   </div>
 </section>
 
