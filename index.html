@@ -679,7 +679,10 @@ h2, .page-section h2, .hero h2, section h2 {
         <div class="terminal-output" id="term-output"></div>
         <div class="terminal-input-row">
           <span class="t-prompt-sym">$</span>
-          <input id="cmd-input" type="text" autocomplete="off" spellcheck="false" placeholder="llano score --from &quot;Laredo, TX&quot; --to &quot;San Antonio, TX&quot;">
+          <div style="position:relative;flex:1;display:flex;align-items:center;">
+            <span id="cmd-ghost" style="position:absolute;left:0;top:50%;transform:translateY(-50%);color:#3a3d4a;font-family:'JetBrains Mono',monospace;font-size:.8em;pointer-events:none;white-space:nowrap;overflow:hidden;width:100%">llano score --from "Laredo" --to "Dallas"</span>
+            <input id="cmd-input" type="text" autocomplete="off" spellcheck="false" style="background:transparent;position:relative;z-index:1;">
+          </div>
         </div>
       </div>
 
@@ -986,6 +989,12 @@ var leafMap = null;
 var output      = document.getElementById("term-output");
 var input       = document.getElementById("cmd-input");
 var placeholder = document.getElementById("map-placeholder");
+var ghost       = document.getElementById("cmd-ghost");
+var SUGGESTION  = 'llano score --from "Laredo" --to "Dallas"';
+
+function updateGhost() {
+  if (ghost) ghost.style.display = input.value === "" ? "block" : "none";
+}
 
 // ── Map init (always visible, Texas overview) ─────────────────────────────────
 function initMap() {
@@ -1019,9 +1028,6 @@ function lineHTML(html) {
 // ── Welcome ───────────────────────────────────────────────────────────────────
 function welcome() {
   lineHTML('<span style="color:#F97316">|:|</span> <span style="color:#e2e4e9">llano</span> <span style="color:#8b8fa8">— route safety scoring (demo)</span>');
-  line("Texas routes only. Press \u2191 for history.", "t-out-muted");
-  blank();
-  lineHTML('<span style="color:#8b8fa8">  llano score --from "Laredo, TX" --to "San Antonio, TX" --arrive "2026-04-20 18:00"</span>');
   blank();
 }
 
@@ -1039,9 +1045,9 @@ function spinner(msg) {
     fi = (fi + 1) % OFFSETS.length;
     el.innerHTML = frame(fi) + '  <span style="color:#8b8fa8">' + msg + "</span>";
   }, 120);
-  return function (done) {
+
+  function stop(done) {
     clearInterval(tid);
-    // Decelerate over ~1.5s before stopping
     var delays = [150, 210, 290, 390, 510];
     var step = 0;
     function slowTick() {
@@ -1054,7 +1060,9 @@ function spinner(msg) {
       setTimeout(slowTick, delays[step++]);
     }
     slowTick();
-  };
+  }
+  stop.update = function(newMsg) { msg = newMsg; };
+  return stop;
 }
 
 // ── Flag parser ───────────────────────────────────────────────────────────────
@@ -1269,6 +1277,8 @@ function execute(cmd) {
 
   if (cmd === "clear" || cmd === "llano clear") {
     output.innerHTML = "";
+    input.value = "";
+    updateGhost();
     if (placeholder) placeholder.style.opacity = "1";
     leafMap.eachLayer(function(layer) {
       if (!(layer instanceof L.TileLayer)) leafMap.removeLayer(layer);
@@ -1291,14 +1301,13 @@ function execute(cmd) {
     line("Error: --depart and --arrive are mutually exclusive", "t-out-err"); blank(); return;
   }
 
-  var stopGeo = spinner("Geocoding addresses...");
+  var stop = spinner("Geocoding...");
   input.disabled = true;
 
   var addresses = [flags.from].concat(flags.via || []).concat([flags.to]);
   Promise.all(addresses.map(geocode))
     .then(function(coords) {
-      stopGeo("Geocoded " + addresses.length + " address" + (addresses.length > 1 ? "es" : ""));
-      var stopScore = spinner("Routing and scoring...");
+      stop.update("Routing and scoring...");
       return fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-API-Key": DEMO_KEY },
@@ -1316,7 +1325,7 @@ function execute(cmd) {
         if (!r.ok) throw new Error("API error " + r.status);
         return r.json();
       }).then(function(routes) {
-        stopScore("Scored " + routes.length + " route" + (routes.length !== 1 ? "s" : ""));
+        stop("Scored " + routes.length + " route" + (routes.length !== 1 ? "s" : ""));
         renderResults(routes, flags);
       });
     })
@@ -1337,16 +1346,24 @@ input.addEventListener("keydown", function(e) {
     history.unshift(cmd);
     histIdx = -1;
     input.value = "";
+    updateGhost();
     execute(cmd);
+  } else if ((e.key === "Tab" || e.key === "ArrowRight") && input.value === "") {
+    e.preventDefault();
+    input.value = SUGGESTION;
+    updateGhost();
   } else if (e.key === "ArrowUp") {
     e.preventDefault();
     if (histIdx < history.length - 1) { histIdx++; input.value = history[histIdx]; }
+    updateGhost();
   } else if (e.key === "ArrowDown") {
     e.preventDefault();
     if (histIdx > 0) { histIdx--; input.value = history[histIdx]; }
     else             { histIdx = -1; input.value = ""; }
+    updateGhost();
   }
 });
+input.addEventListener("input", updateGhost);
 
 // ── Docs tabs ─────────────────────────────────────────────────────────────────
 window.docsTab = function(lang, btn) {
@@ -1366,6 +1383,7 @@ if (isMobile) {
 }
 welcome();
 initMap();
+updateGhost();
 setTimeout(function() { if (!isMobile) input.focus(); }, 100);
 
 })();
