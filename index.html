@@ -1272,7 +1272,7 @@ function spinner(msg) {
     function slowTick() {
       if (step >= delays.length) {
         el.innerHTML = frame(2) + '  <span style="color:#8b8fa8">' + (done || msg) + "</span>";
-        if (callback) callback();
+        if (callback) requestAnimationFrame(function() { setTimeout(callback, 0); });
         return;
       }
       fi = (fi + 1) % OFFSETS.length;
