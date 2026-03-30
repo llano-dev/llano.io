@@ -167,14 +167,15 @@ body, .quarto-container, #quarto-content, main {
   color: #8b8fa8;
   margin-bottom: 1rem;
 }
-h2 {
-  font-size: 1.9em;
-  font-weight: 600;
-  color: #e2e4e9;
-  line-height: 1.25;
-  margin-bottom: 1rem;
+h2, .page-section h2, .hero h2, section h2 {
+  font-size: 1.9em !important;
+  font-weight: 600 !important;
+  color: #e2e4e9 !important;
+  line-height: 1.25 !important;
+  margin-bottom: 1rem !important;
   font-family: 'JetBrains Mono', monospace !important;
   border-bottom: none !important;
+  border: none !important;
   padding-bottom: 0 !important;
 }
 .section-sub {
@@ -354,6 +355,7 @@ h2 {
 .terminal-output {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: .9rem 1.1rem .4rem;
   font-size: .8em;
   line-height: 1.65;
@@ -362,7 +364,7 @@ h2 {
 .terminal-output::-webkit-scrollbar { width: 4px; }
 .terminal-output::-webkit-scrollbar-track { background: transparent; }
 .terminal-output::-webkit-scrollbar-thumb { background: #2e3140; border-radius: 2px; }
-.t-out-line { white-space: pre; color: #e2e4e9; }
+.t-out-line { white-space: pre-wrap; word-break: break-all; color: #e2e4e9; }
 .terminal-input-row {
   display: flex;
   align-items: center;
@@ -1039,7 +1041,19 @@ function spinner(msg) {
   }, 120);
   return function (done) {
     clearInterval(tid);
-    el.innerHTML = '  <span style="color:#34d399">\u2713</span>  <span style="color:#8b8fa8">' + (done || msg) + "</span>";
+    // Decelerate over ~1.5s before stopping
+    var delays = [150, 210, 290, 390, 510];
+    var step = 0;
+    function slowTick() {
+      if (step >= delays.length) {
+        el.innerHTML = frame(0) + '  <span style="color:#8b8fa8">' + (done || msg) + "</span>";
+        return;
+      }
+      fi = (fi + 1) % OFFSETS.length;
+      el.innerHTML = frame(fi) + '  <span style="color:#8b8fa8">' + msg + "</span>";
+      setTimeout(slowTick, delays[step++]);
+    }
+    slowTick();
   };
 }
 
@@ -1099,7 +1113,7 @@ function renderResults(routes, flags) {
   var tbl = document.createElement("table");
   tbl.className = "route-table";
   var thead = tbl.createTHead(), hrow = thead.insertRow();
-  ["","Route","Time","+Time","Safety"].forEach(function(h) {
+  ["","Route","Time","+Time","Safety","RR"].forEach(function(h) {
     var th = document.createElement("th"); th.textContent = h; hrow.appendChild(th);
   });
   var tbody = tbl.createTBody();
@@ -1109,6 +1123,9 @@ function renderResults(routes, flags) {
     var lbl  = scalar(r.name) || scalar(r.label) || ("Route " + (i+1));
     var extra = dur - fastestDur;
     var isBest = i === 0;
+    var rr = (tpc > 0 && !isBest)
+      ? (scalar(ranked[0].trips_per_crash) / tpc).toFixed(2) + "\u00d7"
+      : "\u2014";
     var row = tbody.insertRow();
     row.style.opacity = isBest ? "1" : "0.7";
     [
@@ -1116,7 +1133,8 @@ function renderResults(routes, flags) {
       { text: lbl, color: COLORS[i % COLORS.length] },
       { text: fmtDur(dur) },
       { text: extra > 0 ? "+" + fmtDur(extra) : "", cls: "td-muted" },
-      { text: tpc > 0 ? "1 in " + fmtNum(tpc) + " trips" : "\u2014" }
+      { text: tpc > 0 ? "1 in " + fmtNum(tpc) + " trips" : "\u2014" },
+      { text: rr, cls: "td-muted" }
     ].forEach(function(c) {
       var td = document.createElement("td");
       td.textContent = c.text;
