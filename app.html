@@ -387,25 +387,92 @@
       flex: 1;
       display: flex;
       overflow: hidden;
+      position: relative;
     }
     #terminal-pane {
       flex: 1;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      border-right: 1px solid var(--border);
     }
     #map-pane {
-      width: 380px;
-      flex-shrink: 0;
-      position: relative;
-      background: var(--surface);
+      position: absolute;
+      right: 20px;
+      top: 16px;
+      bottom: auto;
+      width: 480px;
+      height: 340px;
+      min-width: 220px;
+      min-height: 28px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 32px rgba(0,0,0,.5);
+      z-index: 500;
     }
+    #map-pane.minimized { height: 28px !important; }
+    #map-pane.dragging { box-shadow: 0 12px 40px rgba(0,0,0,.7); }
+    #map-resize-handle {
+      position: absolute;
+      bottom: 0; right: 0;
+      width: 16px; height: 16px;
+      cursor: se-resize;
+      z-index: 502;
+    }
+    #map-resize-handle::after {
+      content: '';
+      position: absolute;
+      bottom: 3px; right: 3px;
+      width: 8px; height: 8px;
+      border-right: 2px solid var(--dim);
+      border-bottom: 2px solid var(--dim);
+      border-radius: 1px;
+      opacity: .5;
+    }
+    #map-drag-handle {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 28px;
+      background: rgba(24,27,36,.96);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      z-index: 501;
+      cursor: grab;
+      user-select: none;
+    }
+    #map-drag-handle.dragging { cursor: grabbing; }
+    .map-handle-title { font-size: .7em; color: var(--dim); letter-spacing: .05em; }
+    .map-handle-minimize {
+      font-size: 1em;
+      color: var(--dim);
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 3px;
+      line-height: 1;
+      font-weight: 600;
+    }
+    .map-handle-minimize:hover { color: var(--text); }
     #app-map {
       width: 100%;
       height: 100%;
+      margin-top: 0;
     }
     .leaflet-container { background: #0f1117; }
+    #map-toggle {
+      font-size: .75em;
+      padding: 4px 10px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    #map-toggle:hover { border-color: var(--muted); color: var(--text); }
 
     /* ── Board view ── */
     #board-wrap {
@@ -516,18 +583,157 @@
     }
     .board-action:hover { border-color: var(--orange); color: var(--orange); }
 
+    /* ── Settings view ── */
+    #view-settings { display: none; overflow-y: auto; padding: 36px 40px; height: 100%; }
+    #view-settings::-webkit-scrollbar { width: 4px; }
+    #view-settings::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .settings-section { max-width: 580px; margin-bottom: 36px; }
+    .settings-section h2 { font-size: .85em; color: var(--text); font-weight: 600; margin-bottom: 4px; letter-spacing: .03em; }
+    .settings-section .settings-sub { font-size: .75em; color: var(--dim); margin-bottom: 16px; }
+
+    .key-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+    .key-value {
+      flex: 1;
+      font-size: .8em;
+      color: var(--muted);
+      letter-spacing: .04em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .key-meta { font-size: .72em; color: var(--dim); white-space: nowrap; }
+    .key-revoke {
+      font-size: .7em;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--dim);
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .key-revoke:hover { border-color: var(--red); color: var(--red); }
+
+    .key-new-btn {
+      margin-top: 4px;
+      padding: 7px 14px;
+      background: transparent;
+      border: 1px dashed var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: .8em;
+      cursor: pointer;
+      transition: all .15s;
+      width: 100%;
+      text-align: left;
+    }
+    .key-new-btn:hover { border-color: var(--orange); color: var(--orange); }
+
+    .key-reveal {
+      background: var(--surface2);
+      border: 1px solid var(--orange);
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      display: none;
+    }
+    .key-reveal.visible { display: block; }
+    .key-reveal-value { font-size: .82em; color: var(--orange); letter-spacing: .05em; word-break: break-all; }
+    .key-reveal-warn { font-size: .7em; color: var(--dim); margin-top: 6px; }
+
+    .settings-divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+    .usage-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #1a1e29; font-size: .8em; }
+    .usage-row:last-child { border-bottom: none; }
+    .usage-label { color: var(--muted); }
+    .usage-value { color: var(--text); }
+
+    /* ── Members table ── */
+    .members-table { width: 100%; border-collapse: collapse; }
+    .members-table th {
+      font-size: .72em; color: var(--dim); text-align: left;
+      padding: 5px 12px 5px 0; border-bottom: 1px solid var(--border);
+      font-weight: 400; letter-spacing: .04em;
+    }
+    .members-table td {
+      padding: 9px 12px 9px 0; font-size: .8em;
+      border-bottom: 1px solid #1a1e29; vertical-align: middle;
+    }
+    .members-table tr:hover td { background: var(--surface2); }
+
+    .role-badge {
+      display: inline-block; padding: 2px 7px;
+      border-radius: 4px; font-size: .72em;
+    }
+    .role-admin      { background: rgba(249,115,22,.12); color: var(--orange); }
+    .role-dispatcher { background: rgba(6,182,212,.12);  color: var(--cyan); }
+    .role-viewer     { background: var(--surface2);      color: var(--dim); }
+
+    .member-action {
+      font-size: .7em; padding: 3px 8px; border-radius: 4px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--dim); font-family: var(--font); cursor: pointer;
+      transition: all .15s;
+    }
+    .member-action:hover { border-color: var(--red); color: var(--red); }
+
+    .role-select {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 4px; padding: 3px 6px; font-family: var(--font);
+      font-size: .75em; color: var(--muted); outline: none; cursor: pointer;
+    }
+    .role-select:focus { border-color: var(--orange); }
+
+    /* Invite modal */
+    #invite-modal {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.6); z-index: 900;
+      align-items: center; justify-content: center;
+    }
+    #invite-modal.visible { display: flex; }
+    .modal-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; width: 360px; overflow: hidden;
+    }
+    .modal-header {
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+      font-size: .85em; font-weight: 600; color: var(--text);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-close { color: var(--dim); cursor: pointer; font-size: 1.1em; }
+    .modal-close:hover { color: var(--text); }
+    .modal-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .modal-footer {
+      padding: 10px 16px; border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end; gap: 8px;
+    }
+
     /* ── Input bar ── */
     #input-bar {
       border-top: 1px solid var(--border);
-      padding: 10px 22px;
+      padding: 8px 22px 4px;
       display: flex;
       align-items: center;
       gap: 8px;
       flex-shrink: 0;
     }
     #input-prompt { color: var(--orange); flex-shrink: 0; }
+    #input-wrap { flex: 1; position: relative; }
     #cmd-input {
-      flex: 1;
+      width: 100%;
       background: transparent;
       border: none;
       outline: none;
@@ -537,6 +743,33 @@
       caret-color: var(--orange);
     }
     #cmd-input::placeholder { color: var(--dim); }
+    #cmd-ghost {
+      position: absolute;
+      top: 0; left: 0;
+      font-family: var(--font);
+      font-size: 13px;
+      color: var(--dim);
+      pointer-events: none;
+      white-space: pre;
+      opacity: .5;
+    }
+    #input-hints {
+      padding: 3px 22px 7px;
+      font-size: .68em;
+      color: var(--dim);
+      display: flex;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+    .hint-key {
+      display: inline-block;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0 4px;
+      font-size: .9em;
+      margin-right: 3px;
+      color: var(--muted);
+    }
   </style>
 </head>
 <body>
@@ -642,7 +875,10 @@
 
     <div id="sidebar-footer">
       <span>James Okafor</span>
-      <span class="credits-badge"><span id="credit-count">4</span> credits</span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="credits-badge"><span id="credit-count">4</span> credits</span>
+        <button class="tb-btn" style="padding:2px 8px;font-size:.7em;" onclick="switchView('settings')">⚙ Settings</button>
+      </div>
     </div>
   </div>
 
@@ -659,6 +895,7 @@
       <div id="topbar-actions">
         <button class="tb-btn" id="btn-terminal" onclick="switchView('terminal')">⌨ Terminal</button>
         <button class="tb-btn" id="btn-board"    onclick="switchView('board')">⊞ Board</button>
+        <button class="tb-btn" id="map-toggle" onclick="toggleMap()">⊙ Map</button>
         <button class="tb-btn" onclick="rerunQuery()">↺ Re-run</button>
         <button class="tb-btn" onclick="exportCSV()">↓ Export</button>
         <button class="tb-btn primary" onclick="showCertify()">✦ Certify Route</button>
@@ -669,6 +906,7 @@
     <div id="view-terminal">
     <div id="terminal-split">
     <div id="terminal-pane">
+
       <div id="terminal">
         <div class="t-line"><span class="t-muted">  ────────────────────────────────────</span></div>
         <div class="t-line"><span class="t-muted">  |    |    /\    |\  |   /--\  </span></div>
@@ -786,12 +1024,26 @@
 
       <div id="input-bar">
         <span id="input-prompt">llano&gt;</span>
-        <input id="cmd-input" type="text" placeholder='score --from "..." --to "..."'
-               autocomplete="off" spellcheck="false"
-               onkeydown="handleInput(event)" />
+        <div id="input-wrap">
+          <span id="cmd-ghost"></span>
+          <input id="cmd-input" type="text" placeholder='score --from "..." --to "..."'
+                 autocomplete="off" spellcheck="false"
+                 onkeydown="handleInput(event)" oninput="updateGhost()" />
+        </div>
+      </div>
+      <div id="input-hints">
+        <span><span class="hint-key">→</span> accept suggestion</span>
+        <span><span class="hint-key">⇥</span> reset</span>
       </div>
     </div><!-- /terminal-pane -->
-    <div id="map-pane"><div id="app-map"></div></div>
+    <div id="map-pane">
+      <div id="map-drag-handle">
+        <span class="map-handle-title">MAP</span>
+        <span class="map-handle-minimize" onclick="minimizeMap()" id="map-minimize-btn">−</span>
+      </div>
+      <div id="app-map" style="height:calc(100% - 28px);margin-top:28px;"></div>
+      <div id="map-resize-handle"></div>
+    </div>
     </div><!-- /terminal-split -->
     </div><!-- /view-terminal -->
 
@@ -891,6 +1143,145 @@
       </div>
     </div><!-- /view-board -->
 
+    <!-- Settings view -->
+    <div id="view-settings">
+
+      <div class="settings-section">
+        <h2>API Keys</h2>
+        <div class="settings-sub">Keys are tied to your org (acme.com) and share the same credit pool. Shown once on creation.</div>
+
+        <!-- Reveal box for new key -->
+        <div class="key-reveal" id="key-reveal">
+          <div class="key-reveal-value" id="key-reveal-value"></div>
+          <div class="key-reveal-warn">Copy this key now — it will not be shown again.</div>
+        </div>
+
+        <div id="key-list">
+          <div class="key-row" id="key-row-1">
+            <div class="key-value">sk_live_a8f3k2••••••••••••••9xq1</div>
+            <div class="key-meta">Created Mar 12</div>
+            <button class="key-revoke" onclick="revokeKey('key-row-1')">Revoke</button>
+          </div>
+          <div class="key-row" id="key-row-2">
+            <div class="key-value">sk_live_c1m9p7••••••••••••••4wz8</div>
+            <div class="key-meta">Created Mar 28</div>
+            <button class="key-revoke" onclick="revokeKey('key-row-2')">Revoke</button>
+          </div>
+        </div>
+        <button class="key-new-btn" onclick="generateKey()">+ Generate New Key</button>
+      </div>
+
+      <hr class="settings-divider" />
+
+      <div class="settings-section">
+        <h2>Usage</h2>
+        <div class="settings-sub">Credit usage this billing period.</div>
+        <div class="usage-row"><span class="usage-label">Credits remaining</span><span class="usage-value" id="settings-credits">4</span></div>
+        <div class="usage-row"><span class="usage-label">Reports generated</span><span class="usage-value">1</span></div>
+        <div class="usage-row"><span class="usage-label">API calls (30d)</span><span class="usage-value">47</span></div>
+        <div class="usage-row"><span class="usage-label">Active drivers tracked</span><span class="usage-value">2</span></div>
+        <div style="margin-top:12px;">
+          <button class="key-new-btn" style="border-style:solid;" onclick="">Buy credits — $5 for 5 reports</button>
+        </div>
+      </div>
+
+      <hr class="settings-divider" />
+
+      <div class="settings-section">
+        <h2>Organization</h2>
+        <div class="settings-sub" style="margin-bottom:8px;">acme.com · Early Access</div>
+      </div>
+
+      <hr class="settings-divider" style="margin-top:0;" />
+
+      <div class="settings-section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div>
+            <h2 style="margin-bottom:2px;">Members</h2>
+            <div class="settings-sub" style="margin-bottom:0;">3 members · roles control access to billing, dispatch, and reports.</div>
+          </div>
+          <button class="key-new-btn" style="width:auto;border-style:solid;padding:6px 14px;" onclick="showInvite()">+ Invite</button>
+        </div>
+
+        <table class="members-table" id="members-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Last active</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="color:var(--text)">James Okafor</td>
+              <td style="color:var(--muted)">james@acme.com</td>
+              <td><span class="role-badge role-admin">Admin</span></td>
+              <td style="color:var(--dim)">Just now</td>
+              <td style="color:var(--dim);font-size:.72em;">You</td>
+            </tr>
+            <tr id="member-row-maria">
+              <td style="color:var(--text)">Maria Rivera</td>
+              <td style="color:var(--muted)">maria@acme.com</td>
+              <td>
+                <select class="role-select" onchange="updateRole(this)">
+                  <option>Admin</option>
+                  <option selected>Dispatcher</option>
+                  <option>Viewer</option>
+                </select>
+              </td>
+              <td style="color:var(--dim)">2h ago</td>
+              <td><button class="member-action" onclick="removeMember('member-row-maria')">Remove</button></td>
+            </tr>
+            <tr id="member-row-derek">
+              <td style="color:var(--text)">Derek Chen</td>
+              <td style="color:var(--muted)">derek@acme.com</td>
+              <td>
+                <select class="role-select" onchange="updateRole(this)">
+                  <option>Admin</option>
+                  <option>Dispatcher</option>
+                  <option selected>Viewer</option>
+                </select>
+              </td>
+              <td style="color:var(--dim)">Mar 29</td>
+              <td><button class="member-action" onclick="removeMember('member-row-derek')">Remove</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div><!-- /view-settings -->
+
+    <!-- Invite modal -->
+    <div id="invite-modal" onclick="hideInvite(event)">
+      <div class="modal-box">
+        <div class="modal-header">
+          Invite teammate
+          <span class="modal-close" onclick="hideInvite()">✕</span>
+        </div>
+        <div class="modal-body">
+          <div class="cp-field">
+            <div class="cp-label">Email</div>
+            <input class="cp-input" id="invite-email" placeholder="colleague@acme.com" />
+          </div>
+          <div class="cp-field">
+            <div class="cp-label">Role</div>
+            <select class="cp-input" id="invite-role" style="cursor:pointer;">
+              <option value="admin">Admin — full access including billing &amp; API keys</option>
+              <option value="dispatcher" selected>Dispatcher — run routes, certify trips</option>
+              <option value="viewer">Viewer — read-only access to reports &amp; history</option>
+            </select>
+          </div>
+          <div class="cp-hint" style="margin-top:-4px;">They'll receive a magic link to join acme.com's workspace.</div>
+        </div>
+        <div class="modal-footer">
+          <button class="cp-btn cancel" onclick="hideInvite()">Cancel</button>
+          <button class="cp-btn generate" onclick="sendInvite()">Send Invite</button>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /main -->
 </div><!-- /layout -->
 
@@ -906,11 +1297,169 @@
     currentView = v;
     document.getElementById("view-terminal").style.display = v === "terminal" ? "flex" : "none";
     document.getElementById("view-board").style.display    = v === "board"    ? "flex" : "none";
+    document.getElementById("view-settings").style.display = v === "settings" ? "block" : "none";
     document.getElementById("btn-terminal").style.color    = v === "terminal" ? "var(--orange)" : "";
     document.getElementById("btn-terminal").style.borderColor = v === "terminal" ? "var(--orange)" : "";
     document.getElementById("btn-board").style.color       = v === "board"    ? "var(--orange)" : "";
     document.getElementById("btn-board").style.borderColor = v === "board"    ? "var(--orange)" : "";
+    if (v === "settings") document.getElementById("settings-credits").textContent = credits;
   }
+
+  // ── API key management ──
+  var keyCounter = 3;
+  function generateKey() {
+    var raw = "sk_live_" + randomHex(6) + "••••••••••••••" + randomHex(4);
+    var full = "sk_live_" + randomHex(24);
+
+    // reveal box
+    var reveal = document.getElementById("key-reveal");
+    document.getElementById("key-reveal-value").textContent = full;
+    reveal.classList.add("visible");
+
+    // add masked row
+    var id = "key-row-" + keyCounter++;
+    var row = document.createElement("div");
+    row.className = "key-row";
+    row.id = id;
+    row.innerHTML =
+      '<div class="key-value">' + raw + '</div>' +
+      '<div class="key-meta">Created just now</div>' +
+      '<button class="key-revoke" onclick="revokeKey(\'' + id + '\')">Revoke</button>';
+    document.getElementById("key-list").appendChild(row);
+  }
+
+  function revokeKey(id) {
+    var row = document.getElementById(id);
+    if (!row) return;
+    row.style.opacity = "0";
+    row.style.transition = "opacity .2s";
+    setTimeout(function() { row.remove(); }, 200);
+  }
+
+  function randomHex(n) {
+    var s = "";
+    var chars = "abcdef0123456789";
+    for (var i = 0; i < n; i++) s += chars[Math.floor(Math.random() * chars.length)];
+    return s;
+  }
+
+  // ── Map minimize + drag + resize ──
+  var mapMinimized = false;
+  var mapSaved = {};
+
+  function minimizeMap() {
+    var pane   = document.getElementById("map-pane");
+    var btn    = document.getElementById("map-minimize-btn");
+    var parent = pane.parentElement;
+    mapMinimized = !mapMinimized;
+    if (mapMinimized) {
+      // save current position + size
+      mapSaved = {
+        left:   pane.style.left   || "auto",
+        top:    pane.style.top    || "auto",
+        right:  pane.style.right  || "20px",
+        width:  pane.offsetWidth  + "px",
+        height: pane.offsetHeight + "px"
+      };
+      // snap to bottom-right
+      pane.style.transition = "all .25s ease";
+      pane.style.left   = "auto";
+      pane.style.right  = "20px";
+      pane.style.top    = "auto";
+      pane.style.bottom = "12px";
+      pane.style.width  = "200px";
+      pane.classList.add("minimized");
+      btn.textContent = "+";
+      setTimeout(function() { pane.style.transition = ""; }, 260);
+    } else {
+      pane.style.transition = "all .25s ease";
+      pane.style.bottom = "auto";
+      pane.style.width  = mapSaved.width;
+      pane.style.left   = mapSaved.left;
+      pane.style.right  = mapSaved.right;
+      pane.style.top    = mapSaved.top;
+      pane.classList.remove("minimized");
+      btn.textContent = "−";
+      setTimeout(function() {
+        pane.style.height = mapSaved.height;
+        pane.style.transition = "";
+        appMap.invalidateSize();
+      }, 260);
+    }
+  }
+
+  function toggleMap() {
+    var pane = document.getElementById("map-pane");
+    var btn  = document.getElementById("map-toggle");
+    var visible = pane.style.display !== "none";
+    pane.style.display = visible ? "none" : "";
+    btn.style.color       = !visible ? "var(--orange)" : "";
+    btn.style.borderColor = !visible ? "var(--orange)" : "";
+    if (!visible) setTimeout(function() { appMap.invalidateSize(); }, 50);
+  }
+
+  (function() {
+    var pane   = document.getElementById("map-pane");
+    var handle = document.getElementById("map-drag-handle");
+    var dragging = false, ox = 0, oy = 0;
+
+    handle.addEventListener("mousedown", function(e) {
+      if (e.target.classList.contains("map-handle-minimize")) return;
+      if (mapMinimized) return;
+      dragging = true;
+      var rect = pane.getBoundingClientRect();
+      ox = e.clientX - rect.left;
+      oy = e.clientY - rect.top;
+      pane.classList.add("dragging");
+      handle.classList.add("dragging");
+      e.preventDefault();
+    });
+
+    document.addEventListener("mousemove", function(e) {
+      if (!dragging) return;
+      var parent = pane.parentElement;
+      var pr = parent.getBoundingClientRect();
+      var x = Math.min(Math.max(0, e.clientX - pr.left - ox), pr.width  - pane.offsetWidth);
+      var y = Math.min(Math.max(0, e.clientY - pr.top  - oy), pr.height - pane.offsetHeight);
+      pane.style.left  = x + "px";
+      pane.style.top   = y + "px";
+      pane.style.right = "auto";
+    });
+
+    document.addEventListener("mouseup", function() {
+      if (!dragging) return;
+      dragging = false;
+      pane.classList.remove("dragging");
+      handle.classList.remove("dragging");
+      appMap.invalidateSize();
+    });
+
+    // Custom resize handle
+    var resizeHandle = document.getElementById("map-resize-handle");
+    var resizing = false, rsx = 0, rsy = 0, rsw = 0, rsh = 0;
+
+    resizeHandle.addEventListener("mousedown", function(e) {
+      if (mapMinimized) return;
+      resizing = true;
+      rsx = e.clientX; rsy = e.clientY;
+      rsw = pane.offsetWidth; rsh = pane.offsetHeight;
+      e.preventDefault(); e.stopPropagation();
+    });
+
+    document.addEventListener("mousemove", function(e) {
+      if (!resizing) return;
+      var w = Math.max(220, rsw + (e.clientX - rsx));
+      var h = Math.max(80,  rsh + (e.clientY - rsy));
+      pane.style.width  = w + "px";
+      pane.style.height = h + "px";
+    });
+
+    document.addEventListener("mouseup", function(e) {
+      if (!resizing) return;
+      resizing = false;
+      appMap.invalidateSize();
+    });
+  })();
 
   // ── Sidebar filter ──
   function setFilter(f, el) {
@@ -1045,6 +1594,7 @@
     var val = input.value.trim();
     if (!val) return;
     input.value = "";
+    if (typeof updateGhost === "function") updateGhost();
     appendLine('<span class="t-prompt">llano&gt; </span><span class="t-cmd">' + escHtml(val) + '</span>');
     appendLine('<span class="t-muted">  [demo mode — connect to api.llano.io for live results]</span>');
     appendLine('');
@@ -1079,10 +1629,89 @@
     el.classList.add("active");
   }
 
+  // ── Members ──
+  function showInvite() {
+    document.getElementById("invite-modal").classList.add("visible");
+    setTimeout(function() { document.getElementById("invite-email").focus(); }, 50);
+  }
+
+  function hideInvite(e) {
+    if (e && e.target !== document.getElementById("invite-modal")) return;
+    document.getElementById("invite-modal").classList.remove("visible");
+    document.getElementById("invite-email").value = "";
+  }
+
+  function sendInvite() {
+    var email = document.getElementById("invite-email").value.trim();
+    var role  = document.getElementById("invite-role").value;
+    if (!email) return;
+    var id = "member-row-" + Date.now();
+    var name = email.split("@")[0];
+    var roleLabel = role.charAt(0).toUpperCase() + role.slice(1);
+    var row = document.createElement("tr");
+    row.id = id;
+    row.innerHTML =
+      '<td style="color:var(--text)">' + escHtml(name) + '</td>' +
+      '<td style="color:var(--muted)">' + escHtml(email) + '</td>' +
+      '<td><select class="role-select" onchange="updateRole(this)">' +
+        '<option' + (role==="admin"?" selected":"") + '>Admin</option>' +
+        '<option' + (role==="dispatcher"?" selected":"") + '>Dispatcher</option>' +
+        '<option' + (role==="viewer"?" selected":"") + '>Viewer</option>' +
+      '</select></td>' +
+      '<td style="color:var(--dim)">Invited</td>' +
+      '<td><button class="member-action" onclick="removeMember(\'' + id + '\')">Remove</button></td>';
+    document.querySelector("#members-table tbody").appendChild(row);
+    hideInvite();
+  }
+
+  function removeMember(id) {
+    var row = document.getElementById(id);
+    if (!row) return;
+    row.style.opacity = "0";
+    row.style.transition = "opacity .2s";
+    setTimeout(function() { row.remove(); }, 200);
+  }
+
+  function updateRole(sel) {
+    // role change acknowledged — in real app would POST to API
+  }
+
   function escHtml(s) {
     return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   }
 
+  // ── Ghost text ──
+  var SUGGESTION = 'score --from "San Antonio, TX" --to "Dallas, TX" --alternatives 3';
+  var cmdInput = document.getElementById("cmd-input");
+  var cmdGhost = document.getElementById("cmd-ghost");
+
+  function updateGhost() {
+    var val = cmdInput.value;
+    if (val.length > 0 && SUGGESTION.startsWith(val)) {
+      cmdGhost.textContent = SUGGESTION;
+      // offset ghost to align with typed text
+      cmdGhost.style.left = (val.length * 7.8) + "px";
+      cmdGhost.style.display = "block";
+    } else {
+      cmdGhost.style.display = "none";
+    }
+  }
+
+  cmdInput.addEventListener("keydown", function(e) {
+    if (e.key === "ArrowRight" || e.key === "Tab") {
+      if (cmdGhost.style.display !== "none" && SUGGESTION.startsWith(cmdInput.value)) {
+        e.preventDefault();
+        if (e.key === "Tab") {
+          cmdInput.value = "";
+        } else {
+          cmdInput.value = SUGGESTION;
+        }
+        updateGhost();
+      }
+    }
+  });
+
+  updateGhost();
   document.getElementById("cmd-input").focus();
 
   // ── Static Leaflet map ──
