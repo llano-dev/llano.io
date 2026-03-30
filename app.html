@@ -17,7 +17,6 @@
       --muted:     #8b8fa8;
       --dim:       #5a5f72;
       --orange:    #F97316;
-      --orange-dim:#7c3010;
       --green:     #22c55e;
       --red:       #ef4444;
       --cyan:      #06B6D4;
@@ -34,15 +33,11 @@
       overflow: hidden;
     }
 
-    /* ── Layout ── */
-    #layout {
-      display: flex;
-      height: 100vh;
-    }
+    #layout { display: flex; height: 100vh; }
 
     /* ── Sidebar ── */
     #sidebar {
-      width: 240px;
+      width: 248px;
       flex-shrink: 0;
       background: var(--surface);
       border-right: 1px solid var(--border);
@@ -52,27 +47,17 @@
     }
 
     #sidebar-header {
-      padding: 16px 14px 12px;
+      padding: 14px 14px 12px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
-
-    #sidebar-logo {
-      color: var(--orange);
-      font-size: 1.1em;
-      font-weight: 700;
-      letter-spacing: .08em;
-    }
-
-    #sidebar-user {
-      font-size: .75em;
-      color: var(--dim);
-    }
+    #sidebar-logo { color: var(--orange); font-size: 1.1em; font-weight: 700; letter-spacing: .08em; }
+    #sidebar-user { font-size: .75em; color: var(--dim); }
 
     #new-route-btn {
-      margin: 10px 10px 6px;
+      margin: 10px 10px 0;
       padding: 7px 10px;
       background: transparent;
       border: 1px solid var(--border);
@@ -83,8 +68,43 @@
       cursor: pointer;
       text-align: left;
       transition: border-color .15s, color .15s;
+      width: calc(100% - 20px);
     }
     #new-route-btn:hover { border-color: var(--orange); color: var(--orange); }
+
+    /* Filter tabs */
+    #filter-tabs {
+      display: flex;
+      padding: 8px 10px 0;
+      gap: 4px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0;
+    }
+    .filter-tab {
+      flex: 1;
+      padding: 5px 0 7px;
+      text-align: center;
+      font-size: .72em;
+      color: var(--dim);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color .15s, border-color .15s;
+      letter-spacing: .03em;
+    }
+    .filter-tab:hover { color: var(--muted); }
+    .filter-tab.active { color: var(--text); border-bottom-color: var(--orange); }
+
+    /* Status counts */
+    .filter-tab .tab-count {
+      display: inline-block;
+      background: var(--surface2);
+      border-radius: 8px;
+      padding: 0 5px;
+      font-size: .85em;
+      margin-left: 4px;
+      color: var(--dim);
+    }
+    .filter-tab.active .tab-count { color: var(--muted); }
 
     #trip-list {
       flex: 1;
@@ -108,12 +128,32 @@
       cursor: pointer;
       border-left: 2px solid transparent;
       transition: background .1s, border-color .1s;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
     }
     .trip-item:hover { background: var(--surface2); }
-    .trip-item.active {
-      background: var(--surface2);
-      border-left-color: var(--orange);
+    .trip-item.active { background: var(--surface2); border-left-color: var(--orange); }
+    .trip-item[data-status="completed"] { opacity: .65; }
+
+    .trip-status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
     }
+    .dot-active    { background: var(--green); box-shadow: 0 0 0 2px rgba(34,197,94,.2); }
+    .dot-planned   { background: var(--orange); }
+    .dot-completed { background: var(--dim); }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,.4); }
+      50%       { box-shadow: 0 0 0 4px rgba(34,197,94,0); }
+    }
+    .dot-active { animation: pulse 2s infinite; }
+
+    .trip-body { flex: 1; min-width: 0; }
 
     .trip-route {
       font-size: .8em;
@@ -129,11 +169,22 @@
       margin-top: 2px;
       display: flex;
       gap: 8px;
+      flex-wrap: wrap;
     }
+    .trip-rr.good { color: var(--green); }
+    .trip-rr.warn { color: var(--red); }
+    .trip-rr.base { color: var(--muted); }
 
-    .trip-rr.good  { color: var(--green); }
-    .trip-rr.warn  { color: var(--red); }
-    .trip-rr.base  { color: var(--muted); }
+    .trip-status-label {
+      font-size: .65em;
+      padding: 1px 5px;
+      border-radius: 3px;
+      margin-top: 3px;
+      display: inline-block;
+    }
+    .sl-active    { background: rgba(34,197,94,.12); color: var(--green); }
+    .sl-planned   { background: rgba(249,115,22,.12); color: var(--orange); }
+    .sl-completed { background: var(--surface2); color: var(--dim); }
 
     #sidebar-footer {
       padding: 10px 14px;
@@ -144,7 +195,6 @@
       align-items: center;
       justify-content: space-between;
     }
-
     .credits-badge {
       background: var(--surface2);
       border: 1px solid var(--border);
@@ -155,12 +205,7 @@
     .credits-badge span { color: var(--orange); }
 
     /* ── Main ── */
-    #main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
+    #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
     /* ── Top bar ── */
     #topbar {
@@ -172,20 +217,10 @@
       gap: 10px;
       flex-shrink: 0;
     }
-
-    #topbar-route {
-      font-size: .8em;
-      color: var(--muted);
-    }
-    #topbar-route strong { color: var(--text); }
-
+    .topbar-route { font-size: .8em; color: var(--muted); }
+    .topbar-route strong { color: var(--text); }
     .topbar-sep { color: var(--border); }
-
-    #topbar-actions {
-      margin-left: auto;
-      display: flex;
-      gap: 8px;
-    }
+    #topbar-actions { margin-left: auto; display: flex; gap: 8px; }
 
     .tb-btn {
       padding: 4px 10px;
@@ -199,14 +234,12 @@
       transition: all .15s;
     }
     .tb-btn:hover { border-color: var(--muted); color: var(--text); }
-    .tb-btn.primary {
-      border-color: var(--orange);
-      color: var(--orange);
-    }
-    .tb-btn.primary:hover {
-      background: var(--orange);
-      color: #000;
-    }
+    .tb-btn.primary { border-color: var(--orange); color: var(--orange); }
+    .tb-btn.primary:hover { background: var(--orange); color: #000; }
+
+    /* ── Views ── */
+    #view-terminal, #view-board { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+    #view-board { display: none; }
 
     /* ── Terminal ── */
     #terminal {
@@ -226,12 +259,11 @@
     .t-warn   { color: var(--red); }
     .t-cyan   { color: var(--cyan); }
 
-    /* Results table */
     .result-table {
       margin: 10px 0 6px;
       border-collapse: collapse;
       width: 100%;
-      max-width: 640px;
+      max-width: 660px;
     }
     .result-table th {
       font-size: .75em;
@@ -248,11 +280,29 @@
       border-bottom: 1px solid #1e2130;
     }
     .result-table tr.selected td { background: #1e2130; }
-    .result-table tr.selected td:first-child {
-      border-left: 2px solid var(--orange);
-      padding-left: 6px;
-    }
+    .result-table tr.selected td:first-child { border-left: 2px solid var(--orange); padding-left: 6px; }
     .sel-indicator { color: var(--orange); }
+
+    /* Editable route name in table */
+    .route-name-cell { position: relative; }
+    .route-name-text { cursor: text; }
+    .route-name-text:hover::after {
+      content: ' ✎';
+      font-size: .7em;
+      color: var(--dim);
+      opacity: .6;
+    }
+    .route-name-input {
+      background: var(--surface2);
+      border: 1px solid var(--orange);
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-family: var(--font);
+      font-size: inherit;
+      color: var(--text);
+      outline: none;
+      width: 160px;
+    }
 
     /* Certify panel */
     #certify-panel {
@@ -263,7 +313,6 @@
       border-radius: 8px;
       overflow: hidden;
     }
-
     #certify-panel.hidden { display: none; }
 
     .cp-header {
@@ -283,7 +332,6 @@
       grid-template-columns: 1fr 1fr;
       gap: 10px 14px;
     }
-
     .cp-field { display: flex; flex-direction: column; gap: 4px; }
     .cp-field.full { grid-column: 1 / -1; }
 
@@ -293,7 +341,6 @@
       letter-spacing: .05em;
       text-transform: uppercase;
     }
-
     .cp-input {
       background: var(--surface2);
       border: 1px solid var(--border);
@@ -307,12 +354,7 @@
     }
     .cp-input:focus { border-color: var(--orange); }
     .cp-input::placeholder { color: var(--dim); }
-
-    .cp-hint {
-      font-size: .68em;
-      color: var(--dim);
-      margin-top: 1px;
-    }
+    .cp-hint { font-size: .68em; color: var(--dim); margin-top: 1px; }
 
     .cp-footer {
       padding: 10px 14px;
@@ -321,13 +363,8 @@
       align-items: center;
       justify-content: space-between;
     }
-
-    .cp-credit-note {
-      font-size: .72em;
-      color: var(--dim);
-    }
+    .cp-credit-note { font-size: .72em; color: var(--dim); }
     .cp-credit-note span { color: var(--orange); }
-
     .cp-actions { display: flex; gap: 8px; }
 
     .cp-btn {
@@ -338,19 +375,119 @@
       cursor: pointer;
       transition: all .15s;
     }
-    .cp-btn.cancel {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--muted);
-    }
+    .cp-btn.cancel { background: transparent; border: 1px solid var(--border); color: var(--muted); }
     .cp-btn.cancel:hover { border-color: var(--muted); color: var(--text); }
-    .cp-btn.generate {
-      background: var(--orange);
-      border: 1px solid var(--orange);
-      color: #000;
-      font-weight: 600;
-    }
+    .cp-btn.generate { background: var(--orange); border: 1px solid var(--orange); color: #000; font-weight: 600; }
     .cp-btn.generate:hover { background: #ea6a0a; }
+
+    /* ── Board view ── */
+    #board-wrap {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+    }
+    #board-wrap::-webkit-scrollbar { width: 4px; }
+    #board-wrap::-webkit-scrollbar-track { background: transparent; }
+    #board-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .board-filter-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+    .board-filter-btn {
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-family: var(--font);
+      font-size: .75em;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      transition: all .15s;
+    }
+    .board-filter-btn:hover { border-color: var(--muted); color: var(--text); }
+    .board-filter-btn.active { border-color: var(--orange); color: var(--orange); background: rgba(249,115,22,.08); }
+
+    .board-sort-label { font-size: .72em; color: var(--dim); margin-left: auto; }
+    .board-sort-select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-family: var(--font);
+      font-size: .72em;
+      color: var(--muted);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .board-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .board-table th {
+      font-size: .72em;
+      color: var(--dim);
+      text-align: left;
+      padding: 6px 12px 6px 0;
+      border-bottom: 1px solid var(--border);
+      font-weight: 400;
+      letter-spacing: .04em;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+    }
+    .board-table th:hover { color: var(--muted); }
+    .board-table th .sort-arrow { opacity: .4; margin-left: 3px; }
+    .board-table th.sorted .sort-arrow { opacity: 1; color: var(--orange); }
+
+    .board-table td {
+      padding: 9px 12px 9px 0;
+      font-size: .8em;
+      border-bottom: 1px solid #1a1e29;
+      vertical-align: middle;
+    }
+    .board-table tr:hover td { background: var(--surface2); }
+
+    .board-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: .75em;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+    .bs-active    { background: rgba(34,197,94,.1);  color: var(--green); }
+    .bs-planned   { background: rgba(249,115,22,.1); color: var(--orange); }
+    .bs-completed { background: var(--surface2);     color: var(--dim); }
+
+    .board-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .board-dot.active    { background: var(--green); animation: pulse 2s infinite; }
+    .board-dot.planned   { background: var(--orange); }
+    .board-dot.completed { background: var(--dim); }
+
+    .board-rr.good { color: var(--green); }
+    .board-rr.warn { color: var(--red); }
+    .board-rr.base { color: var(--muted); }
+
+    .board-action {
+      font-size: .72em;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .board-action:hover { border-color: var(--orange); color: var(--orange); }
 
     /* ── Input bar ── */
     #input-bar {
@@ -361,9 +498,7 @@
       gap: 8px;
       flex-shrink: 0;
     }
-
     #input-prompt { color: var(--orange); flex-shrink: 0; }
-
     #cmd-input {
       flex: 1;
       background: transparent;
@@ -378,7 +513,6 @@
   </style>
 </head>
 <body>
-
 <div id="layout">
 
   <!-- ── Sidebar ── -->
@@ -390,58 +524,91 @@
 
     <button id="new-route-btn" onclick="newRoute()">+ New Route</button>
 
-    <div id="trip-list">
-      <div class="trip-group-label">Today</div>
+    <!-- Filter tabs -->
+    <div id="filter-tabs">
+      <div class="filter-tab active" data-filter="all"       onclick="setFilter('all',this)">All <span class="tab-count">6</span></div>
+      <div class="filter-tab"        data-filter="active"    onclick="setFilter('active',this)">Active <span class="tab-count">2</span></div>
+      <div class="filter-tab"        data-filter="planned"   onclick="setFilter('planned',this)">Planned <span class="tab-count">1</span></div>
+      <div class="filter-tab"        data-filter="completed" onclick="setFilter('completed',this)">Done <span class="tab-count">3</span></div>
+    </div>
 
-      <div class="trip-item active" onclick="loadTrip(this)">
-        <div class="trip-route">San Antonio → Dallas</div>
-        <div class="trip-meta">
-          <span>10:14 AM</span>
-          <span class="trip-rr good">SH-130 · 0.62×</span>
+    <div id="trip-list">
+      <!-- Active trips -->
+      <div class="trip-group-label" data-group="today">Today</div>
+
+      <div class="trip-item active" data-status="active" onclick="loadTrip(this)">
+        <div class="trip-status-dot dot-active"></div>
+        <div class="trip-body">
+          <div class="trip-route">San Antonio → Dallas</div>
+          <div class="trip-meta">
+            <span>Dep 10:14 AM</span>
+            <span class="trip-rr good">SH-130 · 0.62×</span>
+          </div>
+          <span class="trip-status-label sl-active">En route</span>
         </div>
       </div>
 
-      <div class="trip-item" onclick="loadTrip(this)">
-        <div class="trip-route">Houston → Dallas</div>
-        <div class="trip-meta">
-          <span>8:02 AM</span>
-          <span class="trip-rr good">US-59 · 0.81×</span>
+      <div class="trip-item" data-status="active" onclick="loadTrip(this)">
+        <div class="trip-status-dot dot-active"></div>
+        <div class="trip-body">
+          <div class="trip-route">Houston → Dallas</div>
+          <div class="trip-meta">
+            <span>Dep 8:02 AM</span>
+            <span class="trip-rr good">US-59 · 0.81×</span>
+          </div>
+          <span class="trip-status-label sl-active">En route</span>
+        </div>
+      </div>
+
+      <div class="trip-item" data-status="planned" onclick="loadTrip(this)">
+        <div class="trip-status-dot dot-planned"></div>
+        <div class="trip-body">
+          <div class="trip-route">Austin → El Paso</div>
+          <div class="trip-meta">
+            <span>Dep 2:00 PM</span>
+            <span class="trip-rr good">I-10 W · 0.74×</span>
+          </div>
+          <span class="trip-status-label sl-planned">Certified</span>
         </div>
       </div>
 
       <div class="trip-group-label">Yesterday</div>
 
-      <div class="trip-item" onclick="loadTrip(this)">
-        <div class="trip-route">San Antonio → Houston</div>
-        <div class="trip-meta">
-          <span>Mar 29</span>
-          <span class="trip-rr base">I-10 · 1.0×</span>
+      <div class="trip-item" data-status="completed" onclick="loadTrip(this)">
+        <div class="trip-status-dot dot-completed"></div>
+        <div class="trip-body">
+          <div class="trip-route">San Antonio → Houston</div>
+          <div class="trip-meta">
+            <span>Mar 29</span>
+            <span class="trip-rr base">I-10 · 1.0×</span>
+          </div>
+          <span class="trip-status-label sl-completed">Completed</span>
         </div>
       </div>
 
-      <div class="trip-item" onclick="loadTrip(this)">
-        <div class="trip-route">Dallas → Oklahoma City</div>
-        <div class="trip-meta">
-          <span>Mar 29</span>
-          <span class="trip-rr warn">I-35 N · 1.14×</span>
-        </div>
-      </div>
-
-      <div class="trip-item" onclick="loadTrip(this)">
-        <div class="trip-route">Laredo → San Antonio</div>
-        <div class="trip-meta">
-          <span>Mar 29</span>
-          <span class="trip-rr good">I-35 N · 0.77×</span>
+      <div class="trip-item" data-status="completed" onclick="loadTrip(this)">
+        <div class="trip-status-dot dot-completed"></div>
+        <div class="trip-body">
+          <div class="trip-route">Dallas → Oklahoma City</div>
+          <div class="trip-meta">
+            <span>Mar 29</span>
+            <span class="trip-rr warn">I-35 N · 1.14×</span>
+          </div>
+          <span class="trip-status-label sl-completed">Completed</span>
         </div>
       </div>
 
       <div class="trip-group-label">Mar 28</div>
 
-      <div class="trip-item" onclick="loadTrip(this)">
-        <div class="trip-route">El Paso → San Antonio</div>
-        <div class="trip-meta">
-          <span>Mar 28</span>
-          <span class="trip-rr good">I-10 · 0.69×</span>
+      <div class="trip-item" data-status="completed" onclick="loadTrip(this)">
+        <div class="trip-status-dot dot-completed"></div>
+        <div class="trip-body">
+          <div class="trip-route">El Paso → San Antonio</div>
+          <div class="trip-meta">
+            <span>Mar 28</span>
+            <span class="trip-rr good">I-10 · 0.69×</span>
+          </div>
+          <span class="trip-status-label sl-completed">Completed</span>
         </div>
       </div>
     </div>
@@ -454,143 +621,243 @@
 
   <!-- ── Main ── -->
   <div id="main">
-
     <div id="topbar">
-      <div id="topbar-route">
+      <div class="topbar-route">
         <strong>San Antonio</strong>
         <span class="topbar-sep"> → </span>
         <strong>Dallas</strong>
       </div>
       <span class="topbar-sep">·</span>
-      <span id="topbar-route" style="font-size:.78em;color:var(--dim)">Mar 30, 10:14 AM</span>
+      <span style="font-size:.78em;color:var(--dim)">Mar 30, 10:14 AM</span>
       <div id="topbar-actions">
+        <button class="tb-btn" id="btn-terminal" onclick="switchView('terminal')">⌨ Terminal</button>
+        <button class="tb-btn" id="btn-board"    onclick="switchView('board')">⊞ Board</button>
         <button class="tb-btn" onclick="rerunQuery()">↺ Re-run</button>
         <button class="tb-btn" onclick="exportCSV()">↓ Export</button>
         <button class="tb-btn primary" onclick="showCertify()">✦ Certify Route</button>
       </div>
     </div>
 
-    <div id="terminal">
+    <!-- Terminal view -->
+    <div id="view-terminal">
+      <div id="terminal">
+        <div class="t-line"><span class="t-muted">  ────────────────────────────────────</span></div>
+        <div class="t-line"><span class="t-muted">  |    |    /\    |\  |   /--\  </span></div>
+        <div class="t-line"><span class="t-muted">  |    |   /  \   | \ |  /    \ </span></div>
+        <div class="t-line"><span class="t-muted">  |__  |__/____\  |  \|  \____/ </span></div>
+        <div class="t-line" style="color:var(--dim)">        route intelligence</div>
+        <div class="t-line"><span class="t-muted">  ────────────────────────────────────</span></div>
+        <div class="t-line">&nbsp;</div>
 
-      <div class="t-line"><span class="t-muted">  ────────────────────────────────────</span></div>
-      <div class="t-line"><span class="t-muted">  |    |    /\    |\  |   /--\  </span></div>
-      <div class="t-line"><span class="t-muted">  |    |   /  \   | \ |  /    \ </span></div>
-      <div class="t-line"><span class="t-muted">  |__  |__/____\  |  \|  \____/ </span></div>
-      <div class="t-line" style="color:var(--dim)">        route intelligence</div>
-      <div class="t-line"><span class="t-muted">  ────────────────────────────────────</span></div>
-      <div class="t-line">&nbsp;</div>
-
-      <div class="t-line">
-        <span class="t-prompt">llano&gt; </span>
-        <span class="t-cmd">score --from "San Antonio, TX" --to "Dallas, TX" --depart "2026-03-30 10:00" --alternatives 3</span>
-      </div>
-      <div class="t-line t-muted">  Fetching routes · checking conditions · scoring…</div>
-      <div class="t-line">&nbsp;</div>
-
-      <table class="result-table" id="result-table">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Route</th>
-            <th>Time</th>
-            <th>+Time</th>
-            <th>Arrive</th>
-            <th>Rel. Risk</th>
-            <th>Safety</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="selected" id="row-0" onclick="selectRoute(0)">
-            <td class="sel-indicator">›</td>
-            <td style="color:var(--cyan)">SH-130 Toll</td>
-            <td>6h 29m</td>
-            <td style="color:var(--dim)">+10m</td>
-            <td style="color:var(--dim)">4:29 PM</td>
-            <td class="t-good">0.62×</td>
-            <td class="t-good">1 in 487</td>
-          </tr>
-          <tr id="row-1" onclick="selectRoute(1)">
-            <td></td>
-            <td style="color:var(--orange)">I-35 N through Austin</td>
-            <td>6h 19m</td>
-            <td style="color:var(--dim)">—</td>
-            <td style="color:var(--dim)">4:19 PM</td>
-            <td class="t-muted">1.0×</td>
-            <td>1 in 303</td>
-          </tr>
-          <tr id="row-2" onclick="selectRoute(2)">
-            <td></td>
-            <td style="color:var(--cyan)">US-281 N rural</td>
-            <td>6h 53m</td>
-            <td style="color:var(--dim)">+34m</td>
-            <td style="color:var(--dim)">4:53 PM</td>
-            <td class="t-warn">1.11×</td>
-            <td class="t-warn">1 in 272</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="t-line t-muted" style="font-size:.78em;margin-top:4px;">
-        Click a row to select · ✦ Certify Route to generate compliance report
-      </div>
-
-      <!-- Certify panel -->
-      <div id="certify-panel" class="hidden">
-        <div class="cp-header">
-          ✦ Certify Route &mdash; <span class="cp-header-route" id="cp-route-name">SH-130 Toll</span>
+        <div class="t-line">
+          <span class="t-prompt">llano&gt; </span>
+          <span class="t-cmd">score --from "San Antonio, TX" --to "Dallas, TX" --depart "2026-03-30 10:00" --alternatives 3</span>
         </div>
-        <div class="cp-body">
-          <div class="cp-field">
-            <div class="cp-label">Driver ID</div>
-            <input class="cp-input" id="cp-driver-id" placeholder="ACM-2847" />
+        <div class="t-line t-muted">  Fetching routes · checking conditions · scoring…</div>
+        <div class="t-line">&nbsp;</div>
+
+        <table class="result-table" id="result-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Route</th>
+              <th>Time</th>
+              <th>+Time</th>
+              <th>Arrive</th>
+              <th>Rel. Risk</th>
+              <th>Safety</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="selected" id="row-0" onclick="selectRoute(0)">
+              <td class="sel-indicator">›</td>
+              <td class="route-name-cell"><span class="route-name-text t-cyan" ondblclick="editRouteName(this,0)">SH-130 Toll</span></td>
+              <td>6h 29m</td>
+              <td class="t-muted">+10m</td>
+              <td class="t-muted">4:29 PM</td>
+              <td class="t-good">0.62×</td>
+              <td class="t-good">1 in 487</td>
+            </tr>
+            <tr id="row-1" onclick="selectRoute(1)">
+              <td></td>
+              <td class="route-name-cell"><span class="route-name-text" style="color:var(--orange)" ondblclick="editRouteName(this,1)">I-35 N through Austin</span></td>
+              <td>6h 19m</td>
+              <td class="t-muted">—</td>
+              <td class="t-muted">4:19 PM</td>
+              <td class="t-muted">1.0×</td>
+              <td>1 in 303</td>
+            </tr>
+            <tr id="row-2" onclick="selectRoute(2)">
+              <td></td>
+              <td class="route-name-cell"><span class="route-name-text t-cyan" ondblclick="editRouteName(this,2)">US-281 N rural</span></td>
+              <td>6h 53m</td>
+              <td class="t-muted">+34m</td>
+              <td class="t-muted">4:53 PM</td>
+              <td class="t-warn">1.11×</td>
+              <td class="t-warn">1 in 272</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="t-line t-muted" style="font-size:.78em;margin-top:4px;">
+          Click row to select · double-click route name to rename · ✦ Certify Route to generate report
+        </div>
+
+        <!-- Certify panel -->
+        <div id="certify-panel" class="hidden">
+          <div class="cp-header">
+            ✦ Certify Route &mdash; <span class="cp-header-route" id="cp-route-name">SH-130 Toll</span>
           </div>
-          <div class="cp-field">
-            <div class="cp-label">Driver Name</div>
-            <input class="cp-input" id="cp-driver-name" placeholder="James Okafor" />
+          <div class="cp-body">
+            <div class="cp-field full">
+              <div class="cp-label">Report Label <span style="color:var(--dim);font-size:.85em;text-transform:none;letter-spacing:0"> — override route name on PDF</span></div>
+              <input class="cp-input" id="cp-label" placeholder="e.g. Austin bypass, Toll route…" />
+            </div>
+            <div class="cp-field">
+              <div class="cp-label">Driver ID</div>
+              <input class="cp-input" id="cp-driver-id" placeholder="ACM-2847" />
+            </div>
+            <div class="cp-field">
+              <div class="cp-label">Driver Name</div>
+              <input class="cp-input" id="cp-driver-name" placeholder="James Okafor" />
+            </div>
+            <div class="cp-field">
+              <div class="cp-label">Phone Number</div>
+              <input class="cp-input" id="cp-phone" placeholder="(210) 555-0142" />
+              <div class="cp-hint">Driver receives SMS with route + tracking link</div>
+            </div>
+            <div class="cp-field">
+              <div class="cp-label">Departure Time</div>
+              <input class="cp-input" id="cp-depart" placeholder="2026-03-30 10:00" />
+            </div>
+            <div class="cp-field">
+              <div class="cp-label">Load / Ref #</div>
+              <input class="cp-input" id="cp-load" placeholder="PO-98432" />
+            </div>
+            <div class="cp-field">
+              <div class="cp-label">Carrier / Fleet ID</div>
+              <input class="cp-input" id="cp-fleet" placeholder="ACME Logistics" />
+            </div>
+            <div class="cp-field full">
+              <div class="cp-label">Notes</div>
+              <input class="cp-input" id="cp-notes" placeholder="Optional — hazmat, oversized load, etc." />
+            </div>
           </div>
-          <div class="cp-field">
-            <div class="cp-label">Phone Number</div>
-            <input class="cp-input" id="cp-phone" placeholder="(210) 555-0142" />
-            <div class="cp-hint">Driver receives SMS with route + tracking link</div>
-          </div>
-          <div class="cp-field">
-            <div class="cp-label">Departure Time</div>
-            <input class="cp-input" id="cp-depart" placeholder="2026-03-30 10:00" />
-          </div>
-          <div class="cp-field">
-            <div class="cp-label">Load / Ref #</div>
-            <input class="cp-input" id="cp-load" placeholder="PO-98432" />
-          </div>
-          <div class="cp-field">
-            <div class="cp-label">Carrier / Fleet ID</div>
-            <input class="cp-input" id="cp-fleet" placeholder="ACME Logistics" />
-          </div>
-          <div class="cp-field full">
-            <div class="cp-label">Notes</div>
-            <input class="cp-input" id="cp-notes" placeholder="Optional — hazmat, oversized load, etc." />
+          <div class="cp-footer">
+            <div class="cp-credit-note">Uses <span>1 credit</span> · <span id="cp-credits-remaining">4</span> remaining</div>
+            <div class="cp-actions">
+              <button class="cp-btn cancel" onclick="hideCertify()">Cancel</button>
+              <button class="cp-btn generate" onclick="generateReport()">Generate Report</button>
+            </div>
           </div>
         </div>
-        <div class="cp-footer">
-          <div class="cp-credit-note">Uses <span>1 credit</span> · <span id="cp-credits-remaining">4</span> remaining</div>
-          <div class="cp-actions">
-            <button class="cp-btn cancel" onclick="hideCertify()">Cancel</button>
-            <button class="cp-btn generate" onclick="generateReport()">Generate Report</button>
-          </div>
+
+        <div class="t-line" id="cursor-line" style="margin-top:14px;">&nbsp;</div>
+      </div><!-- /terminal -->
+
+      <div id="input-bar">
+        <span id="input-prompt">llano&gt;</span>
+        <input id="cmd-input" type="text" placeholder='score --from "..." --to "..."'
+               autocomplete="off" spellcheck="false"
+               onkeydown="handleInput(event)" />
+      </div>
+    </div><!-- /view-terminal -->
+
+    <!-- Board view -->
+    <div id="view-board">
+      <div id="board-wrap">
+        <div class="board-filter-row">
+          <button class="board-filter-btn active" data-bf="all"       onclick="setBoardFilter('all',this)">All</button>
+          <button class="board-filter-btn"        data-bf="active"    onclick="setBoardFilter('active',this)">Active</button>
+          <button class="board-filter-btn"        data-bf="planned"   onclick="setBoardFilter('planned',this)">Planned</button>
+          <button class="board-filter-btn"        data-bf="completed" onclick="setBoardFilter('completed',this)">Completed</button>
+          <span class="board-sort-label">Sort&nbsp;</span>
+          <select class="board-sort-select" onchange="sortBoard(this.value)">
+            <option value="time">Time ↓</option>
+            <option value="rr">Rel. Risk</option>
+            <option value="status">Status</option>
+            <option value="driver">Driver</option>
+          </select>
         </div>
+
+        <table class="board-table" id="board-table">
+          <thead>
+            <tr>
+              <th onclick="sortBoard('status')">Status <span class="sort-arrow">↕</span></th>
+              <th onclick="sortBoard('route')">Route <span class="sort-arrow">↕</span></th>
+              <th onclick="sortBoard('driver')">Driver <span class="sort-arrow">↕</span></th>
+              <th onclick="sortBoard('time')">Dep / ETA <span class="sort-arrow">↕</span></th>
+              <th onclick="sortBoard('rr')" class="sorted">Rel. Risk <span class="sort-arrow">↕</span></th>
+              <th>Safety</th>
+              <th>Ref #</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="board-body">
+            <tr data-status="active">
+              <td><span class="board-status bs-active"><span class="board-dot active"></span>En route</span></td>
+              <td>SAT → DAL</td>
+              <td style="color:var(--muted)">J. Okafor</td>
+              <td style="color:var(--dim)">10:14 AM / 4:29 PM</td>
+              <td><span class="board-rr good">0.62×</span></td>
+              <td style="color:var(--green)">1 in 487</td>
+              <td style="color:var(--dim)">PO-98432</td>
+              <td><button class="board-action">View</button></td>
+            </tr>
+            <tr data-status="active">
+              <td><span class="board-status bs-active"><span class="board-dot active"></span>En route</span></td>
+              <td>HOU → DAL</td>
+              <td style="color:var(--muted)">M. Rivera</td>
+              <td style="color:var(--dim)">8:02 AM / 2:50 PM</td>
+              <td><span class="board-rr good">0.81×</span></td>
+              <td style="color:var(--green)">1 in 381</td>
+              <td style="color:var(--dim)">PO-98415</td>
+              <td><button class="board-action">View</button></td>
+            </tr>
+            <tr data-status="planned">
+              <td><span class="board-status bs-planned"><span class="board-dot planned"></span>Certified</span></td>
+              <td>AUS → ELP</td>
+              <td style="color:var(--muted)">T. Washington</td>
+              <td style="color:var(--dim)">2:00 PM / 9:12 PM</td>
+              <td><span class="board-rr good">0.74×</span></td>
+              <td style="color:var(--green)">1 in 412</td>
+              <td style="color:var(--dim)">PO-98441</td>
+              <td><button class="board-action">View</button></td>
+            </tr>
+            <tr data-status="completed">
+              <td><span class="board-status bs-completed"><span class="board-dot completed"></span>Completed</span></td>
+              <td>SAT → HOU</td>
+              <td style="color:var(--muted)">J. Okafor</td>
+              <td style="color:var(--dim)">Mar 29 / Arrived</td>
+              <td><span class="board-rr base">1.0×</span></td>
+              <td style="color:var(--muted)">1 in 303</td>
+              <td style="color:var(--dim)">PO-98401</td>
+              <td><button class="board-action">View</button></td>
+            </tr>
+            <tr data-status="completed">
+              <td><span class="board-status bs-completed"><span class="board-dot completed"></span>Completed</span></td>
+              <td>DAL → OKC</td>
+              <td style="color:var(--muted)">D. Chen</td>
+              <td style="color:var(--dim)">Mar 29 / Arrived</td>
+              <td><span class="board-rr warn">1.14×</span></td>
+              <td style="color:var(--red)">1 in 266</td>
+              <td style="color:var(--dim)">PO-98388</td>
+              <td><button class="board-action">View</button></td>
+            </tr>
+            <tr data-status="completed">
+              <td><span class="board-status bs-completed"><span class="board-dot completed"></span>Completed</span></td>
+              <td>ELP → SAT</td>
+              <td style="color:var(--muted)">M. Rivera</td>
+              <td style="color:var(--dim)">Mar 28 / Arrived</td>
+              <td><span class="board-rr good">0.69×</span></td>
+              <td style="color:var(--green)">1 in 439</td>
+              <td style="color:var(--dim)">PO-98372</td>
+              <td><button class="board-action">View</button></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-
-      <div class="t-line" id="cursor-line" style="margin-top:14px;">
-        &nbsp;
-      </div>
-
-    </div><!-- /terminal -->
-
-    <div id="input-bar">
-      <span id="input-prompt">llano&gt;</span>
-      <input id="cmd-input" type="text" placeholder='score --from "..." --to "..."'
-             autocomplete="off" spellcheck="false"
-             onkeydown="handleInput(event)" />
-    </div>
+    </div><!-- /view-board -->
 
   </div><!-- /main -->
 </div><!-- /layout -->
@@ -599,7 +866,68 @@
   var selectedRoute = 0;
   var routeNames = ["SH-130 Toll", "I-35 N through Austin", "US-281 N rural"];
   var credits = 4;
+  var currentView = "terminal";
+  var boardFilter = "all";
 
+  // ── View switch ──
+  function switchView(v) {
+    currentView = v;
+    document.getElementById("view-terminal").style.display = v === "terminal" ? "flex" : "none";
+    document.getElementById("view-board").style.display    = v === "board"    ? "flex" : "none";
+    document.getElementById("btn-terminal").style.color    = v === "terminal" ? "var(--orange)" : "";
+    document.getElementById("btn-terminal").style.borderColor = v === "terminal" ? "var(--orange)" : "";
+    document.getElementById("btn-board").style.color       = v === "board"    ? "var(--orange)" : "";
+    document.getElementById("btn-board").style.borderColor = v === "board"    ? "var(--orange)" : "";
+  }
+
+  // ── Sidebar filter ──
+  function setFilter(f, el) {
+    document.querySelectorAll(".filter-tab").forEach(function(t) { t.classList.remove("active"); });
+    el.classList.add("active");
+    document.querySelectorAll(".trip-item").forEach(function(item) {
+      var show = f === "all" || item.dataset.status === f;
+      item.style.display = show ? "flex" : "none";
+    });
+    // hide group labels with no visible items
+    document.querySelectorAll(".trip-group-label").forEach(function(lbl) {
+      var next = lbl.nextElementSibling;
+      var hasVisible = false;
+      while (next && !next.classList.contains("trip-group-label")) {
+        if (next.style.display !== "none") hasVisible = true;
+        next = next.nextElementSibling;
+      }
+      lbl.style.display = hasVisible ? "" : "none";
+    });
+  }
+
+  // ── Board filter ──
+  function setBoardFilter(f, el) {
+    boardFilter = f;
+    document.querySelectorAll(".board-filter-btn").forEach(function(b) { b.classList.remove("active"); });
+    el.classList.add("active");
+    document.querySelectorAll("#board-body tr").forEach(function(row) {
+      row.style.display = (f === "all" || row.dataset.status === f) ? "" : "none";
+    });
+  }
+
+  // ── Board sort ──
+  function sortBoard(key) {
+    var tbody = document.getElementById("board-body");
+    var rows = Array.from(tbody.querySelectorAll("tr"));
+    var colMap = { status: 0, route: 1, driver: 2, time: 3, rr: 4 };
+    var col = colMap[key];
+    if (col === undefined) return;
+    rows.sort(function(a, b) {
+      var at = a.cells[col] ? a.cells[col].textContent.trim() : "";
+      var bt = b.cells[col] ? b.cells[col].textContent.trim() : "";
+      return at.localeCompare(bt);
+    });
+    rows.forEach(function(r) { tbody.appendChild(r); });
+    setBoardFilter(boardFilter, document.querySelector("[data-bf='" + boardFilter + "']"));
+    document.querySelectorAll(".board-table th").forEach(function(th) { th.classList.remove("sorted"); });
+  }
+
+  // ── Route selection ──
   function selectRoute(idx) {
     selectedRoute = idx;
     document.querySelectorAll(".result-table tbody tr").forEach(function(r, i) {
@@ -610,10 +938,37 @@
     if (cp) cp.textContent = routeNames[idx];
   }
 
+  // ── Inline route rename ──
+  function editRouteName(span, idx) {
+    var current = span.textContent;
+    var input = document.createElement("input");
+    input.className = "route-name-input";
+    input.value = current;
+    span.replaceWith(input);
+    input.focus();
+    input.select();
+    function commit() {
+      var val = input.value.trim() || current;
+      routeNames[idx] = val;
+      var newSpan = document.createElement("span");
+      newSpan.className = span.className;
+      newSpan.setAttribute("ondblclick", "editRouteName(this," + idx + ")");
+      newSpan.textContent = val;
+      input.replaceWith(newSpan);
+    }
+    input.addEventListener("blur", commit);
+    input.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") commit();
+      if (e.key === "Escape") { input.value = current; commit(); }
+    });
+  }
+
+  // ── Certify ──
   function showCertify() {
     var panel = document.getElementById("certify-panel");
     panel.classList.remove("hidden");
     document.getElementById("cp-route-name").textContent = routeNames[selectedRoute];
+    document.getElementById("cp-label").placeholder = routeNames[selectedRoute];
     document.getElementById("cp-credits-remaining").textContent = credits;
     panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
@@ -628,11 +983,12 @@
       hideCertify();
       return;
     }
+    var label = document.getElementById("cp-label").value.trim() || routeNames[selectedRoute];
     credits--;
     document.getElementById("credit-count").textContent = credits;
     hideCertify();
     appendLine('');
-    appendLine('<span style="color:var(--dim)">  Generating compliance report…</span>');
+    appendLine('<span style="color:var(--dim)">  Generating compliance report for <strong>' + escHtml(label) + '</strong>…</span>');
     setTimeout(function() {
       appendLine('<span style="color:var(--green)">  ✓ Report generated · PDF emailed to james@acme.com</span>');
       appendLine('<span style="color:var(--green)">  ✓ Tracking SMS sent to (210) 555-0142</span>');
@@ -641,6 +997,7 @@
     }, 900);
   }
 
+  // ── Terminal helpers ──
   function appendLine(html) {
     var cursor = document.getElementById("cursor-line");
     var div = document.createElement("div");
@@ -662,6 +1019,7 @@
   }
 
   function rerunQuery() {
+    if (currentView === "board") return;
     appendLine('');
     appendLine('<span class="t-muted">  Re-running · refreshing conditions…</span>');
     setTimeout(function() {
@@ -679,6 +1037,7 @@
   }
 
   function newRoute() {
+    switchView("terminal");
     document.getElementById("cmd-input").focus();
     document.querySelectorAll(".trip-item").forEach(function(el) { el.classList.remove("active"); });
   }
