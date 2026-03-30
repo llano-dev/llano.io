@@ -1155,7 +1155,7 @@ function spinner(msg) {
     function slowTick() {
       if (step >= delays.length) {
         el.innerHTML = frame(2) + '  <span style="color:#8b8fa8">' + (done || msg) + "</span>";
-        if (callback) requestAnimationFrame(function() { setTimeout(callback, 0); });
+        if (callback) requestAnimationFrame(function() { setTimeout(callback, 180); });
         return;
       }
       fi = (fi + 1) % OFFSETS.length;
@@ -1206,6 +1206,18 @@ function fmtDur(secs) {
 }
 function fmtNum(n) { return parseInt(n, 10).toLocaleString(); }
 function scalar(v) { return Array.isArray(v) ? v[0] : v; }
+function fmtDateTime(d) {
+  var yr = d.getFullYear();
+  var mo = String(d.getMonth()+1).padStart(2,"0");
+  var dy = String(d.getDate()).padStart(2,"0");
+  var hr = String(d.getHours()).padStart(2,"0");
+  var mn = String(d.getMinutes()).padStart(2,"0");
+  return yr + "-" + mo + "-" + dy + " " + hr + ":" + mn;
+}
+function parseTS(str) {
+  // accept "YYYY-MM-DD HH:MM" or ISO
+  return str ? new Date(str.replace(" ","T")) : null;
+}
 
 // ── Render results ────────────────────────────────────────────────────────────
 function renderResults(routes, flags) {
@@ -1216,16 +1228,25 @@ function renderResults(routes, flags) {
   var fastestDur = Math.min.apply(null, durVals);
   var fastestTpc = scalar(ranked[durVals.indexOf(fastestDur)].trips_per_crash) || 0;
 
+  // Resolve base timestamp — explicit depart/arrive or default to now as depart
+  var anchorTS   = parseTS(flags.depart || flags.arrive) || new Date();
+  var hasArrive  = !!flags.arrive;
+  var hasDepart  = !!flags.depart;
+  var timeColHdr = hasArrive ? "Depart" : "Arrive";
+  var showTimeCol = true;  // always show — default depart = now
+
   blank();
   var fromTo = (flags.from||"") + "  \u2192  " + (flags.to||"");
-  var dep = flags.depart ? "  depart " + flags.depart : flags.arrive ? "  arrive " + flags.arrive : "";
-  lineHTML('<span style="color:#8b8fa8">' + fromTo + (dep ? "  " + dep : "") + "</span>");
+  var tsLabel = hasDepart ? "  depart " + flags.depart
+              : hasArrive ? "  arrive " + flags.arrive
+              : "  depart " + fmtDateTime(anchorTS);
+  lineHTML('<span style="color:#8b8fa8">' + fromTo + "  " + tsLabel + "</span>");
   blank();
 
   var tbl = document.createElement("table");
   tbl.className = "route-table";
   var thead = tbl.createTHead(), hrow = thead.insertRow();
-  ["","Route","Time","+Time","Relative Risk","Safety"].forEach(function(h) {
+  ["","Route","Time","+Time",timeColHdr,"Relative Risk","Safety"].forEach(function(h) {
     var th = document.createElement("th"); th.textContent = h; hrow.appendChild(th);
   });
   var tbody = tbl.createTBody();
@@ -1240,6 +1261,12 @@ function renderResults(routes, flags) {
       ? (fastestTpc / tpc).toFixed(2) + "\u00d7"
       : "\u2014";
     if (isFastest) rr = "1.0\u00d7";
+    // Compute per-route arrive or depart time
+    var routeTimeMS = dur * 1000;
+    var routeDate = hasArrive
+      ? new Date(anchorTS.getTime() - routeTimeMS)   // arrive fixed → compute depart
+      : new Date(anchorTS.getTime() + routeTimeMS);  // depart fixed (or now) → compute arrive
+    var routeTimeStr = fmtDateTime(routeDate);
     var row = tbody.insertRow();
     row.style.opacity = isBest ? "1" : "0.7";
     [
@@ -1247,6 +1274,7 @@ function renderResults(routes, flags) {
       { text: lbl, color: COLORS[i % COLORS.length] },
       { text: fmtDur(dur) },
       { text: extra > 0 ? "+" + fmtDur(extra) : "", cls: "td-muted" },
+      { text: routeTimeStr, cls: "td-muted" },
       { text: rr, cls: "td-muted" },
       { text: tpc > 0 ? "1 in " + fmtNum(tpc) + " trips" : "\u2014" }
     ].forEach(function(c) {
