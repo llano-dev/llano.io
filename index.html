@@ -173,6 +173,9 @@ h2 {
   color: #e2e4e9;
   line-height: 1.25;
   margin-bottom: 1rem;
+  font-family: 'JetBrains Mono', monospace !important;
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
 }
 .section-sub {
   color: #8b8fa8;
@@ -424,10 +427,8 @@ h2 {
 }
 .route-table td { padding: .22rem .5rem; border-bottom: 1px solid #1e2026 !important; color: #e2e4e9; }
 .route-table tr:last-child td { border-bottom: none !important; }
-.td-rank { color: #F97316 !important; text-align: center; }
+.td-rank  { color: #F97316 !important; text-align: center; }
 .td-muted { color: #8b8fa8 !important; text-align: right; }
-.td-rr   { color: #8b8fa8 !important; text-align: right; }
-.td-rr-best { color: #F97316 !important; }
 
 /* Leaflet overrides */
 .leaflet-container { background: #13151a !important; }
@@ -641,9 +642,9 @@ h2 {
         <p>A mixed-effects negative binomial model estimates expected crashes per vehicle-mile on every road segment in Texas — controlling for road class, curvature, grade, traffic volume, and urban density.</p>
       </div>
       <div class="method-step">
-        <div class="method-step-num">02 — WEATHER</div>
+        <div class="method-step-num">02 — DYNAMIC</div>
         <h3 class="anchored">Real-time multiplier</h3>
-        <p>An XGBoost case-crossover model estimates how current conditions (temperature, wind, precipitation) elevate crash probability relative to the same segment on a clear day.</p>
+        <p>An XGBoost case-crossover model estimates how current conditions (wind, precipitation, congestion) elevate crash probability relative to the same segment on a clear day.</p>
       </div>
       <div class="method-step">
         <div class="method-step-num">03 — OUTPUT</div>
@@ -1098,7 +1099,7 @@ function renderResults(routes, flags) {
   var tbl = document.createElement("table");
   tbl.className = "route-table";
   var thead = tbl.createTHead(), hrow = thead.insertRow();
-  ["","Route","Time","+Time","Safety","RR"].forEach(function(h) {
+  ["","Route","Time","+Time","Safety"].forEach(function(h) {
     var th = document.createElement("th"); th.textContent = h; hrow.appendChild(th);
   });
   var tbody = tbl.createTBody();
@@ -1108,9 +1109,6 @@ function renderResults(routes, flags) {
     var lbl  = scalar(r.name) || scalar(r.label) || ("Route " + (i+1));
     var extra = dur - fastestDur;
     var isBest = i === 0;
-    var rr = tpc > 0 && !isBest
-      ? (scalar(ranked[0].trips_per_crash) / tpc).toFixed(2) + "\u00d7"
-      : "1.0\u00d7";
     var row = tbody.insertRow();
     row.style.opacity = isBest ? "1" : "0.7";
     [
@@ -1118,8 +1116,7 @@ function renderResults(routes, flags) {
       { text: lbl, color: COLORS[i % COLORS.length] },
       { text: fmtDur(dur) },
       { text: extra > 0 ? "+" + fmtDur(extra) : "", cls: "td-muted" },
-      { text: tpc > 0 ? "1 in " + fmtNum(tpc) + " trips" : "\u2014" },
-      { text: rr, cls: "td-rr" + (isBest ? " td-rr-best" : "") }
+      { text: tpc > 0 ? "1 in " + fmtNum(tpc) + " trips" : "\u2014" }
     ].forEach(function(c) {
       var td = document.createElement("td");
       td.textContent = c.text;
