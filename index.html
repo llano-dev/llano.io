@@ -784,6 +784,9 @@ h2, .page-section h2, .hero h2, section h2 {
             <input id="cmd-input" type="text" autocomplete="off" spellcheck="false" style="background:transparent;position:relative;z-index:1;">
           </div>
         </div>
+        <div id="mobile-suggestion" style="display:none;padding:.45rem .6rem .1rem;">
+          <button onclick="acceptSuggestion()" style="background:#1a1d24;border:1px solid #2e3140;border-radius:4px;color:#3a3d4a;font-family:'JetBrains Mono',monospace;font-size:.72em;padding:.35rem .7rem;cursor:pointer;text-align:left;width:100%;">llano score --from "Laredo" --to "Dallas" <span style="color:#5a5f72;float:right;">tap to try →</span></button>
+        </div>
       </div>
 
       <!-- Map (always visible) -->
@@ -1110,6 +1113,7 @@ var SUGGESTION  = 'llano score --from "Laredo" --to "Dallas"';
 
 function updateGhost() {
   if (ghost && !isMobile) ghost.style.display = input.value === "" ? "block" : "none";
+  if (mobileSuggestion && isMobile) mobileSuggestion.style.display = input.value === "" ? "block" : "none";
 }
 
 // ── Map init (always visible, Texas overview) ─────────────────────────────────
@@ -1573,10 +1577,18 @@ window.docsTab = function(lang, btn) {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 var isMobile = window.innerWidth < 769;
+var mobileSuggestion = document.getElementById("mobile-suggestion");
 if (isMobile) {
   input.placeholder = 'llano score --from "..." --to "..."';
   if (ghost) ghost.style.display = "none";
+  if (mobileSuggestion) mobileSuggestion.style.display = "block";
 }
+
+window.acceptSuggestion = function() {
+  input.value = SUGGESTION;
+  if (mobileSuggestion) mobileSuggestion.style.display = "none";
+  input.focus();
+};
 welcome();
 initMap();
 updateGhost();
