@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Llano — App</title>
   <link rel="icon" href="favicon.ico" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -380,6 +382,31 @@
     .cp-btn.generate { background: var(--orange); border: 1px solid var(--orange); color: #000; font-weight: 600; }
     .cp-btn.generate:hover { background: #ea6a0a; }
 
+    /* ── Terminal / map split ── */
+    #terminal-split {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+    #terminal-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-right: 1px solid var(--border);
+    }
+    #map-pane {
+      width: 380px;
+      flex-shrink: 0;
+      position: relative;
+      background: var(--surface);
+    }
+    #app-map {
+      width: 100%;
+      height: 100%;
+    }
+    .leaflet-container { background: #0f1117; }
+
     /* ── Board view ── */
     #board-wrap {
       flex: 1;
@@ -640,6 +667,8 @@
 
     <!-- Terminal view -->
     <div id="view-terminal">
+    <div id="terminal-split">
+    <div id="terminal-pane">
       <div id="terminal">
         <div class="t-line"><span class="t-muted">  ────────────────────────────────────</span></div>
         <div class="t-line"><span class="t-muted">  |    |    /\    |\  |   /--\  </span></div>
@@ -761,6 +790,9 @@
                autocomplete="off" spellcheck="false"
                onkeydown="handleInput(event)" />
       </div>
+    </div><!-- /terminal-pane -->
+    <div id="map-pane"><div id="app-map"></div></div>
+    </div><!-- /terminal-split -->
     </div><!-- /view-terminal -->
 
     <!-- Board view -->
@@ -1052,6 +1084,66 @@
   }
 
   document.getElementById("cmd-input").focus();
+
+  // ── Static Leaflet map ──
+  var appMap = L.map("app-map", { zoomControl: false, attributionControl: false })
+    .setView([29.8, -98.5], 6);
+
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    maxZoom: 18
+  }).addTo(appMap);
+
+  L.control.zoom({ position: "bottomright" }).addTo(appMap);
+
+  // Approximate route polylines: SAT → DAL via three corridors
+  var routes = [
+    { // SH-130 Toll — loops east of Austin
+      coords: [[29.424, -98.495],[29.7,-97.9],[30.05,-97.65],[30.42,-97.75],[31.0,-97.46],[31.55,-97.15],[32.08,-96.8],[32.78,-96.8]],
+      color: "#06B6D4", weight: 3, opacity: 0.5
+    },
+    { // I-35 N — through Austin
+      coords: [[29.424,-98.495],[29.7,-98.1],[30.27,-97.74],[30.52,-97.65],[31.1,-97.37],[31.55,-97.15],[32.08,-96.8],[32.78,-96.8]],
+      color: "#F97316", weight: 4, opacity: 0.9
+    },
+    { // US-281 N — rural cutoff
+      coords: [[29.424,-98.495],[29.6,-98.48],[30.0,-98.43],[30.5,-98.35],[31.2,-98.1],[31.9,-97.7],[32.4,-97.3],[32.78,-96.8]],
+      color: "#06B6D4", weight: 3, opacity: 0.5
+    }
+  ];
+
+  var polylines = routes.map(function(r) {
+    return L.polyline(r.coords, { color: r.color, weight: r.weight, opacity: r.opacity }).addTo(appMap);
+  });
+
+  function markerIcon(color) {
+    return L.divIcon({
+      className: "",
+      html: '<div style="width:12px;height:12px;border-radius:50%;background:' + color + ';border:2px solid #0f1117;"></div>',
+      iconSize: [12,12], iconAnchor: [6,6]
+    });
+  }
+  L.marker([29.424,-98.495], { icon: markerIcon("#F97316") }).addTo(appMap);
+  L.marker([32.78,-96.8],    { icon: markerIcon("#F97316") }).addTo(appMap);
+
+  // Highlight selected route
+  function highlightRoute(idx) {
+    polylines.forEach(function(pl, i) {
+      if (i === idx) {
+        pl.setStyle({ weight: 4, opacity: 1.0 });
+        pl.bringToFront();
+      } else {
+        pl.setStyle({ weight: 2, opacity: 0.3 });
+      }
+    });
+  }
+  highlightRoute(1); // I-35 N selected by default (index 1)
+
+  // Hook into selectRoute
+  var _origSelectRoute = selectRoute;
+  selectRoute = function(idx) {
+    _origSelectRoute(idx);
+    highlightRoute(idx);
+  };
 </script>
 </body>
 </html>
