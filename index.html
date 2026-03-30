@@ -935,47 +935,41 @@ h2, .page-section h2, .hero h2, section h2 {
         <div class="code-chrome">
           <div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div>
           <div class="code-tabs">
-            <button class="code-tab active" onclick="docsTab('json',this)">JSON</button>
+            <button class="code-tab active" onclick="docsTab('curl',this)">cURL</button>
             <button class="code-tab" onclick="docsTab('python',this)">Python</button>
             <button class="code-tab" onclick="docsTab('r',this)">R</button>
           </div>
         </div>
 
-        <pre class="code-body" id="docs-pane-json"><code><span class="c-cm">// Option A — pass your router key, we call it on your behalf</span>
-{
-  <span class="c-key">"waypoints"</span>:    [[-99.5075, 27.5035], [-98.4936, 29.4241]],
-  <span class="c-key">"arrive"</span>:       <span class="c-str">"2026-04-20T18:00"</span>,
-  <span class="c-key">"alternatives"</span>: 3,
-  <span class="c-key">"router"</span>: {
-    <span class="c-key">"provider"</span>: <span class="c-str">"tomtom"</span>,  <span class="c-cm">// "tomtom" | "pcmiler" | "here"</span>
-    <span class="c-key">"api_key"</span>:  <span class="c-str">"YOUR_TOMTOM_KEY"</span>
-  }
-}
+        <pre class="code-body" id="docs-pane-curl"><code><span class="c-cm"># Option A — pass your router key, Llano calls it on your behalf</span>
+<span class="c-fn">curl</span> -s -X POST https://api.llano.io/score \
+  -H <span class="c-str">"X-API-Key: lno_..."</span> \
+  -H <span class="c-str">"Content-Type: application/json"</span> \
+  -d <span class="c-str">'{
+    "waypoints":    [[-99.5075, 27.5035], [-98.4936, 29.4241]],
+    "arrive":       "2026-04-20T18:00",
+    "alternatives": 3,
+    "router": { "provider": "tomtom", "api_key": "YOUR_KEY" }
+  }'</span>
 
-<span class="c-cm">// Option B — pass raw GeoJSON coordinates directly</span>
-{
-  <span class="c-key">"route"</span>: {
-    <span class="c-key">"type"</span>:        <span class="c-str">"LineString"</span>,
-    <span class="c-key">"coordinates"</span>: [ <span class="c-cm">/* your existing geometry */</span> ]
-  },
-  <span class="c-key">"arrive"</span>: <span class="c-str">"2026-04-20T18:00"</span>
-}
+<span class="c-cm"># Option B — pass raw GeoJSON from your existing pipeline</span>
+<span class="c-fn">curl</span> -s -X POST https://api.llano.io/score \
+  -H <span class="c-str">"X-API-Key: lno_..."</span> \
+  -H <span class="c-str">"Content-Type: application/json"</span> \
+  -d <span class="c-str">'{
+    "route":  { "type": "LineString", "coordinates": [...] },
+    "arrive": "2026-04-20T18:00"
+  }'</span>
 
-<span class="c-cm">// Option C — no router, Llano plans and scores alternatives</span>
-{
-  <span class="c-key">"waypoints"</span>:    [[-99.5075, 27.5035], [-98.4936, 29.4241]],
-  <span class="c-key">"arrive"</span>:       <span class="c-str">"2026-04-20T18:00"</span>,
-  <span class="c-key">"alternatives"</span>: 3
-}
-
-<span class="c-cm">// Response is identical regardless of option (array, safest first)</span>
-[{
-  <span class="c-key">"name"</span>:           <span class="c-str">"I-35 N"</span>,
-  <span class="c-key">"trips_per_crash"</span>: 2841,
-  <span class="c-key">"dynamic_mult"</span>:    1.04,
-  <span class="c-key">"hotspots"</span>:        [...],
-  <span class="c-key">"route"</span>:           { <span class="c-cm">/* GeoJSON */</span> }
-}, ...]</code></pre>
+<span class="c-cm"># Option C — no router, Llano plans and scores alternatives</span>
+<span class="c-fn">curl</span> -s -X POST https://api.llano.io/score \
+  -H <span class="c-str">"X-API-Key: lno_..."</span> \
+  -H <span class="c-str">"Content-Type: application/json"</span> \
+  -d <span class="c-str">'{
+    "waypoints":    [[-99.5075, 27.5035], [-98.4936, 29.4241]],
+    "arrive":       "2026-04-20T18:00",
+    "alternatives": 3
+  }'</span></code></pre>
 
         <pre class="code-body" id="docs-pane-python" style="display:none"><code><span class="c-kw">import</span> requests
 
@@ -1566,7 +1560,7 @@ input.addEventListener("input", updateGhost);
 
 // ── Docs tabs ─────────────────────────────────────────────────────────────────
 window.docsTab = function(lang, btn) {
-  ["json","python","r"].forEach(function(l) {
+  ["curl","python","r"].forEach(function(l) {
     var pane = document.getElementById("docs-pane-" + l);
     if (pane) pane.style.display = l === lang ? "block" : "none";
   });
