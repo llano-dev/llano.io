@@ -970,7 +970,8 @@ var TX_BBOX  = { minLat: 25.8, maxLat: 36.5, minLon: -106.6, maxLon: -93.5 };
 // ── State ─────────────────────────────────────────────────────────────────────
 var history = [];
 var histIdx = -1;
-var leafMap = null;
+var leafMap        = null;
+var hotspotControl = null;
 
 // ── DOM ───────────────────────────────────────────────────────────────────────
 var output      = document.getElementById("term-output");
@@ -1257,7 +1258,9 @@ function renderMap(ranked) {
     });
   }
 
-  L.control.layers(null, { "Hotspots": hotspotLayer }, { position: "topright", collapsed: false }).addTo(leafMap);
+  if (hotspotControl) { hotspotControl.remove(); hotspotControl = null; }
+  hotspotControl = L.control.layers(null, { "Hotspots": hotspotLayer }, { position: "topright", collapsed: false });
+  hotspotControl.addTo(leafMap);
 
   // Waypoint markers
   if (best && best.waypoints) {
