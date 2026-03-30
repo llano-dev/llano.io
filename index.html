@@ -1243,8 +1243,9 @@ function renderMap(ranked) {
     allLats = allLats.concat(xy.lats);
   }
 
-  // Hotspots
+  // Hotspots — layer group, off by default
   var best = ranked[0];
+  var hotspotLayer = L.layerGroup();
   if (best && best.route && best.route.coordinates && best.hotspots) {
     var bxy = extractCoords(best.route.coordinates);
     best.hotspots.forEach(function(hs) {
@@ -1252,11 +1253,13 @@ function renderMap(ranked) {
       var seg = routeSubseg(bxy.lngs, bxy.lats, frac, 0.015);
       if (!seg.lngs.length) return;
       var ll = seg.lats.map(function(lat, j) { return [lat, seg.lngs[j]]; });
-      L.polyline(ll, { color:"#e11d48", weight:18, opacity:0.18, className:"hs-halo" }).addTo(leafMap);
-      L.polyline(ll, { color:"#ff2d55", weight:3,  opacity:0.9,  className:"hs-core" })
-        .bindTooltip("Hotspot — " + (frac*100).toFixed(1) + "% of route").addTo(leafMap);
+      L.polyline(ll, { color:"#e11d48", weight:18, opacity:0.18 }).addTo(hotspotLayer);
+      L.polyline(ll, { color:"#ff2d55", weight:3,  opacity:0.9  })
+        .bindTooltip("Hotspot — " + (frac*100).toFixed(1) + "% of route").addTo(hotspotLayer);
     });
   }
+
+  L.control.layers(null, { "Hotspots": hotspotLayer }, { position: "topright", collapsed: false }).addTo(leafMap);
 
   // Waypoint markers
   if (best && best.waypoints) {
@@ -1287,6 +1290,7 @@ function execute(cmd) {
   cmd = cmd.trim();
   if (!cmd) return;
 
+  output.innerHTML = "";
   lineHTML('<span style="color:#F97316">$</span> <span style="color:#e2e4e9">' + cmd.replace(/</g,"&lt;") + '</span>');
 
   if (cmd === "clear" || cmd === "llano clear") {
