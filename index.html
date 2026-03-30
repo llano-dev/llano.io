@@ -152,16 +152,7 @@ h2, .page-section h2, .hero h2, section h2 {
 .hero-inner {
   max-width: 960px;
   margin: 0 auto;
-  padding: 5rem 1.5rem;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: center;
-  gap: 3rem;
-}
-.hero-visual svg { width: 100%; max-width: 440px; border-radius: 10px; display: block; }
-@media (max-width: 768px) {
-  .hero-inner { grid-template-columns: 1fr; }
-  .hero-visual { display: none; }
+  padding: 4rem 1.5rem 5rem;
 }
 .hero-brand {
   font-size: 1em;
@@ -591,72 +582,18 @@ h2, .page-section h2, .hero h2, section h2 {
 .waitlist-thanks { color: #22C55E; font-size: .85em; }
 </style>
 
+<!-- ── Sunset strip ───────────────────────────────────────────────────────── -->
+<div style="width:100%;height:140px;background:linear-gradient(to bottom, #7c2d12 0%, #c2410c 25%, #F97316 55%, #fbbf24 78%, #0f1117 100%);opacity:.85;"></div>
+
 <!-- ── Hero ──────────────────────────────────────────────────────────────── -->
-<section class="hero">
+<section class="hero" style="border-top:none;">
   <div class="hero-inner">
-    <div>
-      <div class="hero-brand"><span style="color:#F97316">|:|</span> llano</div>
-      <h1>Know the Risk<br>Before You Route</h1>
-      <p>Route safety scoring for trucking fleets. Real crash history, live weather, and road geometry — ranked alternatives in a single API call.</p>
-      <div class="hero-actions">
-        <a class="btn-primary" href="#demo">Try the Demo</a>
-        <a class="btn-ghost" href="#docs">API Docs →</a>
-      </div>
-    </div>
-    <div class="hero-visual">
-      <svg viewbox="0 0 440 290" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <lineargradient id="hsky" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#080a0e"></stop>
-            <stop offset="75%" stop-color="#111520"></stop>
-            <stop offset="100%" stop-color="#1a1f2e"></stop>
-          </lineargradient>
-          <radialgradient id="hvp" cx="50%" cy="46%" r="25%">
-            <stop offset="0%" stop-color="#F97316" stop-opacity="0.35"></stop>
-            <stop offset="100%" stop-color="#F97316" stop-opacity="0"></stop>
-          </radialgradient>
-          <lineargradient id="hroad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#161820"></stop>
-            <stop offset="100%" stop-color="#1c1f28"></stop>
-          </lineargradient>
-        </defs>
-        <!-- Sky -->
-        <rect width="440" height="290" fill="url(#hsky)"></rect>
-        <!-- Stars -->
-        <circle cx="60" cy="30" r=".9" fill="#e2e4e9" opacity=".5"></circle>
-        <circle cx="130" cy="18" r=".7" fill="#e2e4e9" opacity=".4"></circle>
-        <circle cx="200" cy="45" r=".6" fill="#e2e4e9" opacity=".35"></circle>
-        <circle cx="290" cy="22" r=".9" fill="#e2e4e9" opacity=".45"></circle>
-        <circle cx="370" cy="55" r=".7" fill="#e2e4e9" opacity=".35"></circle>
-        <circle cx="40" cy="70" r=".6" fill="#e2e4e9" opacity=".3"></circle>
-        <circle cx="400" cy="35" r=".8" fill="#e2e4e9" opacity=".4"></circle>
-        <circle cx="165" cy="68" r=".5" fill="#e2e4e9" opacity=".25"></circle>
-        <circle cx="320" cy="80" r=".6" fill="#e2e4e9" opacity=".3"></circle>
-        <!-- Horizon glow -->
-        <rect width="440" height="290" fill="url(#hvp)"></rect>
-        <!-- Flat horizon landscape silhouette -->
-        <path d="M 0,138 L 80,135 L 140,137 L 200,134 L 260,136 L 320,133 L 380,135 L 440,134 L 440,142 L 0,142 Z" fill="#131620"></path>
-        <!-- Road surface -->
-        <polygon points="25,290 415,290 248,136 192,136" fill="url(#hroad)"></polygon>
-        <!-- Road shoulders -->
-        <line x1="25" y1="290" x2="192" y2="136" stroke="#252833" stroke-width="1.5"></line>
-        <line x1="415" y1="290" x2="248" y2="136" stroke="#252833" stroke-width="1.5"></line>
-        <!-- Lane line (converging dashes) -->
-        <line x1="220" y1="290" x2="220" y2="136" stroke="#3a3d4a" stroke-width="1.5" stroke-dasharray="22,16"></line>
-        <!-- Edge rumble stripes -->
-        <line x1="58" y1="290" x2="200" y2="136" stroke="#2a2d38" stroke-width="1" opacity=".6"></line>
-        <line x1="382" y1="290" x2="240" y2="136" stroke="#2a2d38" stroke-width="1" opacity=".6"></line>
-        <!-- Vanishing point glow -->
-        <circle cx="220" cy="136" r="40" fill="#F97316" opacity=".07"></circle>
-        <circle cx="220" cy="136" r="15" fill="#F97316" opacity=".07"></circle>
-        <circle cx="220" cy="136" r="3.5" fill="#F97316" opacity=".85"></circle>
-        <!-- Horizon line -->
-        <line x1="0" y1="136" x2="185" y2="136" stroke="#1e2230" stroke-width=".8"></line>
-        <line x1="255" y1="136" x2="440" y2="136" stroke="#1e2230" stroke-width=".8"></line>
-        <!-- Subtle headlight beams on road -->
-        <path d="M 185,290 L 210,136" stroke="#F97316" stroke-width="18" opacity=".025"></path>
-        <path d="M 255,290 L 230,136" stroke="#F97316" stroke-width="18" opacity=".025"></path>
-      </svg>
+    <div class="hero-brand"><span style="color:#F97316">|:|</span> llano</div>
+    <h1>Know the Risk<br>Before You Route</h1>
+    <p>Route safety scoring for trucking fleets. Real crash history, live weather, and road geometry — ranked alternatives in a single API call.</p>
+    <div class="hero-actions">
+      <a class="btn-primary" href="#demo">Try the Demo</a>
+      <a class="btn-ghost" href="#docs">API Docs →</a>
     </div>
   </div>
 </section>
@@ -728,117 +665,63 @@ h2, .page-section h2, .hero h2, section h2 {
     <h2 class="anchored">Laredo → Dallas</h2>
     <p class="section-sub">Two alternatives scored and ranked by safety. The faster route carries meaningfully higher risk — a trade-off Llano surfaces before dispatch.</p>
 
-    <div class="example-split">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-top:2rem;">
 
-      <!-- Annotated map -->
-      <div class="example-map-wrap">
-        <svg viewbox="0 0 300 240" xmlns="http://www.w3.org/2000/svg">
-          <rect width="300" height="240" fill="#0c0e12"></rect>
-
-          <!-- Texas outline -->
-          <path d="M 81,0 L 155,0 L 155,56 L 298,63 L 299,150 L 281,166 L 217,195 L 219,240
-                   L 174,226 L 136,186 L 133,159 L 76,166 L 48,152 L 0,105 L 81,101 Z" fill="#13161e" stroke="#2a2d3a" stroke-width="1.2" stroke-linejoin="round"></path>
-
-          <!-- Route 2 (US-281 rural, cyan — drawn first = underneath) -->
-          <path d="M 167,202 C 172,192 177,181 181,173 C 188,159 196,148 200,138 C 207,121 218,103 231,83" fill="none" stroke="#06B6D4" stroke-width="2.5" stroke-opacity="0.65" stroke-linecap="round"></path>
-
-          <!-- Hotspot halos on Route 2 -->
-          <circle cx="170" cy="197" r="9" fill="#ff2d55" opacity=".12"></circle>
-          <circle cx="170" cy="197" r="4" fill="#ff2d55" opacity=".7"></circle>
-          <circle cx="211" cy="120" r="9" fill="#ff2d55" opacity=".12"></circle>
-          <circle cx="211" cy="120" r="4" fill="#ff2d55" opacity=".7"></circle>
-
-          <!-- Route 1 (I-35 via San Antonio, orange — drawn on top) -->
-          <path d="M 167,202 C 174,186 181,170 190,159 C 196,150 198,140 199,133 C 203,118 212,100 231,83" fill="none" stroke="#F97316" stroke-width="3" stroke-linecap="round"></path>
-
-          <!-- City dots -->
-          <circle cx="167" cy="202" r="5" fill="#F97316" stroke="#0c0e12" stroke-width="1.5"></circle>
-          <circle cx="231" cy="83" r="5" fill="#F97316" stroke="#0c0e12" stroke-width="1.5"></circle>
-          <circle cx="190" cy="159" r="3.5" fill="#F97316" opacity=".6" stroke="#0c0e12" stroke-width="1"></circle>
-
-          <!-- City labels -->
-          <text x="161" y="215" font-size="8" fill="#e2e4e9" font-family="monospace" text-anchor="middle">Laredo</text>
-          <text x="244" y="80" font-size="8" fill="#e2e4e9" font-family="monospace">Dallas</text>
-          <text x="203" y="157" font-size="7" fill="#8b8fa8" font-family="monospace">San Antonio</text>
-
-          <!-- Hotspot labels -->
-          <text x="182" y="192" font-size="6.5" fill="#ff2d55" font-family="monospace">rural two-lane</text>
-          <text x="220" y="117" font-size="6.5" fill="#ff2d55" font-family="monospace">night visibility</text>
-
-          <!-- Legend -->
-          <rect x="8" y="8" width="115" height="44" rx="4" fill="#0f1117" opacity=".9"></rect>
-          <line x1="15" y1="21" x2="32" y2="21" stroke="#F97316" stroke-width="2.5"></line>
-          <text x="36" y="24" font-size="7.5" fill="#e2e4e9" font-family="monospace">I-35 (recommended)</text>
-          <line x1="15" y1="36" x2="32" y2="36" stroke="#06B6D4" stroke-width="2.5" opacity=".65"></line>
-          <text x="36" y="39" font-size="7.5" fill="#8b8fa8" font-family="monospace">US-281 (alternative)</text>
-          <circle cx="20" cy="47" r="3.5" fill="#ff2d55" opacity=".8"></circle>
-          <text x="27" y="50" font-size="7" fill="#8b8fa8" font-family="monospace">hotspot</text>
-
-          <!-- Placeholder watermark -->
-          <text x="150" y="234" font-size="6" fill="#2a2d38" font-family="monospace" text-anchor="middle">placeholder — illustrative only</text>
-        </svg>
+      <div class="ex-route-card best">
+        <span class="ex-badge rec">★ RECOMMENDED</span>
+        <div class="ex-route-name" style="color:#F97316">I-35 N via San Antonio</div>
+        <div class="ex-stats">
+          <div class="ex-stat">
+            <div class="ex-stat-label">Drive Time</div>
+            <div class="ex-stat-value">5h 48m</div>
+          </div>
+          <div class="ex-stat">
+            <div class="ex-stat-label">Relative Risk</div>
+            <div class="ex-stat-value good">1.0× (baseline)</div>
+          </div>
+          <div class="ex-stat">
+            <div class="ex-stat-label">Safety Score</div>
+            <div class="ex-stat-value good">1 in 3,241 trips</div>
+          </div>
+          <div class="ex-stat">
+            <div class="ex-stat-label">Dynamic Mult</div>
+            <div class="ex-stat-value muted">1.02×</div>
+          </div>
+        </div>
+        <div class="ex-hotspots">
+          <div class="ex-hs"><span class="ex-hs-dot"></span>31% mark — urban interchange</div>
+        </div>
       </div>
 
-      <!-- Route comparison cards -->
-      <div class="route-cards">
-
-        <div class="ex-route-card best">
-          <span class="ex-badge rec">★ RECOMMENDED</span>
-          <div class="ex-route-name" style="color:#F97316">I-35 N via San Antonio</div>
-          <div class="ex-stats">
-            <div class="ex-stat">
-              <div class="ex-stat-label">Drive Time</div>
-              <div class="ex-stat-value">5h 48m</div>
-            </div>
-            <div class="ex-stat">
-              <div class="ex-stat-label">Relative Risk</div>
-              <div class="ex-stat-value good">1.0× (baseline)</div>
-            </div>
-            <div class="ex-stat">
-              <div class="ex-stat-label">Safety Score</div>
-              <div class="ex-stat-value good">1 in 3,241 trips</div>
-            </div>
-            <div class="ex-stat">
-              <div class="ex-stat-label">Dynamic Mult</div>
-              <div class="ex-stat-value muted">1.02×</div>
-            </div>
+      <div class="ex-route-card">
+        <span class="ex-badge alt">ALTERNATIVE</span>
+        <div class="ex-route-name" style="color:#06B6D4">US-281 N rural cutoff</div>
+        <div class="ex-stats">
+          <div class="ex-stat">
+            <div class="ex-stat-label">Drive Time</div>
+            <div class="ex-stat-value">5h 24m <span style="color:#8b8fa8;font-size:.85em">↑ 24m faster</span></div>
           </div>
-          <div class="ex-hotspots">
-            <div class="ex-hs"><span class="ex-hs-dot"></span>31% mark — urban interchange</div>
+          <div class="ex-stat">
+            <div class="ex-stat-label">Relative Risk</div>
+            <div class="ex-stat-value warn">1.73× faster route</div>
+          </div>
+          <div class="ex-stat">
+            <div class="ex-stat-label">Safety Score</div>
+            <div class="ex-stat-value warn">1 in 1,876 trips</div>
+          </div>
+          <div class="ex-stat">
+            <div class="ex-stat-label">Dynamic Mult</div>
+            <div class="ex-stat-value muted">1.08×</div>
           </div>
         </div>
-
-        <div class="ex-route-card">
-          <span class="ex-badge alt">ALTERNATIVE</span>
-          <div class="ex-route-name" style="color:#06B6D4">US-281 N rural cutoff</div>
-          <div class="ex-stats">
-            <div class="ex-stat">
-              <div class="ex-stat-label">Drive Time</div>
-              <div class="ex-stat-value">5h 24m <span style="color:#8b8fa8;font-size:.85em">↑ 24m faster</span></div>
-            </div>
-            <div class="ex-stat">
-              <div class="ex-stat-label">Relative Risk</div>
-              <div class="ex-stat-value warn">1.73× faster route</div>
-            </div>
-            <div class="ex-stat">
-              <div class="ex-stat-label">Safety Score</div>
-              <div class="ex-stat-value warn">1 in 1,876 trips</div>
-            </div>
-            <div class="ex-stat">
-              <div class="ex-stat-label">Dynamic Mult</div>
-              <div class="ex-stat-value muted">1.08×</div>
-            </div>
-          </div>
-          <div class="ex-hotspots">
-            <div class="ex-hs"><span class="ex-hs-dot"></span>14% mark — rural two-lane</div>
-            <div class="ex-hs"><span class="ex-hs-dot"></span>67% mark — night visibility</div>
-          </div>
+        <div class="ex-hotspots">
+          <div class="ex-hs"><span class="ex-hs-dot"></span>14% mark — rural two-lane</div>
+          <div class="ex-hs"><span class="ex-hs-dot"></span>67% mark — night visibility</div>
         </div>
-
-        <p style="font-size:.7em;color:#5a5f72;margin:0;">Placeholder values — illustrative only.</p>
       </div>
 
     </div>
+    <p style="font-size:.7em;color:#5a5f72;margin-top:.75rem;">Placeholder values — illustrative only.</p>
   </div>
 </section>
 
