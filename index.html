@@ -110,7 +110,7 @@ ul.task-list li input[type="checkbox"] {
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="mailto:hello@llano.io"> 
+    <a class="nav-link" href="./#about"> 
 <span class="menu-text">Get Early Access</span></a>
   </li>  
 </ul>
@@ -585,6 +585,21 @@ h2, .page-section h2, .hero h2, section h2 {
 .cta-inner h2 { font-size: 1.4em; margin-bottom: .4rem; }
 .cta-inner p { color: #8b8fa8; font-size: .85em; }
 .cta-actions { display: flex; gap: 1rem; align-items: center; flex-shrink: 0; }
+.waitlist-form { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+.waitlist-input {
+  background: #1a1d24;
+  border: 1px solid #2e3140;
+  border-radius: 6px;
+  color: #e2e4e9;
+  font-size: .85em;
+  padding: .55rem 1rem;
+  width: 220px;
+  outline: none;
+  transition: border-color .15s;
+}
+.waitlist-input:focus { border-color: #F97316; }
+.waitlist-input::placeholder { color: #5a5f72; }
+.waitlist-thanks { color: #22C55E; font-size: .85em; }
 </style>
 
 <!-- ── Hero ──────────────────────────────────────────────────────────────── -->
@@ -974,7 +989,11 @@ best <span class="c-kw">&lt;-</span> resp[[1]]   <span class="c-cm"># sorted saf
       <p>Llano is in early access. Texas coverage available today.</p>
     </div>
     <div class="cta-actions">
-      <a class="btn-primary" href="mailto:hello@llano.io">Get Early Access</a>
+      <div class="waitlist-form" id="waitlist-form">
+        <input class="waitlist-input" id="waitlist-email" type="email" placeholder="your@email.com" autocomplete="email">
+        <button class="btn-primary" onclick="submitWaitlist()" style="cursor:pointer;border:none;">Get Early Access</button>
+      </div>
+      <span class="waitlist-thanks" id="waitlist-thanks" style="display:none;">Thanks! We'll be in touch.</span>
     </div>
   </div>
 </section>
@@ -1039,6 +1058,25 @@ function lineHTML(html) {
 
 // ── Welcome ───────────────────────────────────────────────────────────────────
 function welcome() {
+  var o = '#F97316', d = '#e2e4e9', m = '#8b8fa8', dm = '#5a5f72';
+  function ascii(s) {
+    var out = '';
+    for (var i = 0; i < s.length; i++) {
+      out += s[i] === '|'
+        ? '<span style="color:' + o + ';font-weight:600">|</span>'
+        : s[i];
+    }
+    return '<span style="color:' + d + '">' + out + '</span>';
+  }
+  var sep = '  ' + Array(36).join('\u2500');
+  blank();
+  lineHTML('<span style="color:#2a2d38">' + sep + '</span>');
+  lineHTML(ascii('  |    |    /\\    |\\  |   /--\\'));
+  lineHTML(ascii('  |    |   /  \\   | \\ |  /    \\'));
+  lineHTML(ascii('  |__  |__/____\\  |  \\|  \\____/'));
+  lineHTML('<span style="color:' + m + '">        route intelligence</span>');
+  lineHTML('<span style="color:#2a2d38">' + sep + '</span>');
+  lineHTML('<span style="color:' + dm + '">  Texas  \u00b7  early access</span>');
   blank();
 }
 
@@ -1429,6 +1467,25 @@ updateGhost();
 setTimeout(function() { if (!isMobile) input.focus(); }, 100);
 
 })();
+
+// ── Waitlist ───────────────────────────────────────────────────────────────────
+function submitWaitlist() {
+  var emailEl  = document.getElementById("waitlist-email");
+  var formEl   = document.getElementById("waitlist-form");
+  var thanksEl = document.getElementById("waitlist-thanks");
+  var email    = emailEl ? emailEl.value.trim() : "";
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (emailEl) { emailEl.focus(); emailEl.style.borderColor = "#ef4444"; }
+    return;
+  }
+  fetch("https://api.llano.io/waitlist", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: email })
+  }).catch(function() {});  // fail silently — show thanks regardless
+  if (formEl)   formEl.style.display   = "none";
+  if (thanksEl) thanksEl.style.display = "inline";
+}
 </script>
 
 
