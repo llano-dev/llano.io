@@ -870,7 +870,7 @@ h2, .page-section h2, .hero h2, section h2 {
 [{
   <span class="c-key">"name"</span>:           <span class="c-str">"I-35 N"</span>,
   <span class="c-key">"trips_per_crash"</span>: 2841,
-  <span class="c-key">"wx_mult"</span>:         1.04,
+  <span class="c-key">"dynamic_mult"</span>:    1.04,
   <span class="c-key">"hotspots"</span>:        [...],
   <span class="c-key">"route"</span>:           { <span class="c-cm">/* GeoJSON */</span> }
 }, ...]</code></pre>
@@ -905,7 +905,7 @@ best   = routes[0]
 
 <span class="c-fn">print</span>(<span class="c-str">f"</span>{best[<span class="c-str">'name'</span>]}<span class="c-str">"</span>)
 <span class="c-fn">print</span>(<span class="c-str">f"1 in </span>{best[<span class="c-str">'trips_per_crash'</span>]:,}<span class="c-str"> trips"</span>)
-<span class="c-fn">print</span>(<span class="c-str">f"weather mult: </span>{best[<span class="c-str">'wx_mult'</span>]}<span class="c-str">"</span>)</code></pre>
+<span class="c-fn">print</span>(<span class="c-str">f"dynamic mult: </span>{best[<span class="c-str">'dynamic_mult'</span>]}<span class="c-str">"</span>)</code></pre>
 
         <pre class="code-body" id="docs-pane-r" style="display:none"><code><span class="c-kw">library</span>(httr2)
 
@@ -934,7 +934,7 @@ best <span class="c-kw">&lt;-</span> resp[[1]]   <span class="c-cm"># sorted saf
 
 <span class="c-fn">cat</span>(best$name, <span class="c-str">"\n"</span>)
 <span class="c-fn">cat</span>(<span class="c-str">"1 in"</span>, <span class="c-fn">format</span>(best$trips_per_crash, big.mark=<span class="c-str">","</span>), <span class="c-str">"trips\n"</span>)
-<span class="c-fn">cat</span>(<span class="c-str">"weather mult:"</span>, best$wx_mult, <span class="c-str">"\n"</span>)</code></pre>
+<span class="c-fn">cat</span>(<span class="c-str">"dynamic mult:"</span>, best$dynamic_mult, <span class="c-str">"\n"</span>)</code></pre>
       </div>
 
       <div class="docs-fields">
@@ -949,9 +949,9 @@ best <span class="c-kw">&lt;-</span> resp[[1]]   <span class="c-cm"># sorted saf
           <span class="docs-field-desc">Expected trips between crashes on this route at this time. Higher is safer. Ranked descending.</span>
         </div>
         <div class="docs-field">
-          <span class="docs-field-name">wx_mult</span>
+          <span class="docs-field-name">dynamic_mult</span>
           <span class="docs-field-type">number</span>
-          <span class="docs-field-desc">Weather multiplier on crash probability. 1.0 = clear baseline. Values above 1.0 indicate elevated risk from current conditions.</span>
+          <span class="docs-field-desc">Dynamic multiplier on crash probability. 1.0 = clear baseline. Values above 1.0 indicate elevated risk from current conditions.</span>
         </div>
         <div class="docs-field">
           <span class="docs-field-name">hotspots</span>
