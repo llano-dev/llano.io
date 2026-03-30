@@ -1109,7 +1109,7 @@ var ghost       = document.getElementById("cmd-ghost");
 var SUGGESTION  = 'llano score --from "Laredo" --to "Dallas"';
 
 function updateGhost() {
-  if (ghost) ghost.style.display = input.value === "" ? "block" : "none";
+  if (ghost && !isMobile) ghost.style.display = input.value === "" ? "block" : "none";
 }
 
 // ── Map init (always visible, Texas overview) ─────────────────────────────────
@@ -1575,6 +1575,7 @@ window.docsTab = function(lang, btn) {
 var isMobile = window.innerWidth < 769;
 if (isMobile) {
   input.placeholder = 'llano score --from "..." --to "..."';
+  if (ghost) ghost.style.display = "none";
 }
 welcome();
 initMap();
