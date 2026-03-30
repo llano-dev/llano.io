@@ -1134,7 +1134,7 @@ function renderResults(routes, flags) {
   var tbl = document.createElement("table");
   tbl.className = "route-table";
   var thead = tbl.createTHead(), hrow = thead.insertRow();
-  ["","Route","Time","+Time","Safety","RR"].forEach(function(h) {
+  ["","Route","Time","+Time","Relative Risk","Safety"].forEach(function(h) {
     var th = document.createElement("th"); th.textContent = h; hrow.appendChild(th);
   });
   var tbody = tbl.createTBody();
@@ -1156,8 +1156,8 @@ function renderResults(routes, flags) {
       { text: lbl, color: COLORS[i % COLORS.length] },
       { text: fmtDur(dur) },
       { text: extra > 0 ? "+" + fmtDur(extra) : "", cls: "td-muted" },
-      { text: tpc > 0 ? "1 in " + fmtNum(tpc) + " trips" : "\u2014" },
-      { text: rr, cls: "td-muted" }
+      { text: rr, cls: "td-muted" },
+      { text: tpc > 0 ? "1 in " + fmtNum(tpc) + " trips" : "\u2014" }
     ].forEach(function(c) {
       var td = document.createElement("td");
       td.textContent = c.text;
