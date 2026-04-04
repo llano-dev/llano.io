@@ -8,7 +8,8 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    ::selection { background: transparent; }
 
     :root {
       --bg:        #0f1117;
@@ -133,10 +134,28 @@
       display: flex;
       gap: 8px;
       align-items: flex-start;
+      position: relative;
     }
     .trip-item:hover { background: var(--surface2); }
     .trip-item.active { background: var(--surface2); border-left-color: var(--orange); }
     .trip-item[data-status="completed"] { opacity: .65; }
+    .trip-delete {
+      display: none;
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--dim);
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+    .trip-item:hover .trip-delete { display: block; }
+    .trip-delete:hover { color: var(--text); background: var(--border); }
 
     .trip-status-dot {
       width: 7px;
@@ -189,22 +208,68 @@
     .sl-completed { background: var(--surface2); color: var(--dim); }
 
     #sidebar-footer {
-      padding: 10px 14px;
+      padding: 10px 12px;
       border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #sf-avatar {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--orange);
+      color: #000;
       font-size: .72em;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      text-transform: uppercase;
+    }
+    #sf-info {
+      flex: 1;
+      min-width: 0;
+    }
+    #sf-org {
+      font-size: .72em;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #sf-email {
+      font-size: .68em;
+      color: var(--dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #sf-actions {
+      display: flex;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+    .sf-btn {
+      background: none;
+      border: none;
+      color: var(--dim);
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color .15s, background .15s;
+    }
+    .sf-btn:hover { color: var(--fg); background: var(--surface2); }
+    #sf-credits {
+      padding: 6px 14px 2px;
+      font-size: .68em;
       color: var(--dim);
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 5px;
     }
-    .credits-badge {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 2px 7px;
-      color: var(--muted);
-    }
-    .credits-badge span { color: var(--orange); }
+    #sf-credits-count { color: var(--orange); font-weight: 600; }
 
     /* ── Main ── */
     #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -261,6 +326,72 @@
     .t-warn   { color: var(--red); }
     .t-cyan   { color: var(--cyan); }
 
+    .table-block { position: relative; margin-bottom: 18px; }
+    .table-block-del {
+      position: absolute; top: 0; right: 0;
+      background: none; border: none; cursor: pointer;
+      color: var(--dim); font-size: .85em; padding: 2px 4px; line-height: 1;
+      opacity: 0; transition: opacity .15s;
+    }
+    .table-block:hover .table-block-del { opacity: 1; }
+    .table-block-del:hover { color: var(--red); }
+    .tag-zone {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 4px;
+      margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border); min-height: 22px;
+      pointer-events: auto;
+    }
+    .tag-zone * { pointer-events: auto; }
+    .tag-chip {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 3px; padding: 1px 6px; font-size: .7em; color: var(--muted);
+    }
+    .tag-chip button { background: none; border: none; color: var(--dim); cursor: pointer; padding: 0 0 0 2px; font-size: .9em; line-height: 1; }
+    .tag-chip button:hover { color: var(--red); }
+    .tag-chip-sm { display: inline-block; background: var(--surface2); border-radius: 3px; padding: 1px 5px; font-size: .65em; color: var(--dim); }
+    .trip-id-badge { font-size: .65em; color: var(--dim); font-family: var(--font); opacity: 0.45; margin-left: 2px; cursor: pointer; background: none; border: none; padding: 0; line-height: inherit; }
+    .trip-id-badge:hover { opacity: 0.9; color: var(--orange); }
+    .tag-add { font-size: .7em; color: var(--dim); cursor: pointer; padding: 1px 5px; border-radius: 3px; transition: color .1s; }
+    .tag-add:hover { color: var(--muted); }
+    .tag-input { background: var(--surface2); border: 1px solid var(--orange); border-radius: 3px; padding: 1px 6px; color: var(--text); font-size: .7em; font-family: var(--font); outline: none; width: 110px; }
+    .trip-tags-row { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 3px; }
+    .trip-lno { font-size: .62em; color: var(--dim); margin-top: 2px; opacity: 0.5; }
+    .tpc-cell { cursor: pointer; }
+    .tpc-cell:hover { opacity: 0.8; }
+    #score-popup {
+      position: fixed; z-index: 9999;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 12px 14px; min-width: 220px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.45);
+      font-size: .78em; color: var(--text); font-family: var(--font);
+      display: none;
+    }
+    #score-popup .sp-title { font-size: .7em; color: var(--dim); margin-bottom: 8px; letter-spacing: .05em; text-transform: uppercase; }
+    #score-popup .sp-row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 3px 0; border-bottom: 1px solid var(--border); }
+    #score-popup .sp-row:last-child { border-bottom: none; padding-top: 6px; margin-top: 2px; }
+    #score-popup .sp-label { color: var(--muted); }
+    #score-popup .sp-val { color: var(--text); font-weight: 600; }
+    #score-popup .sp-note { color: var(--dim); font-size: .88em; margin-left: 6px; font-weight: 400; }
+    #score-popup .sp-caveat { color: var(--dim); font-size: .75em; margin-top: 8px; font-style: italic; }
+    #tag-filter { padding: 8px 10px 6px; border-bottom: 1px solid var(--border); }
+    #tag-filter-input { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px; color: var(--muted); font-family: var(--font); font-size: .75em; outline: none; transition: border-color .15s, color .15s; }
+    #tag-filter-input:focus { border-color: var(--orange); color: var(--text); }
+    #sidebar-clear-btn { background: none; border: 1px solid var(--border); border-radius: 4px; padding: 3px 7px; color: var(--dim); font-family: var(--font); font-size: .7em; cursor: pointer; white-space: nowrap; transition: border-color .15s, color .15s; flex-shrink: 0; }
+    #sidebar-clear-btn:hover { border-color: var(--red, #ef4444); color: var(--red, #ef4444); }
+    #tag-cloud { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 0 2px; }
+    .tag-cloud-chip { font-size: .68em; padding: 2px 7px; border-radius: 3px; cursor: pointer; background: var(--surface2); color: var(--dim); border: 1px solid transparent; transition: color .1s, border-color .1s; }
+    .tag-cloud-chip:hover { color: var(--muted); border-color: var(--border); }
+    .tag-cloud-chip.active { color: var(--orange); border-color: var(--orange); background: rgba(249,115,22,.08); }
+    .table-block-drag-handle {
+      position: absolute; top: 0; right: 22px;
+      color: var(--dim); font-size: .85em; cursor: grab; line-height: 1;
+      opacity: 0; transition: opacity .15s; user-select: none;
+      padding: 2px 4px;
+    }
+    .table-block:hover .table-block-drag-handle { opacity: 1; }
+    .table-block.dragging { opacity: 0.35; }
+    .table-block.drop-before { border-top: 2px solid var(--orange); padding-top: 2px; }
+    .table-block.drop-after  { border-bottom: 2px solid var(--orange); padding-bottom: 2px; }
     .result-table {
       margin: 10px 0 6px;
       border-collapse: collapse;
@@ -282,17 +413,22 @@
       border-bottom: 1px solid #1e2130;
     }
     .result-table tr.selected td { background: #1e2130; }
-    .result-table tr.selected td:first-child { border-left: 2px solid var(--orange); padding-left: 6px; }
-    .sel-indicator { color: var(--orange); }
+    .result-table tr.selected { box-shadow: inset 2px 0 0 var(--orange); }
 
     /* Editable route name in table */
     .route-name-cell { position: relative; }
     .route-name-text { cursor: text; }
     .route-name-text:hover::after {
-      content: ' ✎';
+      content: '✎';
+      position: absolute;
+      left: calc(100% + 4px);
+      top: 50%;
+      transform: translateY(-50%);
       font-size: .7em;
       color: var(--dim);
       opacity: .6;
+      pointer-events: none;
+      white-space: nowrap;
     }
     .route-name-input {
       background: var(--surface2);
@@ -303,19 +439,30 @@
       font-size: inherit;
       color: var(--text);
       outline: none;
-      width: 160px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
-    /* Certify panel */
+    /* Certify overlay */
+    #certify-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+    #certify-overlay.visible { display: flex; }
     #certify-panel {
-      margin: 14px 0 8px;
-      max-width: 540px;
+      width: 540px;
+      max-width: 92vw;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 8px;
       overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0,0,0,.5);
     }
-    #certify-panel.hidden { display: none; }
 
     .cp-header {
       padding: 10px 14px;
@@ -358,6 +505,31 @@
     .cp-input::placeholder { color: var(--dim); }
     .cp-hint { font-size: .68em; color: var(--dim); margin-top: 1px; }
 
+    /* ── Certify pricing breakdown ── */
+    #cp-pricing {
+      padding: 10px 14px 12px;
+      border-top: 1px solid var(--border);
+      background: rgba(0,0,0,.18);
+    }
+    .cp-price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: .76em;
+      padding: 2px 0;
+      color: var(--muted);
+    }
+    .cp-price-key { color: var(--dim); min-width: 120px; }
+    .cp-price-val { text-align: right; font-variant-numeric: tabular-nums; }
+    .cp-price-divider { border-top: 1px solid var(--border); margin: 6px 0 4px; }
+    .cp-price-total { color: var(--text); font-weight: 600; font-size: .82em; padding-top: 2px; }
+    .cp-price-delta { color: var(--orange); }
+    .cp-price-method {
+      font-size: .67em; color: var(--dim); margin-top: 7px;
+      border-top: 1px solid var(--border); padding-top: 7px;
+      line-height: 1.5;
+    }
+
     .cp-footer {
       padding: 10px 14px;
       border-top: 1px solid var(--border);
@@ -387,63 +559,59 @@
       flex: 1;
       display: flex;
       overflow: hidden;
-      position: relative;
     }
     #terminal-pane {
       flex: 1;
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      min-width: 0;
+    }
+    #split-divider {
+      flex-shrink: 0;
+      width: 4px;
+      background: var(--border);
+      cursor: col-resize;
+      position: relative;
+      transition: background .15s, width .22s ease;
+      z-index: 10;
+    }
+    #split-divider:hover, #split-divider.resizing { background: var(--dim); }
+    #split-divider.map-collapsed {
+      width: 18px;
+      cursor: pointer;
+      background: var(--surface2);
+    }
+    #split-divider.map-collapsed::after {
+      content: '‹';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      color: var(--dim);
+      font-size: 13px;
+      pointer-events: none;
     }
     #map-pane {
-      position: absolute;
-      right: 20px;
-      top: 16px;
-      bottom: auto;
-      width: 480px;
-      height: 340px;
-      min-width: 220px;
-      min-height: 28px;
-      border-radius: 8px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
       overflow: hidden;
-      border: 1px solid var(--border);
-      box-shadow: 0 8px 32px rgba(0,0,0,.5);
-      z-index: 500;
+      transition: width .22s ease;
+      border-left: 1px solid var(--border);
+      min-width: 0;
     }
-    #map-pane.minimized { height: 28px !important; }
-    #map-pane.dragging { box-shadow: 0 12px 40px rgba(0,0,0,.7); }
-    #map-resize-handle {
-      position: absolute;
-      bottom: 0; right: 0;
-      width: 16px; height: 16px;
-      cursor: se-resize;
-      z-index: 502;
-    }
-    #map-resize-handle::after {
-      content: '';
-      position: absolute;
-      bottom: 3px; right: 3px;
-      width: 8px; height: 8px;
-      border-right: 2px solid var(--dim);
-      border-bottom: 2px solid var(--dim);
-      border-radius: 1px;
-      opacity: .5;
-    }
+    #map-pane.collapsed { width: 0 !important; border-left-width: 0; }
     #map-drag-handle {
-      position: absolute;
-      top: 0; left: 0; right: 0;
       height: 28px;
+      flex-shrink: 0;
       background: rgba(24,27,36,.96);
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 10px;
-      z-index: 501;
-      cursor: grab;
       user-select: none;
     }
-    #map-drag-handle.dragging { cursor: grabbing; }
     .map-handle-title { font-size: .7em; color: var(--dim); letter-spacing: .05em; }
     .map-handle-minimize {
       font-size: 1em;
@@ -455,12 +623,26 @@
       font-weight: 600;
     }
     .map-handle-minimize:hover { color: var(--text); }
-    #app-map {
-      width: 100%;
-      height: 100%;
-      margin-top: 0;
+    #app-map { flex: 1; width: 100%; min-height: 0; }
+    @keyframes hs-pulse {
+      0%, 100% { transform: scale(1);   opacity: 0.9; box-shadow: 0 0 0 0   rgba(255,45,85,.55); }
+      50%       { transform: scale(1.4); opacity: 0.6; box-shadow: 0 0 0 7px rgba(255,45,85,0);   }
+    }
+    .hs-dot {
+      width: 11px; height: 11px; border-radius: 50%;
+      background: #ff2d55; border: 2px solid rgba(255,255,255,.25);
+      animation: hs-pulse 1.8s ease-in-out infinite;
     }
     .leaflet-container { background: #0f1117; }
+    #terminal.drag-over { outline: 1px dashed var(--orange); outline-offset: -6px; }
+    .trip-item.dragging { opacity: .5; }
+    .leaflet-control-layers {
+      background: #1a1d24 !important;
+      border: 1px solid #2a2d36 !important;
+      color: var(--text) !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,.5) !important;
+    }
+    .leaflet-control-layers label { color: var(--text) !important; }
     #map-toggle {
       font-size: .75em;
       padding: 4px 10px;
@@ -570,6 +752,27 @@
     .board-rr.warn { color: var(--red); }
     .board-rr.base { color: var(--muted); }
 
+    /* ── Trip progress tracker ── */
+    .trip-tracker { display: flex; align-items: center; gap: 0; white-space: nowrap; }
+    .tt-step {
+      width: 7px; height: 7px; border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: transparent; flex-shrink: 0;
+    }
+    .tt-step.done   { background: var(--orange); border-color: var(--orange); }
+    .tt-step.active { background: var(--orange); border-color: var(--orange); box-shadow: 0 0 0 2px rgba(249,115,22,.2); }
+    .tt-line { width: 14px; height: 1px; background: var(--border); flex-shrink: 0; }
+    .tt-line.done { background: var(--orange); }
+    .tt-label { font-size: .7em; color: var(--dim); margin-left: 7px; }
+
+    /* ── Board download button ── */
+    .board-dl {
+      background: none; border: 1px solid var(--border); color: var(--dim);
+      border-radius: 4px; padding: 2px 7px; font-size: .72em; cursor: pointer;
+      transition: all .15s; white-space: nowrap;
+    }
+    .board-dl:hover { border-color: var(--muted); color: var(--text); }
+
     .board-action {
       font-size: .72em;
       padding: 3px 8px;
@@ -651,10 +854,94 @@
       display: none;
     }
     .key-reveal.visible { display: block; }
-    .key-reveal-value { font-size: .82em; color: var(--orange); letter-spacing: .05em; word-break: break-all; }
+    .key-reveal-value {
+      font-size: .82em; color: var(--orange); letter-spacing: .05em;
+      word-break: break-all; cursor: pointer; user-select: all;
+    }
+    .key-reveal-value:hover { opacity: .8; }
     .key-reveal-warn { font-size: .7em; color: var(--dim); margin-top: 6px; }
 
     .settings-divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+    /* ── Settings nav ── */
+    .settings-nav {
+      display: flex; gap: 4px; margin-bottom: 32px;
+      border-bottom: 1px solid var(--border); padding-bottom: 0;
+    }
+    .settings-nav-item {
+      padding: 6px 14px 9px; font-size: .78em; color: var(--dim);
+      cursor: pointer; border-bottom: 2px solid transparent;
+      transition: color .15s, border-color .15s; letter-spacing: .03em;
+    }
+    .settings-nav-item:hover { color: var(--muted); }
+    .settings-nav-item.active { color: var(--text); border-bottom-color: var(--orange); }
+
+    /* ── Integrations ── */
+    .integration-card {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 13px 14px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 6px; margin-bottom: 8px;
+      transition: border-color .25s;
+    }
+    .integration-card.connected { border-color: rgba(74,222,128,.3); }
+    .int-logo-box {
+      width: 36px; height: 36px; flex-shrink: 0;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .int-logo {
+      max-width: 24px; max-height: 20px; display: block;
+      filter: grayscale(1); opacity: .35; transition: filter .3s, opacity .3s;
+    }
+    .integration-card.connected .int-logo { filter: none; opacity: 1; }
+    .int-card-body { flex: 1; min-width: 0; }
+    .int-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; gap: 8px; }
+    .integration-name { font-size: .82em; color: var(--text); font-weight: 600; }
+    .int-card-sub { font-size: .72em; color: var(--dim); margin-top: 2px; }
+    .int-card-input-row { display: flex; gap: 6px; align-items: center; }
+    .integration-key-input {
+      flex: 1; min-width: 0;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 4px; padding: 6px 8px;
+      font-family: var(--font); font-size: .78em; color: var(--muted); outline: none;
+      transition: border-color .15s, color .15s;
+    }
+    .integration-key-input:focus { border-color: var(--orange); color: var(--text); }
+    .integration-key-input[readonly] { cursor: default; color: var(--muted); letter-spacing: .04em; }
+    .int-card-hint { font-size: .7em; color: var(--dim); margin-top: 7px; }
+    .truck-opt {
+      font-size: .76em; color: var(--muted);
+      display: flex; align-items: center; gap: 5px; cursor: pointer;
+    }
+    .truck-opt input[type=checkbox] { accent-color: var(--orange); cursor: pointer; }
+    .vtype-btn {
+      background: none; border: none; padding: 4px 10px;
+      font-size: .75em; color: var(--dim); cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .vtype-btn.active { background: var(--orange); color: #000; font-weight: 600; }
+    .int-btn {
+      flex-shrink: 0; padding: 5px 10px; border-radius: 4px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--dim); font-family: var(--font); font-size: .72em;
+      cursor: pointer; transition: all .15s; white-space: nowrap;
+    }
+    .int-btn:hover { color: var(--muted); border-color: var(--muted); }
+    .int-btn.primary { border-color: var(--orange); color: var(--orange); }
+    .int-btn.primary:hover { background: var(--orange); color: #000; }
+    .int-btn.primary:disabled { opacity: .5; cursor: default; }
+    .int-btn.danger:hover  { border-color: var(--red); color: var(--red); }
+    .int-action-btn { min-width: 90px; }
+    .int-btn.secondary { border-color: var(--border); color: var(--muted); font-size: .72em; padding: 3px 8px; }
+    .int-btn.secondary:hover { border-color: var(--muted); color: var(--text); }
+    .int-btn.secondary:disabled { opacity: .5; cursor: default; }
+    .int-card-footer { display: flex; align-items: center; gap: 8px; margin-top: 7px; }
+    .int-verified-text { font-size: .7em; color: var(--dim); flex: 1; }
+    .integration-status { font-size: .75em; white-space: nowrap; font-weight: 500; flex-shrink: 0; }
+    .integration-status.connected { color: var(--green); }
+    .integration-status.empty     { color: var(--dim); }
+    .integration-status.testing   { color: var(--cyan); }
+    .integration-status.error     { color: var(--red); }
 
     .usage-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #1a1e29; font-size: .8em; }
     .usage-row:last-child { border-bottom: none; }
@@ -662,7 +949,7 @@
     .usage-value { color: var(--text); }
 
     /* ── Members table ── */
-    .members-table { width: 100%; border-collapse: collapse; }
+    .members-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
     .members-table th {
       font-size: .72em; color: var(--dim); text-align: left;
       padding: 5px 12px 5px 0; border-bottom: 1px solid var(--border);
@@ -671,7 +958,13 @@
     .members-table td {
       padding: 9px 12px 9px 0; font-size: .8em;
       border-bottom: 1px solid #1a1e29; vertical-align: middle;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
+    .members-table th:nth-child(1), .members-table td:nth-child(1) { width: 28%; }
+    .members-table th:nth-child(2), .members-table td:nth-child(2) { width: 30%; }
+    .members-table th:nth-child(3), .members-table td:nth-child(3) { width: 14%; }
+    .members-table th:nth-child(4), .members-table td:nth-child(4) { width: 18%; }
+    .members-table th:nth-child(5), .members-table td:nth-child(5) { width: 10%; }
     .members-table tr:hover td { background: var(--surface2); }
 
     .role-badge {
@@ -779,105 +1072,40 @@
   <div id="sidebar">
     <div id="sidebar-header">
       <div id="sidebar-logo">LLANO</div>
-      <div id="sidebar-user">acme.com</div>
     </div>
 
     <button id="new-route-btn" onclick="newRoute()">+ New Route</button>
 
-    <!-- Filter tabs -->
-    <div id="filter-tabs">
-      <div class="filter-tab active" data-filter="all"       onclick="setFilter('all',this)">All <span class="tab-count">6</span></div>
-      <div class="filter-tab"        data-filter="active"    onclick="setFilter('active',this)">Active <span class="tab-count">2</span></div>
-      <div class="filter-tab"        data-filter="planned"   onclick="setFilter('planned',this)">Planned <span class="tab-count">1</span></div>
-      <div class="filter-tab"        data-filter="completed" onclick="setFilter('completed',this)">Done <span class="tab-count">3</span></div>
+    <!-- Tag filter -->
+    <div id="tag-filter">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input id="tag-filter-input" placeholder="filter by tag…" oninput="renderSidebar()" autocomplete="off" style="flex:1;min-width:0;" />
+        <button id="sidebar-clear-btn" onclick="clearSidebar()" title="Clear all trips from sidebar">Clear</button>
+      </div>
+      <div id="tag-cloud"></div>
     </div>
 
-    <div id="trip-list">
-      <!-- Active trips -->
-      <div class="trip-group-label" data-group="today">Today</div>
+    <div id="trip-list"></div>
 
-      <div class="trip-item active" data-status="active" onclick="loadTrip(this)">
-        <div class="trip-status-dot dot-active"></div>
-        <div class="trip-body">
-          <div class="trip-route">San Antonio → Dallas</div>
-          <div class="trip-meta">
-            <span>Dep 10:14 AM</span>
-            <span class="trip-rr good">SH-130 · 0.62×</span>
-          </div>
-          <span class="trip-status-label sl-active">En route</span>
-        </div>
-      </div>
-
-      <div class="trip-item" data-status="active" onclick="loadTrip(this)">
-        <div class="trip-status-dot dot-active"></div>
-        <div class="trip-body">
-          <div class="trip-route">Houston → Dallas</div>
-          <div class="trip-meta">
-            <span>Dep 8:02 AM</span>
-            <span class="trip-rr good">US-59 · 0.81×</span>
-          </div>
-          <span class="trip-status-label sl-active">En route</span>
-        </div>
-      </div>
-
-      <div class="trip-item" data-status="planned" onclick="loadTrip(this)">
-        <div class="trip-status-dot dot-planned"></div>
-        <div class="trip-body">
-          <div class="trip-route">Austin → El Paso</div>
-          <div class="trip-meta">
-            <span>Dep 2:00 PM</span>
-            <span class="trip-rr good">I-10 W · 0.74×</span>
-          </div>
-          <span class="trip-status-label sl-planned">Certified</span>
-        </div>
-      </div>
-
-      <div class="trip-group-label">Yesterday</div>
-
-      <div class="trip-item" data-status="completed" onclick="loadTrip(this)">
-        <div class="trip-status-dot dot-completed"></div>
-        <div class="trip-body">
-          <div class="trip-route">San Antonio → Houston</div>
-          <div class="trip-meta">
-            <span>Mar 29</span>
-            <span class="trip-rr base">I-10 · 1.0×</span>
-          </div>
-          <span class="trip-status-label sl-completed">Completed</span>
-        </div>
-      </div>
-
-      <div class="trip-item" data-status="completed" onclick="loadTrip(this)">
-        <div class="trip-status-dot dot-completed"></div>
-        <div class="trip-body">
-          <div class="trip-route">Dallas → Oklahoma City</div>
-          <div class="trip-meta">
-            <span>Mar 29</span>
-            <span class="trip-rr warn">I-35 N · 1.14×</span>
-          </div>
-          <span class="trip-status-label sl-completed">Completed</span>
-        </div>
-      </div>
-
-      <div class="trip-group-label">Mar 28</div>
-
-      <div class="trip-item" data-status="completed" onclick="loadTrip(this)">
-        <div class="trip-status-dot dot-completed"></div>
-        <div class="trip-body">
-          <div class="trip-route">El Paso → San Antonio</div>
-          <div class="trip-meta">
-            <span>Mar 28</span>
-            <span class="trip-rr good">I-10 · 0.69×</span>
-          </div>
-          <span class="trip-status-label sl-completed">Completed</span>
-        </div>
-      </div>
-    </div>
+    <div id="sf-credits"><span id="credit-count">—</span> balance</div>
 
     <div id="sidebar-footer">
-      <span>James Okafor</span>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <span class="credits-badge"><span id="credit-count">4</span> credits</span>
-        <button class="tb-btn" style="padding:2px 8px;font-size:.7em;" onclick="switchView('settings')">⚙ Settings</button>
+      <div id="sf-avatar"></div>
+      <div id="sf-info">
+        <div id="sf-org"></div>
+        <div id="sf-name"></div>
+      </div>
+      <div id="sf-actions">
+        <button class="sf-btn" onclick="toggleSettings()" title="Settings">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+        <button class="sf-btn" onclick="logout()" title="Sign out">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </button>
       </div>
     </div>
   </div>
@@ -885,19 +1113,10 @@
   <!-- ── Main ── -->
   <div id="main">
     <div id="topbar">
-      <div class="topbar-route">
-        <strong>San Antonio</strong>
-        <span class="topbar-sep"> → </span>
-        <strong>Dallas</strong>
-      </div>
-      <span class="topbar-sep">·</span>
-      <span style="font-size:.78em;color:var(--dim)">Mar 30, 10:14 AM</span>
+      <span style="font-size:.78em;color:var(--dim)" id="topbar-clock"></span>
       <div id="topbar-actions">
-        <button class="tb-btn" id="btn-terminal" onclick="switchView('terminal')">⌨ Terminal</button>
+        <button class="tb-btn" id="btn-terminal" onclick="switchView('terminal')">⌨ Sandbox</button>
         <button class="tb-btn" id="btn-board"    onclick="switchView('board')">⊞ Board</button>
-        <button class="tb-btn" id="map-toggle" onclick="toggleMap()">⊙ Map</button>
-        <button class="tb-btn" onclick="rerunQuery()">↺ Re-run</button>
-        <button class="tb-btn" onclick="exportCSV()">↓ Export</button>
         <button class="tb-btn primary" onclick="showCertify()">✦ Certify Route</button>
       </div>
     </div>
@@ -908,14 +1127,16 @@
     <div id="terminal-pane">
 
       <div id="terminal">
-        <div class="t-line"><span class="t-muted">  ────────────────────────────────────</span></div>
-        <div class="t-line"><span class="t-muted">  |    |    /\    |\  |   /--\  </span></div>
-        <div class="t-line"><span class="t-muted">  |    |   /  \   | \ |  /    \ </span></div>
-        <div class="t-line"><span class="t-muted">  |__  |__/____\  |  \|  \____/ </span></div>
-        <div class="t-line" style="color:var(--dim)">        route intelligence</div>
-        <div class="t-line"><span class="t-muted">  ────────────────────────────────────</span></div>
-        <div class="t-line">&nbsp;</div>
+        <div class="banner-line" style="display:flex;flex-direction:column;align-items:center;padding:20vh 0 2em;gap:0">
+          <div class="t-line"><span class="t-muted">  ────────────────────────────────────</span></div>
+          <div class="t-line"><span class="t-muted">  |    |    /\    |\  |   /--\ </span></div>
+          <div class="t-line"><span class="t-muted">  |    |   /  \   | \ |  /    \</span></div>
+          <div class="t-line"><span class="t-muted">  |__  |__/____\  |  \|  \____/</span></div>
+          <div class="t-line" style="color:var(--dim)">        route intelligence</div>
+          <div class="t-line"><span class="t-muted">  ────────────────────────────────────</span></div>
+        </div>
 
+        <div id="demo-section" style="display:none">
         <div class="t-line">
           <span class="t-prompt">llano&gt; </span>
           <span class="t-cmd">score --from "San Antonio, TX" --to "Dallas, TX" --depart "2026-03-30 10:00" --alternatives 3</span>
@@ -926,7 +1147,6 @@
         <table class="result-table" id="result-table">
           <thead>
             <tr>
-              <th></th>
               <th>Route</th>
               <th>Time</th>
               <th>+Time</th>
@@ -937,7 +1157,6 @@
           </thead>
           <tbody>
             <tr class="selected" id="row-0" onclick="selectRoute(0)">
-              <td class="sel-indicator">›</td>
               <td class="route-name-cell"><span class="route-name-text t-cyan" ondblclick="editRouteName(this,0)">SH-130 Toll</span></td>
               <td>6h 29m</td>
               <td class="t-muted">+10m</td>
@@ -946,7 +1165,6 @@
               <td class="t-good">1 in 487</td>
             </tr>
             <tr id="row-1" onclick="selectRoute(1)">
-              <td></td>
               <td class="route-name-cell"><span class="route-name-text" style="color:var(--orange)" ondblclick="editRouteName(this,1)">I-35 N through Austin</span></td>
               <td>6h 19m</td>
               <td class="t-muted">—</td>
@@ -955,7 +1173,6 @@
               <td>1 in 303</td>
             </tr>
             <tr id="row-2" onclick="selectRoute(2)">
-              <td></td>
               <td class="route-name-cell"><span class="route-name-text t-cyan" ondblclick="editRouteName(this,2)">US-281 N rural</span></td>
               <td>6h 53m</td>
               <td class="t-muted">+34m</td>
@@ -969,55 +1186,7 @@
         <div class="t-line t-muted" style="font-size:.78em;margin-top:4px;">
           Click row to select · double-click route name to rename · ✦ Certify Route to generate report
         </div>
-
-        <!-- Certify panel -->
-        <div id="certify-panel" class="hidden">
-          <div class="cp-header">
-            ✦ Certify Route &mdash; <span class="cp-header-route" id="cp-route-name">SH-130 Toll</span>
-          </div>
-          <div class="cp-body">
-            <div class="cp-field full">
-              <div class="cp-label">Report Label <span style="color:var(--dim);font-size:.85em;text-transform:none;letter-spacing:0"> — override route name on PDF</span></div>
-              <input class="cp-input" id="cp-label" placeholder="e.g. Austin bypass, Toll route…" />
-            </div>
-            <div class="cp-field">
-              <div class="cp-label">Driver ID</div>
-              <input class="cp-input" id="cp-driver-id" placeholder="ACM-2847" />
-            </div>
-            <div class="cp-field">
-              <div class="cp-label">Driver Name</div>
-              <input class="cp-input" id="cp-driver-name" placeholder="James Okafor" />
-            </div>
-            <div class="cp-field">
-              <div class="cp-label">Phone Number</div>
-              <input class="cp-input" id="cp-phone" placeholder="(210) 555-0142" />
-              <div class="cp-hint">Driver receives SMS with route + tracking link</div>
-            </div>
-            <div class="cp-field">
-              <div class="cp-label">Departure Time</div>
-              <input class="cp-input" id="cp-depart" placeholder="2026-03-30 10:00" />
-            </div>
-            <div class="cp-field">
-              <div class="cp-label">Load / Ref #</div>
-              <input class="cp-input" id="cp-load" placeholder="PO-98432" />
-            </div>
-            <div class="cp-field">
-              <div class="cp-label">Carrier / Fleet ID</div>
-              <input class="cp-input" id="cp-fleet" placeholder="ACME Logistics" />
-            </div>
-            <div class="cp-field full">
-              <div class="cp-label">Notes</div>
-              <input class="cp-input" id="cp-notes" placeholder="Optional — hazmat, oversized load, etc." />
-            </div>
-          </div>
-          <div class="cp-footer">
-            <div class="cp-credit-note">Uses <span>1 credit</span> · <span id="cp-credits-remaining">4</span> remaining</div>
-            <div class="cp-actions">
-              <button class="cp-btn cancel" onclick="hideCertify()">Cancel</button>
-              <button class="cp-btn generate" onclick="generateReport()">Generate Report</button>
-            </div>
-          </div>
-        </div>
+        </div><!-- /#demo-section -->
 
         <div class="t-line" id="cursor-line" style="margin-top:14px;">&nbsp;</div>
       </div><!-- /terminal -->
@@ -1026,7 +1195,7 @@
         <span id="input-prompt">llano&gt;</span>
         <div id="input-wrap">
           <span id="cmd-ghost"></span>
-          <input id="cmd-input" type="text" placeholder='score --from "..." --to "..."'
+          <input id="cmd-input" type="text"
                  autocomplete="off" spellcheck="false"
                  onkeydown="handleInput(event)" oninput="updateGhost()" />
         </div>
@@ -1036,13 +1205,13 @@
         <span><span class="hint-key">⇥</span> reset</span>
       </div>
     </div><!-- /terminal-pane -->
+    <div id="split-divider"></div>
     <div id="map-pane">
       <div id="map-drag-handle">
         <span class="map-handle-title">MAP</span>
         <span class="map-handle-minimize" onclick="minimizeMap()" id="map-minimize-btn">−</span>
       </div>
-      <div id="app-map" style="height:calc(100% - 28px);margin-top:28px;"></div>
-      <div id="map-resize-handle"></div>
+      <div id="app-map"></div>
     </div>
     </div><!-- /terminal-split -->
     </div><!-- /view-terminal -->
@@ -1078,65 +1247,8 @@
             </tr>
           </thead>
           <tbody id="board-body">
-            <tr data-status="active">
-              <td><span class="board-status bs-active"><span class="board-dot active"></span>En route</span></td>
-              <td>SAT → DAL</td>
-              <td style="color:var(--muted)">J. Okafor</td>
-              <td style="color:var(--dim)">10:14 AM / 4:29 PM</td>
-              <td><span class="board-rr good">0.62×</span></td>
-              <td style="color:var(--green)">1 in 487</td>
-              <td style="color:var(--dim)">PO-98432</td>
-              <td><button class="board-action">View</button></td>
-            </tr>
-            <tr data-status="active">
-              <td><span class="board-status bs-active"><span class="board-dot active"></span>En route</span></td>
-              <td>HOU → DAL</td>
-              <td style="color:var(--muted)">M. Rivera</td>
-              <td style="color:var(--dim)">8:02 AM / 2:50 PM</td>
-              <td><span class="board-rr good">0.81×</span></td>
-              <td style="color:var(--green)">1 in 381</td>
-              <td style="color:var(--dim)">PO-98415</td>
-              <td><button class="board-action">View</button></td>
-            </tr>
-            <tr data-status="planned">
-              <td><span class="board-status bs-planned"><span class="board-dot planned"></span>Certified</span></td>
-              <td>AUS → ELP</td>
-              <td style="color:var(--muted)">T. Washington</td>
-              <td style="color:var(--dim)">2:00 PM / 9:12 PM</td>
-              <td><span class="board-rr good">0.74×</span></td>
-              <td style="color:var(--green)">1 in 412</td>
-              <td style="color:var(--dim)">PO-98441</td>
-              <td><button class="board-action">View</button></td>
-            </tr>
-            <tr data-status="completed">
-              <td><span class="board-status bs-completed"><span class="board-dot completed"></span>Completed</span></td>
-              <td>SAT → HOU</td>
-              <td style="color:var(--muted)">J. Okafor</td>
-              <td style="color:var(--dim)">Mar 29 / Arrived</td>
-              <td><span class="board-rr base">1.0×</span></td>
-              <td style="color:var(--muted)">1 in 303</td>
-              <td style="color:var(--dim)">PO-98401</td>
-              <td><button class="board-action">View</button></td>
-            </tr>
-            <tr data-status="completed">
-              <td><span class="board-status bs-completed"><span class="board-dot completed"></span>Completed</span></td>
-              <td>DAL → OKC</td>
-              <td style="color:var(--muted)">D. Chen</td>
-              <td style="color:var(--dim)">Mar 29 / Arrived</td>
-              <td><span class="board-rr warn">1.14×</span></td>
-              <td style="color:var(--red)">1 in 266</td>
-              <td style="color:var(--dim)">PO-98388</td>
-              <td><button class="board-action">View</button></td>
-            </tr>
-            <tr data-status="completed">
-              <td><span class="board-status bs-completed"><span class="board-dot completed"></span>Completed</span></td>
-              <td>ELP → SAT</td>
-              <td style="color:var(--muted)">M. Rivera</td>
-              <td style="color:var(--dim)">Mar 28 / Arrived</td>
-              <td><span class="board-rr good">0.69×</span></td>
-              <td style="color:var(--green)">1 in 439</td>
-              <td style="color:var(--dim)">PO-98372</td>
-              <td><button class="board-action">View</button></td>
+            <tr id="board-empty-row">
+              <td colspan="8" style="text-align:center;color:var(--dim);padding:48px 0;font-size:.85em;">No certified routes yet.</td>
             </tr>
           </tbody>
         </table>
@@ -1146,111 +1258,243 @@
     <!-- Settings view -->
     <div id="view-settings">
 
-      <div class="settings-section">
-        <h2>API Keys</h2>
-        <div class="settings-sub">Keys are tied to your org (acme.com) and share the same credit pool. Shown once on creation.</div>
-
-        <!-- Reveal box for new key -->
-        <div class="key-reveal" id="key-reveal">
-          <div class="key-reveal-value" id="key-reveal-value"></div>
-          <div class="key-reveal-warn">Copy this key now — it will not be shown again.</div>
+      <div style="max-width:620px;">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:24px;">
+          <div style="font-size:1.05em;font-weight:600;color:var(--text);letter-spacing:.03em;">Settings</div>
         </div>
 
-        <div id="key-list">
-          <div class="key-row" id="key-row-1">
-            <div class="key-value">sk_live_a8f3k2••••••••••••••9xq1</div>
-            <div class="key-meta">Created Mar 12</div>
-            <button class="key-revoke" onclick="revokeKey('key-row-1')">Revoke</button>
+        <!-- Section nav -->
+        <div class="settings-nav">
+          <div class="settings-nav-item active" onclick="showSettingsSection('profile',this)">Profile</div>
+          <div class="settings-nav-item" onclick="showSettingsSection('keys',this)">API Keys</div>
+          <div class="settings-nav-item" onclick="showSettingsSection('integrations',this)">Integrations</div>
+          <div class="settings-nav-item" onclick="showSettingsSection('usage',this)">Usage</div>
+          <div class="settings-nav-item" onclick="showSettingsSection('members',this)">Members</div>
+        </div>
+
+        <!-- ── Profile ── -->
+        <div class="settings-pane" id="spane-profile">
+          <div class="settings-section">
+            <h2>Saved Addresses</h2>
+            <div class="settings-sub">Frequently used locations — reference by name in the terminal.</div>
+            <div id="saved-addresses-list" style="margin-top:12px;display:flex;flex-direction:column;gap:6px;"></div>
+            <div style="display:flex;gap:6px;margin-top:10px;">
+              <input id="saved-addr-name" type="text" placeholder="e.g. home_terminal"
+                style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:5px 9px;color:var(--text);font-size:.78em;width:180px;outline:none;"
+                oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'_')" />
+              <input id="saved-addr-value" type="text" placeholder="Address or city"
+                style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:5px 9px;color:var(--text);font-size:.78em;flex:1;outline:none;" />
+              <button class="int-btn primary" onclick="addSavedAddress()">Add</button>
+            </div>
           </div>
-          <div class="key-row" id="key-row-2">
-            <div class="key-value">sk_live_c1m9p7••••••••••••••4wz8</div>
-            <div class="key-meta">Created Mar 28</div>
-            <button class="key-revoke" onclick="revokeKey('key-row-2')">Revoke</button>
+          <div class="settings-section" style="margin-top:24px;">
+            <h2>Vehicle Profiles</h2>
+            <div class="settings-sub">Saved vehicle configurations — reference by name in the terminal.</div>
+            <div id="saved-trucks-list" style="margin-top:12px;display:flex;flex-direction:column;gap:6px;"></div>
+            <div style="margin-top:10px;display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;gap:8px;align-items:center;">
+                <input id="saved-truck-name" type="text" placeholder="e.g. my_truck"
+                  style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:5px 9px;color:var(--text);font-size:.78em;width:180px;outline:none;"
+                  oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'_')" />
+                <div style="display:flex;border:1px solid var(--border);border-radius:4px;overflow:hidden;">
+                  <button id="vtype-passenger" class="vtype-btn active" onclick="setVehicleType('passenger')">Passenger</button>
+                  <button id="vtype-truck"     class="vtype-btn"        onclick="setVehicleType('truck')">Truck</button>
+                </div>
+              </div>
+              <div id="truck-flags" style="display:none;display:grid;grid-template-columns:1fr 1fr;gap:4px 24px;">
+                <label class="truck-opt"><input type="checkbox" id="st-hazmat" /> Hazmat</label>
+                <label class="truck-opt"><input type="checkbox" id="st-notolls" /> Avoid tolls</label>
+                <label class="truck-opt"><input type="checkbox" id="st-nohwy" /> Avoid highways</label>
+                <label class="truck-opt"><input type="checkbox" id="st-noferries" /> Avoid ferries</label>
+                <label class="truck-opt"><input type="checkbox" id="st-notunnels" /> Avoid tunnels</label>
+                <label class="truck-opt"><input type="checkbox" id="st-nounpaved" /> Avoid unpaved roads</label>
+                <label class="truck-opt"><input type="checkbox" id="st-hhg" /> National Network (HHG)</label>
+                <label class="truck-opt"><input type="checkbox" id="st-53ft" /> 53′ trailer</label>
+                <label class="truck-opt"><input type="checkbox" id="st-oversize" /> Oversize / overweight</label>
+                <label class="truck-opt"><input type="checkbox" id="st-lez" /> Avoid low-emission zones</label>
+              </div>
+              <div><button class="int-btn primary" onclick="addSavedTruck()">Add profile</button></div>
+            </div>
+            <div style="margin-top:16px;display:flex;align-items:center;gap:10px;">
+              <span style="font-size:.78em;color:var(--muted);white-space:nowrap;">Default profile</span>
+              <select id="default-profile-select" onchange="setDefaultProfile(this.value)"
+                style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;
+                       padding:4px 8px;color:var(--text);font-size:.78em;font-family:var(--font);
+                       outline:none;cursor:pointer;flex:1;max-width:200px;">
+                <option value="">None</option>
+              </select>
+              <span id="default-profile-hint" style="font-size:.72em;color:var(--dim);"></span>
+            </div>
           </div>
         </div>
-        <button class="key-new-btn" onclick="generateKey()">+ Generate New Key</button>
-      </div>
 
-      <hr class="settings-divider" />
-
-      <div class="settings-section">
-        <h2>Usage</h2>
-        <div class="settings-sub">Credit usage this billing period.</div>
-        <div class="usage-row"><span class="usage-label">Credits remaining</span><span class="usage-value" id="settings-credits">4</span></div>
-        <div class="usage-row"><span class="usage-label">Reports generated</span><span class="usage-value">1</span></div>
-        <div class="usage-row"><span class="usage-label">API calls (30d)</span><span class="usage-value">47</span></div>
-        <div class="usage-row"><span class="usage-label">Active drivers tracked</span><span class="usage-value">2</span></div>
-        <div style="margin-top:12px;">
-          <button class="key-new-btn" style="border-style:solid;" onclick="">Buy credits — $5 for 5 reports</button>
-        </div>
-      </div>
-
-      <hr class="settings-divider" />
-
-      <div class="settings-section">
-        <h2>Organization</h2>
-        <div class="settings-sub" style="margin-bottom:8px;">acme.com · Early Access</div>
-      </div>
-
-      <hr class="settings-divider" style="margin-top:0;" />
-
-      <div class="settings-section">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-          <div>
-            <h2 style="margin-bottom:2px;">Members</h2>
-            <div class="settings-sub" style="margin-bottom:0;">3 members · roles control access to billing, dispatch, and reports.</div>
+        <!-- ── API Keys ── -->
+        <div class="settings-pane" id="spane-keys" style="display:none">
+          <div class="settings-section">
+            <h2>API Keys</h2>
+            <div class="settings-sub">Keys are tied to your org (<span id="settings-org-domain">—</span>) and share the same credit pool. Shown once on creation.</div>
+            <div class="key-reveal" id="key-reveal">
+              <div class="key-reveal-value" id="key-reveal-value" onclick="copyRevealedKey(this)" title="Click to copy"></div>
+              <div class="key-reveal-warn" id="key-reveal-hint">Click the key to copy · shown once, will not be displayed again.</div>
+            </div>
+            <div id="key-list"></div>
+            <button class="key-new-btn" onclick="generateKey()">+ Generate New Key</button>
           </div>
-          <button class="key-new-btn" style="width:auto;border-style:solid;padding:6px 14px;" onclick="showInvite()">+ Invite</button>
         </div>
 
-        <table class="members-table" id="members-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Last active</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="color:var(--text)">James Okafor</td>
-              <td style="color:var(--muted)">james@acme.com</td>
-              <td><span class="role-badge role-admin">Admin</span></td>
-              <td style="color:var(--dim)">Just now</td>
-              <td style="color:var(--dim);font-size:.72em;">You</td>
-            </tr>
-            <tr id="member-row-maria">
-              <td style="color:var(--text)">Maria Rivera</td>
-              <td style="color:var(--muted)">maria@acme.com</td>
-              <td>
-                <select class="role-select" onchange="updateRole(this)">
-                  <option>Admin</option>
-                  <option selected>Dispatcher</option>
-                  <option>Viewer</option>
-                </select>
-              </td>
-              <td style="color:var(--dim)">2h ago</td>
-              <td><button class="member-action" onclick="removeMember('member-row-maria')">Remove</button></td>
-            </tr>
-            <tr id="member-row-derek">
-              <td style="color:var(--text)">Derek Chen</td>
-              <td style="color:var(--muted)">derek@acme.com</td>
-              <td>
-                <select class="role-select" onchange="updateRole(this)">
-                  <option>Admin</option>
-                  <option>Dispatcher</option>
-                  <option selected>Viewer</option>
-                </select>
-              </td>
-              <td style="color:var(--dim)">Mar 29</td>
-              <td><button class="member-action" onclick="removeMember('member-row-derek')">Remove</button></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+        <!-- ── Integrations ── -->
+        <div class="settings-pane" id="spane-integrations" style="display:none">
+          <div class="settings-section">
+            <h2>Integrations</h2>
+            <div class="settings-sub">Keys are stored server-side and never returned in plaintext. Test &amp; Save validates before committing.</div>
 
+            <!-- HERE Maps -->
+            <div class="integration-card" id="int-card-here">
+              <div class="int-logo-box"><img class="int-logo" src="/herelogo.png" alt="HERE"></div>
+              <div class="int-card-body">
+                <div class="int-card-header">
+                  <div>
+                    <div class="integration-name">HERE Maps</div>
+                    <div class="int-card-sub">Map tiles &amp; routing API</div>
+                  </div>
+                  <div class="integration-status empty" id="int-status-here">Not set</div>
+                </div>
+                <div class="int-card-input-row">
+                  <input class="integration-key-input" id="int-here" type="text"
+                    placeholder="Paste HERE API key…"
+                    autocomplete="off" data-lpignore="true" data-form-type="other" data-1p-ignore />
+                  <button class="int-btn primary int-action-btn" id="int-action-here" onclick="testAndSaveInt('here')">Test &amp; Save</button>
+                </div>
+                <div class="int-card-footer" id="int-footer-here" style="visibility:hidden">
+                  <span class="int-verified-text" id="int-verified-here"></span>
+                  <button class="int-btn secondary" id="int-retest-here" onclick="retestInt('here')">Re-test</button>
+                </div>
+                <div class="int-card-hint">platform.here.com → Projects → REST → Create API key</div>
+              </div>
+            </div>
+
+            <!-- PC*Miler -->
+            <div class="integration-card" id="int-card-pcmiler">
+              <div class="int-logo-box"><img class="int-logo" src="/pcmilerlogo.png" alt="PC*Miler"></div>
+              <div class="int-card-body">
+                <div class="int-card-header">
+                  <div>
+                    <div class="integration-name">PC*Miler</div>
+                    <div class="int-card-sub">Truck routing &amp; mileage (Trimble/ALK)</div>
+                  </div>
+                  <div class="integration-status empty" id="int-status-pcmiler">Not set</div>
+                </div>
+                <div class="int-card-input-row">
+                  <input class="integration-key-input" id="int-pcmiler" type="text"
+                    placeholder="Paste PC*Miler auth token…"
+                    autocomplete="off" data-lpignore="true" data-form-type="other" data-1p-ignore />
+                  <button class="int-btn primary int-action-btn" id="int-action-pcmiler" onclick="testAndSaveInt('pcmiler')">Test &amp; Save</button>
+                </div>
+                <div class="int-card-footer" id="int-footer-pcmiler" style="visibility:hidden">
+                  <span class="int-verified-text" id="int-verified-pcmiler"></span>
+                  <button class="int-btn secondary" id="int-retest-pcmiler" onclick="retestInt('pcmiler')">Re-test</button>
+                </div>
+                <div class="int-card-hint">pcmiler.alk.com → My Account → API Access → Auth Token</div>
+              </div>
+            </div>
+
+            <!-- Samsara -->
+            <div class="integration-card" id="int-card-samsara">
+              <div class="int-logo-box"><img class="int-logo" src="/samsaralogo.png" alt="Samsara"></div>
+              <div class="int-card-body">
+                <div class="int-card-header">
+                  <div>
+                    <div class="integration-name">Samsara</div>
+                    <div class="int-card-sub">Fleet telematics — read:fleet scope</div>
+                  </div>
+                  <div class="integration-status empty" id="int-status-samsara">Not set</div>
+                </div>
+                <div class="int-card-input-row">
+                  <input class="integration-key-input" id="int-samsara" type="text"
+                    placeholder="Paste Samsara API token…"
+                    autocomplete="off" data-lpignore="true" data-form-type="other" data-1p-ignore />
+                  <button class="int-btn primary int-action-btn" id="int-action-samsara" onclick="testAndSaveInt('samsara')">Test &amp; Save</button>
+                </div>
+                <div class="int-card-footer" id="int-footer-samsara" style="visibility:hidden">
+                  <span class="int-verified-text" id="int-verified-samsara"></span>
+                  <button class="int-btn secondary" id="int-retest-samsara" onclick="retestInt('samsara')">Re-test</button>
+                </div>
+                <div class="int-card-hint">Settings → API Tokens → Create Token → Read-only access</div>
+              </div>
+            </div>
+
+            <!-- Motive -->
+            <div class="integration-card" id="int-card-motive">
+              <div class="int-logo-box"><img class="int-logo" src="/motivelogo.png" alt="Motive"></div>
+              <div class="int-card-body">
+                <div class="int-card-header">
+                  <div>
+                    <div class="integration-name">Motive</div>
+                    <div class="int-card-sub">Fleet telematics (formerly KeepTruckin)</div>
+                  </div>
+                  <div class="integration-status empty" id="int-status-motive">Not set</div>
+                </div>
+                <div class="int-card-input-row">
+                  <input class="integration-key-input" id="int-motive" type="text"
+                    placeholder="Paste Motive API token…"
+                    autocomplete="off" data-lpignore="true" data-form-type="other" data-1p-ignore />
+                  <button class="int-btn primary int-action-btn" id="int-action-motive" onclick="testAndSaveInt('motive')">Test &amp; Save</button>
+                </div>
+                <div class="int-card-footer" id="int-footer-motive" style="visibility:hidden">
+                  <span class="int-verified-text" id="int-verified-motive"></span>
+                  <button class="int-btn secondary" id="int-retest-motive" onclick="retestInt('motive')">Re-test</button>
+                </div>
+                <div class="int-card-hint">Settings → API → Generate API Token → Read-only</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ── Usage ── -->
+        <div class="settings-pane" id="spane-usage" style="display:none">
+          <div class="settings-section">
+            <h2>Usage</h2>
+            <div class="settings-sub">Account balance for certifications.</div>
+            <div class="usage-row"><span class="usage-label">Current balance</span><span class="usage-value" id="settings-credits">—</span></div>
+            <div id="settings-balance-expiry" style="font-size:.72em;color:var(--dim);margin-top:2px;"></div>
+            <div style="margin-top:12px;">
+              <button class="key-new-btn" style="border-style:solid;">Add funds</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Members ── -->
+        <div class="settings-pane" id="spane-members" style="display:none">
+          <div class="settings-section">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+              <div>
+                <h2 style="margin-bottom:2px;">Members</h2>
+                <div class="settings-sub" style="margin-bottom:0;" id="members-sub">—</div>
+              </div>
+              <button class="key-new-btn" style="width:auto;border-style:solid;padding:6px 14px;" onclick="showInvite()">+ Invite</button>
+            </div>
+            <table class="members-table" id="members-table">
+              <thead>
+                <tr><th>Name</th><th>Email</th><th>Role</th><th>Last active</th><th></th></tr>
+              </thead>
+              <tbody>
+                <tr id="member-row-me">
+                  <td style="color:var(--text);">
+                    <span id="me-name" onclick="startEditMemberName()" title="Click to edit"
+                      style="cursor:pointer;border-bottom:1px dashed var(--border);display:inline-block;width:100%;position:relative;">—</span>
+                  </td>
+                  <td style="color:var(--muted)" id="me-email">—</td>
+                  <td><span class="role-badge role-admin" id="me-role-badge">—</span></td>
+                  <td style="color:var(--dim)">Just now</td>
+                  <td style="color:var(--dim);font-size:.72em;">You</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
     </div><!-- /view-settings -->
 
     <!-- Invite modal -->
@@ -1285,15 +1529,214 @@
   </div><!-- /main -->
 </div><!-- /layout -->
 
+<!-- Auth gate — shown when unauthenticated or link expired -->
+<div id="auth-gate" style="display:none;position:fixed;inset:0;background:var(--bg);
+  flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;">
+  <div style="color:var(--orange);font-size:1.1em;font-weight:700;letter-spacing:.08em;">LLANO</div>
+  <div id="gate-msg" style="color:var(--muted);font-size:.85em;max-width:320px;text-align:center;">
+    Sign in to continue.
+  </div>
+  <div id="gate-form" style="display:flex;flex-direction:column;gap:8px;width:260px;">
+    <input id="gate-email" type="email" placeholder="your@email.com" autocomplete="email"
+      style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;
+        padding:8px 10px;color:var(--text);font-family:var(--font);font-size:.85em;outline:none;
+        transition:border-color .15s;"
+      onfocus="this.style.borderColor='var(--orange)'"
+      onblur="this.style.borderColor='var(--border)'"
+      onkeydown="if(event.key==='Enter')requestGateAccess()" />
+    <button onclick="requestGateAccess()"
+      style="padding:8px;background:var(--orange);border:none;border-radius:4px;
+        color:#000;font-family:var(--font);font-size:.85em;font-weight:700;cursor:pointer;
+        transition:opacity .15s;"
+      onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+      Send magic link
+    </button>
+  </div>
+</div>
+
 <script>
   var selectedRoute = 0;
   var routeNames = ["SH-130 Toll", "I-35 N through Austin", "US-281 N rural"];
-  var credits = 4;
+  var tableRoutes   = {};
+  var tableParams   = {};
+  var tableCount    = 0;
+  var activeTableId = null;
+  var dragState     = {}; // { tableId, sessId }
+
+  // ── Trip record store ──
+  function genLnoId() {
+    var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    var id = "LNO";
+    for (var i = 0; i < 6; i++) id += chars[Math.floor(Math.random() * chars.length)];
+    return id;
+  }
+  function persistTrips() {
+    try {
+      var slim = trips.slice(0, 100).map(function(t) {
+        var c = Object.assign({}, t); delete c.tables; return c; // keep payload, drop live tables
+      });
+      localStorage.setItem("llano_trips", JSON.stringify(slim));
+    } catch(e) {}
+  }
+  function loadPersistedTrips() {
+    try {
+      var raw = localStorage.getItem("llano_trips");
+      if (raw) trips = JSON.parse(raw);
+    } catch(e) {}
+  }
+  function loadTripsFromApi() {
+    fetch("/trips", { credentials: "include" })
+      .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function(serverTrips) {
+        var changed = false;
+        serverTrips.forEach(function(st) {
+          var existing = trips.find(function(t) { return t.trip_id && t.trip_id === st.trip_id; });
+          if (existing) {
+            existing.tags      = (st.tags || existing.tags || []).filter(function(t) { return t && !/^\{/.test(t); });
+            existing.certified = st.certified;
+          } else {
+            // Only add if not already present as a local-only entry with matching from/to/time
+            trips.push({
+              id:        genLnoId(),
+              trip_id:   st.trip_id,
+              from:      st.from || "",
+              to:        st.to   || "",
+              createdAt: st.created_at ? new Date(st.created_at).getTime() : 0,
+              tags:      (st.tags || []).filter(function(t) { return t && !/^\{/.test(t); }),
+              certified: st.certified || false,
+              tables:    [],
+              payload:   null
+            });
+            changed = true;
+          }
+        });
+        trips.sort(function(a, b) { return (b.createdAt||0) - (a.createdAt||0); });
+        if (changed) persistTrips();
+        renderSidebar();
+      })
+      .catch(function() {}); // silent — user may not be logged in yet
+  }
+  var trips = [];
+  loadPersistedTrips();
+  setTimeout(loadTripsFromApi, 500); // after auth/me resolves
+  var activeTags = [];
+  var currentFilter   = "all";
+  var credits = 0;
   var currentView = "terminal";
+  var prevView    = "terminal";
   var boardFilter = "all";
+  var me = null;
+  var currentFrom = "San Antonio, TX";
+  var currentTo   = "Dallas, TX";
+
+  const API = "";
+
+  // ── Bootstrap ──
+  function initApp() {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get("error") === "invalid_token") {
+      showGate("That link has already been used or expired. Request a new one.");
+      return;
+    }
+
+    fetch(API + "/auth/me", { credentials: "include" })
+      .then(function(r) {
+        if (r.status === 401) { showGate(); return null; }
+        return r.json();
+      })
+      .then(function(data) {
+        if (!data) return;
+        // Normalize: plumber may return length-1 vectors as arrays
+        function s(v) { return Array.isArray(v) ? v[0] : v; }
+        me = data;
+        var email   = s(data.email);
+        var role    = s(data.role);
+        var domain  = s(data.org.domain);
+        var plan    = s(data.org.plan);
+        credits     = s(data.org.credits);
+
+        // Sidebar
+        var FREE_DOMAINS = ["gmail.com","yahoo.com","hotmail.com","outlook.com","icloud.com",
+                            "me.com","mac.com","proton.me","protonmail.com","live.com","msn.com"];
+        var emailDomain = (email.split("@")[1] || "").toLowerCase();
+        var isPersonal  = FREE_DOMAINS.indexOf(emailDomain) !== -1;
+        var displayOrg  = isPersonal ? "" : domain;
+
+        document.getElementById("sf-org").textContent   = displayOrg;
+        document.getElementById("sf-org").style.display = displayOrg ? "" : "none";
+        var displayName = localStorage.getItem("llano_display_name") || email.split("@")[0];
+        document.getElementById("sf-name").textContent   = displayName;
+        document.getElementById("sf-avatar").textContent = displayName[0] || "?";
+        document.getElementById("credit-count").textContent = fmtBal(credits);
+
+        // Settings
+        document.getElementById("settings-org-domain").textContent = domain;
+        document.getElementById("settings-credits").textContent = fmtBal(credits);
+        var expEl = document.getElementById("settings-balance-expiry");
+        if (expEl) {
+          var exp = data.org && data.org.balance_expires_at;
+          expEl.textContent = exp ? "Expires " + new Date(exp).toLocaleDateString("en-US", { year:"numeric", month:"long", day:"numeric" }) : "";
+        }
+
+        // Members table — current user row
+        var namePart = localStorage.getItem("llano_display_name") || email.split("@")[0];
+        document.getElementById("me-name").textContent = namePart;
+        var meEmailEl = document.getElementById("me-email");
+        meEmailEl.textContent = email;
+        var badge = document.getElementById("me-role-badge");
+        badge.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+        badge.className = "role-badge role-" + role;
+        var msub = document.getElementById("members-sub");
+        if (msub) msub.textContent = (isPersonal ? "" : domain + " · ") + "roles control access to billing, dispatch, and reports.";
+
+        document.getElementById("cp-credits-remaining").textContent = fmtBal(credits);
+
+        document.getElementById("cmd-input").focus();
+      })
+      .catch(function() { showGate("Could not reach the server. Try again."); });
+  }
+
+  function showGate(msg) {
+    document.getElementById("layout").style.display = "none";
+    var gate = document.getElementById("auth-gate");
+    gate.style.display = "flex";
+    document.getElementById("gate-msg").textContent = msg || "Sign in to continue.";
+    var form = document.getElementById("gate-form");
+    form.style.display = "flex";
+    var btn = form.querySelector("button");
+    btn.textContent = "Send magic link";
+    btn.disabled = false;
+    document.getElementById("gate-email").value = "";
+  }
+
+  function logout() {
+    fetch(API + "/auth/logout", { method: "POST", credentials: "include" })
+      .finally(function() { showGate("You've been signed out."); });
+  }
+
+  function requestGateAccess() {
+    var email = (document.getElementById("gate-email").value || "").trim();
+    if (!email) return;
+    var btn = document.querySelector("#gate-form button");
+    btn.textContent = "Sending…";
+    btn.disabled = true;
+    fetch(API + "/auth/request", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email })
+    }).then(function() {
+      document.getElementById("gate-form").style.display = "none";
+      document.getElementById("gate-msg").textContent = "Check your email — magic link sent to " + email + ".";
+    }).catch(function() {
+      btn.textContent = "Send magic link";
+      btn.disabled = false;
+      document.getElementById("gate-msg").textContent = "Something went wrong. Try again.";
+    });
+  }
 
   // ── View switch ──
   function switchView(v) {
+    if (currentView !== "settings") prevView = currentView;
     currentView = v;
     document.getElementById("view-terminal").style.display = v === "terminal" ? "flex" : "none";
     document.getElementById("view-board").style.display    = v === "board"    ? "flex" : "none";
@@ -1302,183 +1745,794 @@
     document.getElementById("btn-terminal").style.borderColor = v === "terminal" ? "var(--orange)" : "";
     document.getElementById("btn-board").style.color       = v === "board"    ? "var(--orange)" : "";
     document.getElementById("btn-board").style.borderColor = v === "board"    ? "var(--orange)" : "";
-    if (v === "settings") document.getElementById("settings-credits").textContent = credits;
-  }
-
-  // ── API key management ──
-  var keyCounter = 3;
-  function generateKey() {
-    var raw = "sk_live_" + randomHex(6) + "••••••••••••••" + randomHex(4);
-    var full = "sk_live_" + randomHex(24);
-
-    // reveal box
-    var reveal = document.getElementById("key-reveal");
-    document.getElementById("key-reveal-value").textContent = full;
-    reveal.classList.add("visible");
-
-    // add masked row
-    var id = "key-row-" + keyCounter++;
-    var row = document.createElement("div");
-    row.className = "key-row";
-    row.id = id;
-    row.innerHTML =
-      '<div class="key-value">' + raw + '</div>' +
-      '<div class="key-meta">Created just now</div>' +
-      '<button class="key-revoke" onclick="revokeKey(\'' + id + '\')">Revoke</button>';
-    document.getElementById("key-list").appendChild(row);
-  }
-
-  function revokeKey(id) {
-    var row = document.getElementById(id);
-    if (!row) return;
-    row.style.opacity = "0";
-    row.style.transition = "opacity .2s";
-    setTimeout(function() { row.remove(); }, 200);
-  }
-
-  function randomHex(n) {
-    var s = "";
-    var chars = "abcdef0123456789";
-    for (var i = 0; i < n; i++) s += chars[Math.floor(Math.random() * chars.length)];
-    return s;
-  }
-
-  // ── Map minimize + drag + resize ──
-  var mapMinimized = false;
-  var mapSaved = {};
-
-  function minimizeMap() {
-    var pane   = document.getElementById("map-pane");
-    var btn    = document.getElementById("map-minimize-btn");
-    var parent = pane.parentElement;
-    mapMinimized = !mapMinimized;
-    if (mapMinimized) {
-      // save current position + size
-      mapSaved = {
-        left:   pane.style.left   || "auto",
-        top:    pane.style.top    || "auto",
-        right:  pane.style.right  || "20px",
-        width:  pane.offsetWidth  + "px",
-        height: pane.offsetHeight + "px"
-      };
-      // snap to bottom-right
-      pane.style.transition = "all .25s ease";
-      pane.style.left   = "auto";
-      pane.style.right  = "20px";
-      pane.style.top    = "auto";
-      pane.style.bottom = "12px";
-      pane.style.width  = "200px";
-      pane.classList.add("minimized");
-      btn.textContent = "+";
-      setTimeout(function() { pane.style.transition = ""; }, 260);
-    } else {
-      pane.style.transition = "all .25s ease";
-      pane.style.bottom = "auto";
-      pane.style.width  = mapSaved.width;
-      pane.style.left   = mapSaved.left;
-      pane.style.right  = mapSaved.right;
-      pane.style.top    = mapSaved.top;
-      pane.classList.remove("minimized");
-      btn.textContent = "−";
-      setTimeout(function() {
-        pane.style.height = mapSaved.height;
-        pane.style.transition = "";
-        appMap.invalidateSize();
-      }, 260);
+    if (v === "settings") {
+      document.getElementById("settings-credits").textContent = fmtBal(credits);
+      renderSavedAddresses();
+      renderSavedTrucks();
+      loadKeys();
+      if (typeof loadIntegrations === "function") loadIntegrations();
     }
   }
 
-  function toggleMap() {
-    var pane = document.getElementById("map-pane");
-    var btn  = document.getElementById("map-toggle");
-    var visible = pane.style.display !== "none";
-    pane.style.display = visible ? "none" : "";
-    btn.style.color       = !visible ? "var(--orange)" : "";
-    btn.style.borderColor = !visible ? "var(--orange)" : "";
-    if (!visible) setTimeout(function() { appMap.invalidateSize(); }, 50);
+  function toggleSettings() {
+    if (currentView === "settings") switchView(prevView || "terminal");
+    else switchView("settings");
   }
 
-  (function() {
-    var pane   = document.getElementById("map-pane");
-    var handle = document.getElementById("map-drag-handle");
-    var dragging = false, ox = 0, oy = 0;
+  function applyDisplayName(name) {
+    if (!name) return;
+    localStorage.setItem("llano_display_name", name);
+    document.getElementById("sf-name").textContent   = name;
+    document.getElementById("sf-avatar").textContent = name[0];
+  }
 
-    handle.addEventListener("mousedown", function(e) {
-      if (e.target.classList.contains("map-handle-minimize")) return;
-      if (mapMinimized) return;
-      dragging = true;
-      var rect = pane.getBoundingClientRect();
-      ox = e.clientX - rect.left;
-      oy = e.clientY - rect.top;
-      pane.classList.add("dragging");
-      handle.classList.add("dragging");
+  function startEditMemberName() {
+    var span = document.getElementById("me-name");
+    if (!span || span.dataset.editing) return;
+    var current = span.textContent;
+    span.dataset.editing = "1";
+    var inp = document.createElement("input");
+    inp.type  = "text";
+    inp.value = current === "—" ? "" : current;
+    inp.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;background:var(--surface2);border:1px solid var(--orange);border-radius:3px;padding:0 6px;color:var(--text);font-size:inherit;outline:none;box-sizing:border-box;";
+    span.style.position = "relative";
+    span.appendChild(inp);
+    inp.focus(); inp.select();
+    function commit() {
+      var val = inp.value.trim() || current;
+      delete span.dataset.editing;
+      inp.remove();
+      span.textContent = val;
+      applyDisplayName(val);
+    }
+    inp.addEventListener("blur",  commit);
+    inp.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") { inp.blur(); }
+      if (e.key === "Escape") { inp.value = current; inp.blur(); }
+    });
+  }
+
+  // ── Saved addresses & truck profiles ──
+  function getSavedAddresses() {
+    try { return JSON.parse(localStorage.getItem("llano_saved_addresses") || "[]"); } catch(e) { return []; }
+  }
+  function getSavedTrucks() {
+    try { return JSON.parse(localStorage.getItem("llano_saved_trucks") || "[]"); } catch(e) { return []; }
+  }
+  function renderSavedAddresses() {
+    var list = document.getElementById("saved-addresses-list");
+    if (!list) return;
+    var items = getSavedAddresses();
+    list.innerHTML = items.length ? "" : '<div style="font-size:.75em;color:var(--dim)">No saved addresses yet.</div>';
+    items.forEach(function(item, i) {
+      var row = document.createElement("div");
+      row.style.cssText = "display:flex;align-items:center;gap:8px;font-size:.78em;";
+      row.innerHTML = '<span style="color:var(--muted);min-width:110px;flex-shrink:0;">' + escHtml(item.name) + '</span>'
+        + '<span style="color:var(--dim);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml(item.value) + '</span>'
+        + '<button class="int-link danger" style="font-size:.9em;" onclick="deleteSavedAddress(' + i + ')">Remove</button>';
+      list.appendChild(row);
+    });
+  }
+  function renderSavedTrucks() {
+    var list = document.getElementById("saved-trucks-list");
+    if (!list) return;
+    var items = getSavedTrucks();
+    list.innerHTML = items.length ? "" : '<div style="font-size:.75em;color:var(--dim)">No truck profiles yet.</div>';
+    items.forEach(function(item, i) {
+      var tags = [];
+      // Support both old format {hazmat,notolls,nohwy} and new {flags:{}}
+      var vtype = item.type || "truck";
+      var flags = item.flags || { "st-hazmat": item.hazmat, "st-notolls": item.notolls, "st-nohwy": item.nohwy };
+      if (vtype === "truck") TRUCK_FLAGS.forEach(function(f) { if (flags[f.id]) tags.push(f.label); });
+      var typeColor = vtype === "passenger" ? "var(--muted)" : "var(--orange)";
+      var row = document.createElement("div");
+      row.style.cssText = "display:flex;align-items:center;gap:8px;font-size:.78em;";
+      row.innerHTML = '<span style="color:var(--muted);min-width:110px;flex-shrink:0;">' + escHtml(item.name) + '</span>'
+        + '<span style="color:' + typeColor + ';margin-right:4px;">' + vtype + '</span>'
+        + '<span style="color:var(--dim);flex:1;">' + (tags.length ? tags.join(", ") : "") + '</span>'
+        + '<button class="int-link danger" style="font-size:.9em;" onclick="deleteSavedTruck(' + i + ')">Remove</button>';
+      list.appendChild(row);
+    });
+    renderDefaultProfileSelect();
+  }
+  function addSavedAddress() {
+    var name  = (document.getElementById("saved-addr-name").value  || "").trim();
+    var value = (document.getElementById("saved-addr-value").value || "").trim();
+    if (!name || !value) return;
+    var items = getSavedAddresses();
+    items.push({ name: name, value: value });
+    localStorage.setItem("llano_saved_addresses", JSON.stringify(items));
+    document.getElementById("saved-addr-name").value  = "";
+    document.getElementById("saved-addr-value").value = "";
+    renderSavedAddresses();
+  }
+  var currentVehicleType = "passenger";
+
+  function setVehicleType(type) {
+    currentVehicleType = type;
+    document.getElementById("vtype-passenger").classList.toggle("active", type === "passenger");
+    document.getElementById("vtype-truck").classList.toggle("active",     type === "truck");
+    document.getElementById("truck-flags").style.display = type === "truck" ? "grid" : "none";
+  }
+
+  var TRUCK_FLAGS = [
+    { id: "st-hazmat",    label: "hazmat" },
+    { id: "st-notolls",   label: "no tolls" },
+    { id: "st-nohwy",     label: "no highways" },
+    { id: "st-noferries", label: "no ferries" },
+    { id: "st-notunnels", label: "no tunnels" },
+    { id: "st-nounpaved", label: "no unpaved" },
+    { id: "st-hhg",       label: "HHG" },
+    { id: "st-53ft",      label: "53′" },
+    { id: "st-oversize",  label: "oversize" },
+    { id: "st-lez",       label: "no LEZ" }
+  ];
+
+  function addSavedTruck() {
+    var name = (document.getElementById("saved-truck-name").value || "").trim();
+    if (!name) return;
+    var flags = {};
+    TRUCK_FLAGS.forEach(function(f) {
+      flags[f.id] = document.getElementById(f.id).checked;
+    });
+    var items = getSavedTrucks();
+    items.push({ name: name, type: currentVehicleType, flags: currentVehicleType === "truck" ? flags : {} });
+    localStorage.setItem("llano_saved_trucks", JSON.stringify(items));
+    document.getElementById("saved-truck-name").value = "";
+    TRUCK_FLAGS.forEach(function(f) { document.getElementById(f.id).checked = false; });
+    setVehicleType("passenger");
+    renderSavedTrucks();
+  }
+  function deleteSavedAddress(i) {
+    var items = getSavedAddresses(); items.splice(i, 1);
+    localStorage.setItem("llano_saved_addresses", JSON.stringify(items));
+    renderSavedAddresses();
+  }
+  function deleteSavedTruck(i) {
+    var items = getSavedTrucks(); items.splice(i, 1);
+    localStorage.setItem("llano_saved_trucks", JSON.stringify(items));
+    // Clear default if it was this profile
+    var def = localStorage.getItem("llano_default_profile") || "";
+    if (def && !items.find(function(t) { return t.name === def; }))
+      localStorage.removeItem("llano_default_profile");
+    renderSavedTrucks();
+  }
+  function setDefaultProfile(name) {
+    if (name) localStorage.setItem("llano_default_profile", name);
+    else localStorage.removeItem("llano_default_profile");
+    var hint = document.getElementById("default-profile-hint");
+    if (hint) hint.textContent = name ? "applied automatically when no --profile flag is used" : "";
+  }
+  function renderDefaultProfileSelect() {
+    var sel = document.getElementById("default-profile-select");
+    if (!sel) return;
+    var def = localStorage.getItem("llano_default_profile") || "";
+    var trucks = getSavedTrucks();
+    sel.innerHTML = '<option value="">None</option>';
+    trucks.forEach(function(t) {
+      var opt = document.createElement("option");
+      opt.value = t.name; opt.textContent = t.name;
+      if (t.name === def) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    var hint = document.getElementById("default-profile-hint");
+    if (hint) hint.textContent = def ? "applied automatically when no --profile flag is used" : "";
+  }
+
+  // ── API key management ──
+  function loadKeys() {
+    fetch(API + "/auth/keys", { credentials: "include" })
+      .then(function(r) { return r.json(); })
+      .then(function(keys) {
+        var list = document.getElementById("key-list");
+        list.innerHTML = "";
+        if (!keys || !keys.length) return;
+        keys.forEach(function(k) { addKeyRow(k.id, k.display, k.created_at); });
+      });
+  }
+
+  function addKeyRow(keyId, display, createdAt) {
+    var rowId = "key-row-" + keyId.slice(0, 8);
+    var row = document.createElement("div");
+    row.className = "key-row";
+    row.id = rowId;
+    row.dataset.keyId = keyId;
+    row.innerHTML =
+      '<div class="key-value">' + escHtml(display) + '</div>' +
+      '<div class="key-meta">Created ' + escHtml(createdAt || "—") + '</div>' +
+      '<button class="key-revoke" onclick="revokeKey(\'' + rowId + '\')">Revoke</button>';
+    document.getElementById("key-list").appendChild(row);
+  }
+
+  function generateKey() {
+    fetch(API + "/auth/keys", { method: "POST", credentials: "include" })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.error) { alert(data.error); return; }
+        document.getElementById("key-reveal-value").textContent = data.key;
+        document.getElementById("key-reveal").classList.add("visible");
+        var display = data.key.slice(0, 10) + "••••••••••••" + data.key.slice(-4);
+        addKeyRow(data.key, display, "just now");
+      });
+  }
+
+  function revokeKey(rowId) {
+    var row = document.getElementById(rowId);
+    if (!row) return;
+    var keyId = row.dataset.keyId;
+    fetch(API + "/auth/keys/" + keyId, { method: "DELETE", credentials: "include" })
+      .then(function() {
+        row.style.opacity = "0";
+        row.style.transition = "opacity .2s";
+        setTimeout(function() { row.remove(); }, 200);
+      });
+  }
+
+  // ── Map minimize + drag + resize ──
+  var mapCollapsed = false;
+  var mapWidth = Math.max(380, Math.floor(window.innerWidth * 0.42));
+
+  function collapseMap() {
+    var pane     = document.getElementById("map-pane");
+    var divider  = document.getElementById("split-divider");
+    var btn      = document.getElementById("map-minimize-btn");
+    var navBtn   = document.getElementById("map-toggle");
+    mapCollapsed = true;
+    pane.classList.add("collapsed");
+    divider.classList.add("map-collapsed");
+    btn.textContent = "+";
+    if (navBtn) { navBtn.style.color = ""; navBtn.style.borderColor = ""; }
+    setTimeout(function() { appMap.invalidateSize(); }, 240);
+  }
+
+  function expandMap() {
+    var pane     = document.getElementById("map-pane");
+    var divider  = document.getElementById("split-divider");
+    var btn      = document.getElementById("map-minimize-btn");
+    var navBtn   = document.getElementById("map-toggle");
+    mapCollapsed = false;
+    pane.style.width = mapWidth + "px";
+    pane.classList.remove("collapsed");
+    divider.classList.remove("map-collapsed");
+    btn.textContent = "−";
+    if (navBtn) { navBtn.style.color = "var(--orange)"; navBtn.style.borderColor = "var(--orange)"; }
+    setTimeout(function() { appMap.invalidateSize(); }, 240);
+  }
+
+  function minimizeMap() {
+    if (mapCollapsed) expandMap(); else collapseMap();
+  }
+
+  function toggleMap() {
+    if (mapCollapsed) expandMap(); else collapseMap();
+  }
+
+  // Set initial map pane width
+  document.getElementById("map-pane").style.width = mapWidth + "px";
+
+  // Divider: drag to resize, click when collapsed to expand
+  (function() {
+    var divider  = document.getElementById("split-divider");
+    var pane     = document.getElementById("map-pane");
+    var resizing = false, startX = 0, startW = 0;
+
+    divider.addEventListener("mousedown", function(e) {
+      if (mapCollapsed) { expandMap(); return; }
+      resizing = true;
+      startX = e.clientX;
+      startW = pane.offsetWidth;
+      divider.classList.add("resizing");
+      document.body.style.cursor     = "col-resize";
+      document.body.style.userSelect = "none";
       e.preventDefault();
     });
 
     document.addEventListener("mousemove", function(e) {
-      if (!dragging) return;
-      var parent = pane.parentElement;
-      var pr = parent.getBoundingClientRect();
-      var x = Math.min(Math.max(0, e.clientX - pr.left - ox), pr.width  - pane.offsetWidth);
-      var y = Math.min(Math.max(0, e.clientY - pr.top  - oy), pr.height - pane.offsetHeight);
-      pane.style.left  = x + "px";
-      pane.style.top   = y + "px";
-      pane.style.right = "auto";
+      if (!resizing) return;
+      var split = document.getElementById("terminal-split");
+      var maxW  = split.offsetWidth - 300;
+      var w     = Math.min(maxW, Math.max(200, startW - (e.clientX - startX)));
+      pane.style.width = w + "px";
+      mapWidth = w;
     });
 
     document.addEventListener("mouseup", function() {
-      if (!dragging) return;
-      dragging = false;
-      pane.classList.remove("dragging");
-      handle.classList.remove("dragging");
-      appMap.invalidateSize();
-    });
-
-    // Custom resize handle
-    var resizeHandle = document.getElementById("map-resize-handle");
-    var resizing = false, rsx = 0, rsy = 0, rsw = 0, rsh = 0;
-
-    resizeHandle.addEventListener("mousedown", function(e) {
-      if (mapMinimized) return;
-      resizing = true;
-      rsx = e.clientX; rsy = e.clientY;
-      rsw = pane.offsetWidth; rsh = pane.offsetHeight;
-      e.preventDefault(); e.stopPropagation();
-    });
-
-    document.addEventListener("mousemove", function(e) {
-      if (!resizing) return;
-      var w = Math.max(220, rsw + (e.clientX - rsx));
-      var h = Math.max(80,  rsh + (e.clientY - rsy));
-      pane.style.width  = w + "px";
-      pane.style.height = h + "px";
-    });
-
-    document.addEventListener("mouseup", function(e) {
       if (!resizing) return;
       resizing = false;
+      divider.classList.remove("resizing");
+      document.body.style.cursor     = "";
+      document.body.style.userSelect = "";
       appMap.invalidateSize();
     });
   })();
 
   // ── Sidebar filter ──
   function setFilter(f, el) {
+    currentFilter = f;
     document.querySelectorAll(".filter-tab").forEach(function(t) { t.classList.remove("active"); });
-    el.classList.add("active");
-    document.querySelectorAll(".trip-item").forEach(function(item) {
-      var show = f === "all" || item.dataset.status === f;
-      item.style.display = show ? "flex" : "none";
+    if (el) el.classList.add("active");
+    renderSidebar();
+  }
+
+  function renderSidebar() {
+    var list = document.getElementById("trip-list");
+    if (!list) return;
+
+    // Tag cloud — all unique tags across trips
+    var cloud = document.getElementById("tag-cloud");
+    if (cloud) {
+      var allTags = [];
+      trips.forEach(function(t) { (t.tags || []).forEach(function(tag) { if (tag && !/^\{/.test(tag) && allTags.indexOf(tag) === -1) allTags.push(tag); }); });
+      allTags.sort();
+      cloud.innerHTML = "";
+      allTags.forEach(function(tag) {
+        var isActive = activeTags.indexOf(tag) !== -1;
+        var chip = document.createElement("span");
+        chip.className = "tag-cloud-chip" + (isActive ? " active" : "");
+        chip.textContent = tag;
+        chip.onclick = (function(t) { return function() {
+          var idx = activeTags.indexOf(t);
+          if (idx === -1) activeTags.push(t);
+          else activeTags.splice(idx, 1);
+          renderSidebar();
+        }; })(tag);
+        cloud.appendChild(chip);
+      });
+    }
+
+    var filterEl = document.getElementById("tag-filter-input");
+    var textFilter = filterEl ? filterEl.value.trim().toLowerCase() : "";
+
+    // Show ALL trips — sidebar is the full sequential query history
+    var filtered = trips.slice().sort(function(a, b) { return (b.createdAt||0) - (a.createdAt||0); });
+    if (activeTags.length) {
+      filtered = filtered.filter(function(t) {
+        return activeTags.every(function(at) { return (t.tags||[]).indexOf(at) !== -1; });
+      });
+    }
+    if (textFilter) {
+      filtered = filtered.filter(function(t) {
+        return (t.tags||[]).some(function(tag) { return tag.indexOf(textFilter) !== -1; }) ||
+               (t.from||"").toLowerCase().indexOf(textFilter) !== -1 ||
+               (t.to||"").toLowerCase().indexOf(textFilter) !== -1 ||
+               (t.id||"").toLowerCase().indexOf(textFilter) !== -1;
+      });
+    }
+
+    list.innerHTML = "";
+    if (!filtered.length) {
+      list.innerHTML = '<div style="padding:20px 14px;font-size:.78em;color:var(--dim)">' +
+        (trips.length ? 'No trips match the current filter.' : 'No trips yet.<br>Score a route to get started.') + '</div>';
+      return;
+    }
+    filtered.forEach(function(trip) {
+      var tagsHtml = (trip.tags||[]).map(function(tag) {
+        return '<span class="tag-chip-sm">' + escHtml(tag) + '</span>';
+      }).join("");
+      var certBadge = trip.certified
+        ? '<span style="color:var(--green);font-size:.7em;margin-left:4px;" title="Certified">✦</span>'
+        : '';
+      var item = document.createElement("div");
+      item.className = "trip-item";
+      item.dataset.tripId = trip.id;
+      item.draggable = true;
+      item.addEventListener("dragstart", function(e) {
+        e.dataTransfer.setData("text/llano-trip-id", trip.id);
+        e.dataTransfer.effectAllowed = "copy";
+        item.classList.add("dragging");
+      });
+      item.addEventListener("dragend", function() { item.classList.remove("dragging"); });
+      item.innerHTML =
+        '<div class="trip-body">' +
+          '<div class="trip-route">' + escHtml(trip.from||"?") + ' <span style="color:var(--dim)">→</span> ' + escHtml(trip.to||"?") + certBadge + '</div>' +
+          '<div class="trip-meta">' + (trip.timeVal ? escHtml(trip.timeVal) : "") + '</div>' +
+          '<div class="trip-meta" style="margin-top:1px;">' + (trip.createdAt ? timeAgo(trip.createdAt) : "") + '</div>' +
+          (tagsHtml ? '<div class="trip-tags-row">' + tagsHtml + '</div>' : '') +
+          '<div class="trip-lno">' + escHtml(trip.id) + '</div>' +
+        '</div>' +
+        '<button class="trip-delete" onclick="deleteTrip(\'' + escHtml(trip.id) + '\',event)" title="Remove">×</button>';
+      list.appendChild(item);
     });
-    // hide group labels with no visible items
-    document.querySelectorAll(".trip-group-label").forEach(function(lbl) {
-      var next = lbl.nextElementSibling;
-      var hasVisible = false;
-      while (next && !next.classList.contains("trip-group-label")) {
-        if (next.style.display !== "none") hasVisible = true;
-        next = next.nextElementSibling;
-      }
-      lbl.style.display = hasVisible ? "" : "none";
+  }
+
+  // ── Tag management ───────────────────────────────────────────────────────
+
+  function renderTagZone(container, tripId) {
+    var trip = trips.find(function(t) { return t.id === tripId; });
+    var tags = (trip && trip.tags) || [];
+    container.innerHTML = "";
+    // LNO ID first
+    var badge = document.createElement("button");
+    badge.type = "button";
+    badge.className = "trip-id-badge";
+    badge.textContent = tripId;
+    badge.title = "click to copy";
+    badge.onclick = function(e) { copyTripId(tripId, badge, e); };
+    container.appendChild(badge);
+    // Tags after (filter out legacy PG array literals)
+    tags.filter(function(tag) { return tag && !/^\{/.test(tag); }).forEach(function(tag, i) {
+      var chip = document.createElement("span");
+      chip.className = "tag-chip";
+      chip.appendChild(document.createTextNode(tag));
+      var x = document.createElement("button");
+      x.textContent = "×";
+      x.onclick = (function(tid, idx) { return function(e) { e.stopPropagation(); removeTag(tid, idx); }; })(tripId, i);
+      chip.appendChild(x);
+      container.appendChild(chip);
     });
+    // + tag button last
+    var addBtn = document.createElement("span");
+    addBtn.className = "tag-add";
+    addBtn.textContent = "+ tag";
+    addBtn.onclick = function(e) { e.stopPropagation(); startTagInput(container, tripId); };
+    container.appendChild(addBtn);
+  }
+  function startTagInput(container, tripId) {
+    var addBtn = container.querySelector(".tag-add");
+    if (addBtn) addBtn.style.display = "none";
+    var input = document.createElement("input");
+    input.className = "tag-input";
+    input.placeholder = "tag…";
+    container.appendChild(input);
+    input.focus();
+    var committed = false;
+    function commit() {
+      if (committed) return; committed = true;
+      var val = input.value.trim().toLowerCase().replace(/\s+/g, "-");
+      if (val) addTag(tripId, val);
+      else renderTagZone(container, tripId);
+    }
+    input.addEventListener("blur", commit);
+    input.addEventListener("keydown", function(e) {
+      if (e.key === "Enter")  { e.preventDefault(); commit(); }
+      if (e.key === "Escape") { input.value = ""; commit(); }
+    });
+  }
+  function syncTagsToServer(trip) {
+    if (!trip || !trip.trip_id) return;
+    fetch("/trips/" + trip.trip_id + "/tags", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tags: trip.tags || [] })
+    }).catch(function() {});
+  }
+  function addTag(tripId, tag) {
+    var trip = trips.find(function(t) { return t.id === tripId; });
+    if (!trip) return;
+    if (!trip.tags) trip.tags = [];
+    if (trip.tags.indexOf(tag) === -1) trip.tags.push(tag);
+    persistTrips();
+    syncTagsToServer(trip);
+    renderSidebar();
+    document.querySelectorAll('.tag-zone[data-trip-id="' + tripId + '"]').forEach(function(z) { renderTagZone(z, tripId); });
+  }
+  function removeTag(tripId, idx) {
+    var trip = trips.find(function(t) { return t.id === tripId; });
+    if (!trip || !trip.tags) return;
+    trip.tags.splice(idx, 1);
+    persistTrips();
+    syncTagsToServer(trip);
+    renderSidebar();
+    document.querySelectorAll('.tag-zone[data-trip-id="' + tripId + '"]').forEach(function(z) { renderTagZone(z, tripId); });
+  }
+
+  // ── Table record helpers ──────────────────────────────────────────────────
+
+  function buildTableBlock(record, tripId) {
+    // Populate global lookup tables so selectRoute / updateMap keep working
+    tableRoutes[record.id] = record.sorted;
+    tableParams[record.id] = { arrive: record.arrive, depart: record.depart };
+    // Make routeNames point at the record's array so edits are reflected
+    routeNames    = record.routeNames;
+    activeTableId = record.id;
+
+    function sc(v) { return Array.isArray(v) ? v[0] : v; }
+    function fmtDur(secs) {
+      secs = Math.round(+secs);
+      var h = Math.floor(secs / 3600), mm = Math.floor((secs % 3600) / 60);
+      return h ? (h + "h " + (mm < 10 ? "0" : "") + mm + "m") : mm + "m";
+    }
+    function fmtClock(baseStr, deltaSecs) {
+      var parts = baseStr.replace("T", " ").split(/[\s\-:]/);
+      var d = new Date(+parts[0], +parts[1]-1, +parts[2], +parts[3]||0, +parts[4]||0, +parts[5]||0);
+      d.setSeconds(d.getSeconds() + deltaSecs);
+      return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    }
+
+    var wrapper = document.createElement("div");
+    wrapper.className = "table-block";
+    wrapper.dataset.tableId = record.id;
+    wrapper.dataset.tripId  = tripId || "";
+
+    // Delete button
+    var delBtn = document.createElement("button");
+    delBtn.className = "table-block-del";
+    delBtn.title = "Remove this result";
+    delBtn.textContent = "✕";
+    delBtn.onclick = (function(tid, tbid) {
+      return function(e) { e.stopPropagation(); deleteTable(tid, tbid); };
+    })(tripId, record.id);
+    wrapper.appendChild(delBtn);
+
+    // Drag handle (shown on hover, left of header)
+    var dragHandle = document.createElement("span");
+    dragHandle.className = "table-block-drag-handle";
+    dragHandle.title = "Drag to reorder";
+    dragHandle.textContent = "⠿";
+    wrapper.appendChild(dragHandle);
+
+    // Drag-to-reorder — only enable draggable while handle is held
+    dragHandle.addEventListener("mousedown", function() {
+      wrapper.draggable = true;
+    });
+    wrapper.addEventListener("mouseup",   function() { wrapper.draggable = false; });
+    wrapper.addEventListener("mouseleave", function() { wrapper.draggable = false; });
+    wrapper.draggable = false;
+    wrapper.addEventListener("dragstart", function(e) {
+      if (!wrapper.draggable) { e.preventDefault(); return; }
+      dragState.tableId = record.id;
+      dragState.tripId  = wrapper.dataset.tripId;
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", record.id);
+      setTimeout(function() { wrapper.classList.add("dragging"); }, 0);
+    });
+    wrapper.addEventListener("dragend", function() {
+      wrapper.draggable = false;
+      wrapper.classList.remove("dragging");
+      document.querySelectorAll(".table-block").forEach(function(b) {
+        b.classList.remove("drop-before", "drop-after");
+      });
+      dragState = {};
+    });
+    wrapper.addEventListener("dragover", function(e) {
+      if (!dragState.tableId || dragState.tableId === record.id) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      var rect = wrapper.getBoundingClientRect();
+      var before = e.clientY < rect.top + rect.height / 2;
+      document.querySelectorAll(".table-block").forEach(function(b) {
+        b.classList.remove("drop-before", "drop-after");
+      });
+      wrapper.classList.add(before ? "drop-before" : "drop-after");
+    });
+    wrapper.addEventListener("dragleave", function() {
+      wrapper.classList.remove("drop-before", "drop-after");
+    });
+    wrapper.addEventListener("drop", function(e) {
+      e.preventDefault();
+      wrapper.classList.remove("drop-before", "drop-after");
+      if (!dragState.tableId || dragState.tableId === record.id) return;
+      var srcTrip = trips.find(function(t) { return t.id === dragState.tripId; });
+      var tgtTrip = trips.find(function(t) { return t.id === wrapper.dataset.tripId; });
+      if (!srcTrip || !tgtTrip || !srcTrip.tables) return;
+      var srcIdx = srcTrip.tables.findIndex(function(t) { return t.id === dragState.tableId; });
+      if (srcIdx === -1) return;
+      var moved = srcTrip.tables.splice(srcIdx, 1)[0];
+      if (!tgtTrip.tables) tgtTrip.tables = [];
+      var tgtIdx = tgtTrip.tables.findIndex(function(t) { return t.id === record.id; });
+      var dropRect = wrapper.getBoundingClientRect();
+      var insertIdx = (e.clientY < dropRect.top + dropRect.height / 2) ? tgtIdx : tgtIdx + 1;
+      tgtTrip.tables.splice(insertIdx < 0 ? tgtTrip.tables.length : insertIdx, 0, moved);
+      // Move DOM block
+      var draggedBlock = document.querySelector('.table-block[data-table-id="' + moved.id + '"]');
+      if (draggedBlock) draggedBlock.remove();
+      var newBlock = buildTableBlock(moved, tgtTrip.id);
+      if (insertIdx <= tgtIdx) wrapper.parentNode.insertBefore(newBlock, wrapper);
+      else wrapper.parentNode.insertBefore(newBlock, wrapper.nextSibling);
+      persistTrips();
+      renderSidebar();
+    });
+
+    // Route header
+    var hdrDiv = document.createElement("div");
+    hdrDiv.className = "t-line";
+    hdrDiv.innerHTML = record.hdrRoute;
+    wrapper.appendChild(hdrDiv);
+
+    // Time line
+    var timeDiv = document.createElement("div");
+    timeDiv.className = "t-line";
+    timeDiv.innerHTML = record.hdrTime;
+    wrapper.appendChild(timeDiv);
+
+    // Table
+    var timeHeader = record.arrive ? "Depart" : "Arrive";
+    var table = document.createElement("table");
+    table.id = record.id;
+    table.className = "result-table";
+    table.innerHTML =
+      '<thead><tr>' +
+        '<th>Route</th><th>Time</th><th>+Time</th>' +
+        '<th>' + timeHeader + '</th><th>Miles</th><th>Rel. Risk</th><th>Safety</th>' +
+      '</tr></thead><tbody></tbody>';
+
+    var tbody = table.querySelector("tbody");
+    record.sorted.forEach(function(route, i) {
+      var tpc    = sc(route.trips_per_crash) || 0;
+      var tMult  = sc(route.temporal_mult)   || 1;
+      var wxMult = sc(route.wx_mult)         || 1;
+      var wxDays = sc(route.wx_forecast_days) || 0;
+      var baseTpc = tpc ? Math.round(tpc * tMult * wxMult) : 0;
+      var dur  = sc(route.duration_secs)   || 0;
+      var dist = sc(route.distance_mi);
+      var distStr = dist ? (Math.round(dist * 10) / 10).toLocaleString() + " mi" : "—";
+      var name = record.routeNames[i];
+      var isBaseline = (i === record.baselineIdx);
+      var delta    = dur - record.fastestDur;
+      var deltaStr = delta > 30 ? "+" + fmtDur(delta) : "—";
+      var rr      = tpc ? record.baselineTpc / tpc : null;
+      var rrStr   = isBaseline ? "1.0×" : (rr ? rr.toFixed(2) + "×" : "—");
+      var rrClass = isBaseline ? "t-muted" : (rr && rr < 1.0 ? "t-good" : (rr && rr > 1.15 ? "t-warn" : "t-muted"));
+      var tpcStr   = tpc ? "1 in " + tpc.toLocaleString() : "—";
+      var tpcClass = tpc >= 1000 ? "t-good" : (tpc > 0 && tpc < 500 ? "t-warn" : "");
+      var nameStyle = ' style="color:' + ROUTE_COLORS[i % ROUTE_COLORS.length] + '"';
+      var clockStr;
+      if (record.arrive) clockStr = fmtClock(record.arrive, -dur);
+      else if (record.depart) clockStr = fmtClock(record.depart, dur);
+      else clockStr = new Date(Date.now() + dur * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+
+      var tr = document.createElement("tr");
+      tr.id = record.id + "-row-" + i;
+      tr.onclick = (function(tid, idx) { return function() { selectRoute(tid, idx); }; })(record.id, i);
+      if (i === 0) tr.className = "selected";
+      tr.innerHTML =
+        '<td class="route-name-cell"><span class="route-name-text"' + nameStyle +
+          ' ondblclick="editRouteName(this,' + i + ')">' + escHtml(name) + '</span></td>' +
+        '<td>' + fmtDur(dur) + '</td>' +
+        '<td class="t-muted">' + deltaStr + '</td>' +
+        '<td class="t-muted">' + clockStr + '</td>' +
+        '<td class="t-muted">' + distStr + '</td>' +
+        '<td class="' + rrClass + '">' + rrStr + '</td>' +
+        '<td class="' + tpcClass + ' tpc-cell" data-tpc="' + tpc + '" data-base="' + baseTpc + '" data-tmult="' + tMult.toFixed(3) + '" data-wxmult="' + wxMult.toFixed(3) + '" data-wxdays="' + wxDays.toFixed(1) + '" onclick="showScoreBreakdown(event,this)">' + tpcStr + '</td>';
+      tbody.appendChild(tr);
+    });
+    wrapper.appendChild(table);
+
+    // Hint line
+    var hint = document.createElement("div");
+    hint.className = "t-line t-muted";
+    hint.style.cssText = "font-size:.78em;margin-top:4px;";
+    hint.textContent = "Click row to select · double-click route name to rename · ✦ Certify Route to generate report";
+    wrapper.appendChild(hint);
+
+    // Tag zone
+    var tagZone = document.createElement("div");
+    tagZone.className = "tag-zone";
+    tagZone.dataset.tripId = tripId || "";
+    tagZone.draggable = false;
+    tagZone.addEventListener("mousedown", function(e) { e.stopPropagation(); });
+    if (tripId) renderTagZone(tagZone, tripId);
+    else {
+      // Placeholder until tripId is assigned after createTripRecord
+      var addBtn = document.createElement("span");
+      addBtn.className = "tag-add";
+      addBtn.textContent = "+ tag";
+      addBtn.onclick = function(e) {
+        e.stopPropagation();
+        var tid = tagZone.dataset.tripId;
+        if (tid) startTagInput(tagZone, tid);
+      };
+      tagZone.appendChild(addBtn);
+    }
+    wrapper.appendChild(tagZone);
+
+    return wrapper;
+  }
+
+  function clearTerminal() {
+    var terminal = document.getElementById("terminal");
+    var cursor   = document.getElementById("cursor-line");
+    if (!terminal) return;
+    terminal.innerHTML = "";
+    var w = document.createElement("div");
+    w.className = "banner-line";
+    w.style.cssText = "display:flex;flex-direction:column;align-items:center;padding:20vh 0 2em;gap:0";
+    [
+      '<span class="t-muted">  ────────────────────────────────────</span>',
+      '<span class="t-muted">  |    |    /\\    |\\  |   /--\\ </span>',
+      '<span class="t-muted">  |    |   /  \\   | \\ |  /    \\</span>',
+      '<span class="t-muted">  |__  |__/____\\  |  \\|  \\____/</span>',
+      '<span style="color:var(--dim)">        route intelligence</span>',
+      '<span class="t-muted">  ────────────────────────────────────</span>'
+    ].forEach(function(h) {
+      var d = document.createElement("div"); d.className = "t-line"; d.innerHTML = h;
+      w.appendChild(d);
+    });
+    terminal.appendChild(w);
+    if (cursor) terminal.appendChild(cursor);
+    else { var cl = document.createElement("div"); cl.id = "cursor-line"; terminal.appendChild(cl); }
+  }
+
+  function deleteTable(tripId, tableId) {
+    var trip = tripId
+      ? trips.find(function(t) { return t.id === tripId; })
+      : trips.find(function(t) { return t.tables && t.tables.some(function(tb) { return tb.id === tableId; }); });
+    if (trip && trip.tables) trip.tables = trip.tables.filter(function(tb) { return tb.id !== tableId; });
+    var block = document.querySelector('.table-block[data-table-id="' + tableId + '"]');
+    if (block) block.remove();
+    if (!document.querySelectorAll(".table-block").length) clearTerminal();
+    persistTrips();
+    renderSidebar();
+  }
+
+  function createTripRecord(from, to, record, serverTripId) {
+    var trip = {
+      id:       genLnoId(),
+      trip_id:  serverTripId || null,
+      from: from, to: to,
+      timeVal:  record.timeVal || "",
+      createdAt: Date.now(),
+      tags: [],
+      certified: false,
+      tables: [record],
+      // payload for cross-session restore (kept in localStorage, tables stripped)
+      payload: {
+        sorted:       record.sorted,
+        routeNames:   record.routeNames,
+        fastestDur:   record.fastestDur,
+        baselineIdx:  record.baselineIdx,
+        baselineTpc:  record.baselineTpc,
+        depart:       record.depart,
+        arrive:       record.arrive,
+        timeVal:      record.timeVal,
+        hdrRoute:     record.hdrRoute,
+        hdrTime:      record.hdrTime
+      },
+      bestRoute: record.routeNames[0] || null,
+      bestRR: record.baselineTpc && record.sorted[0]
+        ? record.baselineTpc / (Array.isArray(record.sorted[0].trips_per_crash) ? record.sorted[0].trips_per_crash[0] : record.sorted[0].trips_per_crash)
+        : null
+    };
+    record.tripId = trip.id;
+    trips.unshift(trip);
+    persistTrips();
+    renderSidebar();
+    return trip.id;
+  }
+
+  function deleteTrip(id, e) {
+    e.stopPropagation();
+    trips = trips.filter(function(t) { return t.id !== id; });
+    persistTrips();
+    renderSidebar();
+  }
+  function clearSidebar() {
+    if (!trips.length) return;
+    trips = [];
+    try { localStorage.removeItem("llano_trips"); } catch(e) {}
+    renderSidebar();
+  }
+
+  function loadTrip(id) {
+    var trip = trips.find(function(t) { return t.id === id; });
+    if (!trip) return;
+
+    var tables = (trip.tables && trip.tables.length) ? trip.tables : null;
+
+    // Restore from payload when tables were stripped (e.g. after page reload)
+    if (!tables && trip.payload && trip.payload.sorted && trip.payload.sorted.length) {
+      var newId = "tbl-" + Math.random().toString(36).slice(2, 10);
+      var restored = Object.assign({ id: newId }, trip.payload);
+      trip.tables = [restored]; // cache so re-clicks don't re-create
+      tables = trip.tables;
+    }
+
+    if (!tables || !tables.length) {
+      switchView("terminal");
+      appendLine('<span class="t-muted">  Route data unavailable — rescore to restore.</span>');
+      return;
+    }
+
+    document.querySelectorAll(".banner-line").forEach(function(el) { el.remove(); });
+    tables.forEach(function(record) { appendNode(buildTableBlock(record, trip.id)); });
+    var last = tables[tables.length - 1];
+    if (typeof updateMap === "function") {
+      updateMap(last.sorted, false); highlightRoute(last.selectedRoute || 0);
+      if (mapCollapsed) expandMap();
+    }
+    switchView("terminal");
+    setTimeout(function() { document.getElementById("cmd-input").focus(); }, 50);
   }
 
   // ── Board filter ──
@@ -1509,14 +2563,31 @@
   }
 
   // ── Route selection ──
-  function selectRoute(idx) {
-    selectedRoute = idx;
-    document.querySelectorAll(".result-table tbody tr").forEach(function(r, i) {
-      r.classList.toggle("selected", i === idx);
-      r.querySelector("td:first-child").textContent = i === idx ? "›" : "";
+  function selectRoute(tableIdOrIdx, idx) {
+    // Support legacy demo-table calls: selectRoute(idx)
+    var tableId, rowIdx;
+    if (idx === undefined) { rowIdx = tableIdOrIdx; tableId = null; }
+    else                   { tableId = tableIdOrIdx; rowIdx = idx; }
+
+    selectedRoute = rowIdx;
+    // Deselect all rows across every table, then select only the chosen row
+    document.querySelectorAll(".result-table tbody tr").forEach(function(r) {
+      r.classList.remove("selected");
     });
+    var container = tableId ? document.getElementById(tableId)
+                            : document.querySelector(".result-table");
+    if (container) {
+      var rows = container.querySelectorAll("tbody tr");
+      if (rows[rowIdx]) rows[rowIdx].classList.add("selected");
+    }
     var cp = document.getElementById("cp-route-name");
-    if (cp) cp.textContent = routeNames[idx];
+    if (cp) cp.textContent = routeNames[rowIdx] || "";
+
+    if (tableId && tableRoutes[tableId]) {
+      activeTableId = tableId;
+      if (typeof updateMap === "function") updateMap(tableRoutes[tableId], false);
+      if (typeof highlightRoute === "function") highlightRoute(rowIdx);
+    }
   }
 
   // ── Inline route rename ──
@@ -1533,6 +2604,7 @@
       routeNames[idx] = val;
       var newSpan = document.createElement("span");
       newSpan.className = span.className;
+      if (span.style.cssText) newSpan.style.cssText = span.style.cssText;
       newSpan.setAttribute("ondblclick", "editRouteName(this," + idx + ")");
       newSpan.textContent = val;
       input.replaceWith(newSpan);
@@ -1544,42 +2616,316 @@
     });
   }
 
+  // ── Certify pricing ──
+  var _lastCertCents = 200;
+
+  function certPrice(routes, selectedIdx) {
+    var scv = function(v) { return Array.isArray(v) ? v[0] : v; };
+    // trips_per_crash is already the combined TPC (temporal + weather applied server-side)
+    var adjTpc = function(r) {
+      var tpc = scv(r.trips_per_crash);
+      return (tpc && tpc > 0) ? tpc : 0;
+    };
+    var tpcVals = (routes || []).map(adjTpc).filter(function(x) { return x > 0; });
+    if (tpcVals.length === 0) return { tpcSafest: 0, tpcSelected: 0, baseCents: 200, deltaRatio: 0, cents: 200 };
+    var tpcSafest   = Math.max.apply(null, tpcVals);
+    var tpcSelected = adjTpc(routes[selectedIdx] || {}) || tpcSafest;
+    var baseCents   = Math.min(2000, Math.max(200, Math.round(200000 / tpcSafest)));
+    var deltaRatio  = Math.max(0, tpcSafest / tpcSelected - 1);
+    var cents       = Math.min(2000, Math.max(200, Math.round(200000 / tpcSelected)));
+    return { tpcSafest: tpcSafest, tpcSelected: tpcSelected, baseCents: baseCents, deltaRatio: deltaRatio, cents: cents };
+  }
+
+  function fmtBal(dollars) {
+    return "$" + (Math.round(dollars * 100) / 100).toFixed(2);
+  }
+
+  function renderCertPricing(p) {
+    var fmtTpc = function(n) { return n > 0 ? Math.round(n).toLocaleString() : "—"; };
+    document.getElementById("cp-tpc-safest").textContent   = fmtTpc(p.tpcSafest);
+    document.getElementById("cp-base-price").textContent   = fmtBal(p.baseCents / 100);
+    document.getElementById("cp-tpc-selected").textContent = fmtTpc(p.tpcSelected);
+    var deltaEl = document.getElementById("cp-delta-pct");
+    if (p.deltaRatio > 0.001) {
+      deltaEl.textContent = "+" + Math.round(p.deltaRatio * 100) + "% risk  →  +" + fmtBal((p.cents - p.baseCents) / 100);
+    } else {
+      deltaEl.textContent = "safest available";
+    }
+    document.getElementById("cp-total-price").textContent   = fmtBal(p.cents / 100);
+    document.getElementById("cp-total-credits").textContent = "deducted from balance";
+    _lastCertCents = p.cents;
+  }
+
   // ── Certify ──
   function showCertify() {
-    var panel = document.getElementById("certify-panel");
-    panel.classList.remove("hidden");
-    document.getElementById("cp-route-name").textContent = routeNames[selectedRoute];
-    document.getElementById("cp-label").placeholder = routeNames[selectedRoute];
-    document.getElementById("cp-credits-remaining").textContent = credits;
-    panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    document.getElementById("cp-route-name").textContent = routeNames[selectedRoute] || "";
+    document.getElementById("cp-label").placeholder = routeNames[selectedRoute] || "";
+    document.getElementById("cp-credits-remaining").textContent = fmtBal(credits);
+
+    // Compute and render pricing
+    var routes = activeTableId && tableRoutes[activeTableId];
+    renderCertPricing(certPrice(routes || [], selectedRoute));
+
+    // Pre-fill departure time for the selected route
+    var departStr = "";
+    var params = activeTableId && tableParams[activeTableId];
+    var routes = activeTableId && tableRoutes[activeTableId];
+    if (params && routes) {
+      var sc2 = function(v) { return Array.isArray(v) ? v[0] : v; };
+      var dur = sc2((routes[selectedRoute] || {}).duration_secs) || 0;
+      var base;
+      if (params.arrive) {
+        // depart = arrive - duration
+        var p = params.arrive.replace("T"," ").split(/[\s\-:]/);
+        var d = new Date(+p[0], +p[1]-1, +p[2], +p[3]||0, +p[4]||0);
+        d.setSeconds(d.getSeconds() - dur);
+        base = d;
+      } else if (params.depart) {
+        var p2 = params.depart.replace("T"," ").split(/[\s\-:]/);
+        base = new Date(+p2[0], +p2[1]-1, +p2[2], +p2[3]||0, +p2[4]||0);
+      } else {
+        base = new Date(Date.now());
+      }
+      var pad = function(n) { return n < 10 ? "0" + n : "" + n; };
+      departStr = base.getFullYear() + "-" + pad(base.getMonth()+1) + "-" + pad(base.getDate()) +
+                  " " + pad(base.getHours()) + ":" + pad(base.getMinutes());
+    }
+    document.getElementById("cp-depart").value = departStr;
+
+    document.getElementById("certify-overlay").classList.add("visible");
   }
 
   function hideCertify() {
-    document.getElementById("certify-panel").classList.add("hidden");
+    document.getElementById("certify-overlay").classList.remove("visible");
   }
 
   function generateReport() {
-    if (credits <= 0) {
-      appendLine('<span style="color:var(--red)">  No credits remaining. Purchase more to generate a report.</span>');
+    if (credits * 100 < _lastCertCents) {
+      appendLine('<span style="color:var(--red)">  Insufficient balance (' + fmtBal(_lastCertCents / 100) + ' needed, ' + fmtBal(credits) + ' available).</span>');
       hideCertify();
       return;
     }
-    var label = document.getElementById("cp-label").value.trim() || routeNames[selectedRoute];
-    credits--;
-    document.getElementById("credit-count").textContent = credits;
+    var label    = document.getElementById("cp-label").value.trim() || routeNames[selectedRoute];
+    var driverId = document.getElementById("cp-driver-id").value.trim();
+    var driverName = document.getElementById("cp-driver-name").value.trim();
+    var phone    = document.getElementById("cp-phone").value.trim();
+    var depart   = document.getElementById("cp-depart").value.trim();
+    var load     = document.getElementById("cp-load").value.trim();
+    var fleet    = document.getElementById("cp-fleet").value.trim();
+    var notes    = document.getElementById("cp-notes").value.trim();
+
     hideCertify();
     appendLine('');
-    appendLine('<span style="color:var(--dim)">  Generating compliance report for <strong>' + escHtml(label) + '</strong>…</span>');
-    setTimeout(function() {
-      appendLine('<span style="color:var(--green)">  ✓ Report generated · PDF emailed to james@acme.com</span>');
-      appendLine('<span style="color:var(--green)">  ✓ Tracking SMS sent to (210) 555-0142</span>');
-      appendLine('<span style="color:var(--dim)">    report ID: RPT-' + Math.random().toString(36).substr(2,8).toUpperCase() + '</span>');
+    appendLine('<span style="color:var(--dim)">  Certifying <strong>' + escHtml(label) + '</strong>…</span>');
+
+    // Find trip_id for the active table so the dispatch links back to the trips row
+    var activeTripServerId = null;
+    trips.forEach(function(t) {
+      if (t.tables && t.tables.some(function(tb) { return tb.id === activeTableId; }))
+        activeTripServerId = t.trip_id;
+    });
+
+    fetch(API + "/certify", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        route_name: routeNames[selectedRoute],
+        report_label: label,
+        from_label: currentFrom,
+        to_label:   currentTo,
+        driver_id: driverId,
+        driver_name: driverName,
+        driver_phone: phone,
+        depart: depart,
+        load_ref: load,
+        fleet_id: fleet,
+        notes: notes,
+        trip_id: activeTripServerId,
+        cert_credits: _lastCertCents
+      })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) {
+        appendLine('<span style="color:var(--red)">  ✗ ' + escHtml(data.error) + '</span>');
+        return;
+      }
+      credits = data.balance_remaining !== undefined ? data.balance_remaining : credits - (_lastCertCents / 100);
+      document.getElementById("credit-count").textContent = fmtBal(credits);
+      document.getElementById("settings-credits").textContent = fmtBal(credits);
+      document.getElementById("cp-credits-remaining").textContent = fmtBal(credits);
+      var userEmail = me ? me.email : "";
+      // Mark trip certified locally
+      if (activeTripServerId) {
+        var certTrip = trips.find(function(t) { return t.trip_id === activeTripServerId; });
+        if (certTrip) { certTrip.certified = true; persistTrips(); renderSidebar(); }
+      }
+      appendLine('<span style="color:var(--green)">  ✓ Report certified · ID: ' + escHtml(data.report_id || "—") + '</span>');
+      if (userEmail) appendLine('<span style="color:var(--dim)">    Confirmation sent to ' + escHtml(userEmail) + '</span>');
+      if (phone) appendLine('<span style="color:var(--green)">  ✓ SMS dispatched to ' + escHtml(phone) + '</span>');
       appendLine('');
-    }, 900);
+
+      // Add to board
+      var _scv = function(v) { return Array.isArray(v) ? v[0] : v; };
+      var _rs  = tableRoutes[activeTableId] || [];
+      var _r   = _rs[selectedRoute] || {};
+      var _adj = _scv(_r.trips_per_crash) || 0;  // already combined TPC
+      var _b0  = _rs[0] || {};
+      var _bAdj= _scv(_b0.trips_per_crash) || _adj;
+      var _rr  = (_adj && _bAdj) ? Math.round(_bAdj / _adj * 100) / 100 : null;
+      addBoardRow({
+        reportId:    data.report_id || "—",
+        label:       label,
+        from:        currentFrom,
+        to:          currentTo,
+        driverName:  driverName,
+        driverId:    driverId,
+        driverPhone: phone,
+        depart:      depart,
+        rr:          _rr,
+        tpc:         _adj,
+        rrStr:       _rr !== null ? _rr.toFixed(2) + "\u00d7" : "—",
+        tpcStr:      _adj ? "1\u202fin\u202f" + _adj.toLocaleString() : "—",
+        loadRef:     load,
+        fleetId:     fleet,
+        notes:       notes,
+        certifiedAt: new Date().toISOString(),
+        createdAt:   Date.now()
+      });
+    })
+    .catch(function() {
+      appendLine('<span style="color:var(--red)">  ✗ Request failed</span>');
+    });
+  }
+
+  // ── Board ──
+  function boardTripStatus(depart) {
+    if (!depart) return "certified";
+    var d = new Date(depart);
+    if (isNaN(d.getTime())) return "certified";
+    var diff = Date.now() - d.getTime();
+    if (diff < 0) return "planned";
+    if (diff < 24 * 3600 * 1000) return "enroute";
+    return "delivered";
+  }
+
+  function trackerHtml(depart) {
+    var s = boardTripStatus(depart);
+    var labels = { certified: "Certified", planned: "Planned", enroute: "En Route", delivered: "Delivered" };
+    var s1 = s === "certified" || s === "planned" ? "active" : "done";
+    var l1 = (s === "enroute" || s === "delivered") ? "done" : "";
+    var s2 = s === "enroute" ? "active" : (s === "delivered" ? "done" : "");
+    var l2 = s === "delivered" ? "done" : "";
+    var s3 = s === "delivered" ? "active" : "";
+    return '<div class="trip-tracker">' +
+      '<span class="tt-step ' + s1 + '"></span>' +
+      '<span class="tt-line ' + l1 + '"></span>' +
+      '<span class="tt-step ' + s2 + '"></span>' +
+      '<span class="tt-line ' + l2 + '"></span>' +
+      '<span class="tt-step ' + s3 + '"></span>' +
+      '<span class="tt-label">' + labels[s] + '</span>' +
+      '</div>';
+  }
+
+  function downloadDispatch(e) {
+    var pkg = {
+      report_id: e.reportId,
+      certified_at: e.certifiedAt || new Date(e.createdAt || Date.now()).toISOString(),
+      route: { name: e.routeName || e.label || null, from: e.from || null, to: e.to || null, depart: e.depart || null },
+      risk: { relative_risk: e.rr || null, relative_risk_label: e.rrStr || null, safety: e.safety || null },
+      driver: { name: e.driverName || null, id: e.driverId || null, phone: e.driverPhone || null },
+      load: { ref: e.loadRef || null, fleet_id: e.fleetId || null, notes: e.notes || null }
+    };
+    var blob = new Blob([JSON.stringify(pkg, null, 2)], { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = (e.reportId || "dispatch") + ".json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function renderBoardRow(e) {
+    var tbody = document.getElementById("board-body");
+    var empty = document.getElementById("board-empty-row");
+    if (empty) empty.remove();
+    var rrCls  = !e.rr ? "base" : (e.rr < 1.0 ? "good" : (e.rr > 1.15 ? "warn" : "base"));
+    var safetyTxt = e.tpcStr && e.tpcStr !== "—" ? e.tpcStr : (e.safety ? escHtml(e.safety) : "\u2014");
+    var route  = escHtml((e.from || "") + " \u2192 " + (e.to || "") + (e.label ? " \u00b7 " + e.label : ""));
+    var tr = document.createElement("tr");
+    tr.dataset.status = boardTripStatus(e.depart);
+    var idx = boardData.length;
+    boardData.push(e);
+    tr.innerHTML =
+      '<td>' + trackerHtml(e.depart) + '</td>' +
+      '<td>' + route + '</td>' +
+      '<td style="color:var(--muted)">' + escHtml(e.driverName || "\u2014") + '</td>' +
+      '<td style="color:var(--dim)">'   + escHtml(e.depart     || "\u2014") + '</td>' +
+      '<td><span class="board-rr ' + rrCls + '">' + escHtml(e.rrStr  || "\u2014") + '</span></td>' +
+      '<td style="color:var(--dim)">' + safetyTxt + '</td>' +
+      '<td style="color:var(--dim);font-size:.75em">' + escHtml(e.reportId || "\u2014") + '</td>' +
+      '<td><button class="board-dl" onclick="downloadDispatch(boardData[' + idx + '])">↓ Download</button></td>';
+    tbody.insertBefore(tr, tbody.firstChild);
+  }
+
+  function addBoardRow(entry) {
+    renderBoardRow(entry);
+    try {
+      var stored = JSON.parse(localStorage.getItem("llano_board") || "[]");
+      stored.unshift(entry);
+      if (stored.length > 500) stored.length = 500;
+      localStorage.setItem("llano_board", JSON.stringify(stored));
+    } catch(e) {}
+  }
+
+  var boardData = [];
+
+  function loadBoardFromStorage() {
+    try {
+      var stored = JSON.parse(localStorage.getItem("llano_board") || "[]");
+      stored.forEach(function(e) { renderBoardRow(e); });
+    } catch(e) {}
+  }
+
+  function loadDispatchesFromApi() {
+    fetch(API + "/dispatches", { credentials: "include" })
+      .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function(rows) {
+        if (!Array.isArray(rows) || rows.length === 0) return;
+        // Clear board and re-render from server (authoritative 90-day window)
+        boardData = [];
+        var tbody = document.getElementById("board-body");
+        tbody.innerHTML = '<tr id="board-empty-row"><td colspan="8" style="text-align:center;color:var(--dim);padding:48px 0;font-size:.85em;">No certified routes yet.</td></tr>';
+        rows.forEach(function(row) {
+          var rr = (row.rr != null && !isNaN(row.rr)) ? row.rr : null;
+          renderBoardRow({
+            reportId:    row.report_id,
+            routeName:   row.route_name,
+            label:       row.label || row.route_name,
+            from:        row.from,
+            to:          row.to,
+            depart:      row.depart,
+            driverName:  row.driver_name,
+            driverId:    row.driver_id,
+            driverPhone: row.driver_phone,
+            rr:          rr,
+            rrStr:       rr !== null ? (Math.round(rr * 100) / 100).toFixed(2) + "\u00d7" : "\u2014",
+            tpcStr:      "\u2014",
+            safety:      row.safety,
+            loadRef:     row.load_ref,
+            fleetId:     row.fleet_id,
+            notes:       row.notes,
+            certifiedAt: row.created_at,
+            createdAt:   new Date(row.created_at).getTime()
+          });
+        });
+      })
+      .catch(function() { loadBoardFromStorage(); }); // fallback to localStorage on error
   }
 
   // ── Terminal helpers ──
   function appendLine(html) {
+    document.querySelectorAll(".banner-line").forEach(function(el) { el.remove(); });
     var cursor = document.getElementById("cursor-line");
     var div = document.createElement("div");
     div.className = "t-line";
@@ -1588,16 +2934,430 @@
     cursor.scrollIntoView({ block: "nearest" });
   }
 
+  function appendNode(node) {
+    var cursor = document.getElementById("cursor-line");
+    cursor.parentNode.insertBefore(node, cursor);
+    cursor.scrollIntoView({ block: "nearest" });
+  }
+
+  function appendSpinner(label) {
+    // Dots pass forward: gap → approaching dot → full mark → receding dot → gap
+    var frames = ["| |", "|·|", "|:|", "|·|", "| |"];
+    var i = 0;
+    var delay = 110; // ms between frames at full speed
+    var timer = null;
+
+    var div = document.createElement("div");
+    div.className = "t-line t-muted";
+    div.innerHTML = '<span class="spinner-icon">' + frames[0] + '</span>  ' + label;
+    appendNode(div);
+
+    function tick() {
+      i = (i + 1) % frames.length;
+      var icon = div.querySelector(".spinner-icon");
+      if (icon) icon.textContent = frames[i];
+    }
+    function schedule() { timer = setTimeout(function() { tick(); schedule(); }, delay); }
+    schedule();
+
+    // stop(callback): eases to a halt then calls callback
+    return function stop(callback) {
+      clearTimeout(timer);
+      var easing = [160, 230, 330, 460, 620, 800];
+      var s = 0;
+      function slowStep() {
+        if (s >= easing.length) { div.remove(); if (callback) callback(); return; }
+        timer = setTimeout(function() { tick(); s++; slowStep(); }, easing[s]);
+      }
+      slowStep();
+    };
+  }
+
   function handleInput(e) {
     if (e.key !== "Enter") return;
     var input = document.getElementById("cmd-input");
-    var val = input.value.trim();
-    if (!val) return;
+    var raw = input.value.trim();
+    if (!raw) return;
     input.value = "";
+    histIdx = -1; histDraft = "";
+    if (typeof cmdHistory !== "undefined") { cmdHistory.push(raw); if (cmdHistory.length > 200) cmdHistory.shift(); }
     if (typeof updateGhost === "function") updateGhost();
-    appendLine('<span class="t-prompt">llano&gt; </span><span class="t-cmd">' + escHtml(val) + '</span>');
-    appendLine('<span class="t-muted">  [demo mode — connect to api.llano.io for live results]</span>');
-    appendLine('');
+
+    // Normalise smart/curly quotes before any processing
+    var val = raw.replace(/[\u201C\u201D\u201E\u201F]/g, '"').replace(/[\u2018\u2019]/g, "'");
+
+    var m = val.match(/^(\w+)(.*)/);
+    if (!m) return;
+    var cmd = m[1].toLowerCase();
+
+    if (cmd === "help") {
+      appendLine('<span class="t-prompt">llano&gt; </span><span class="t-cmd">' + escHtml(raw) + '</span>');
+      appendLine('<span class="t-muted">  Commands:</span>');
+      appendLine('');
+      appendLine('<span class="t-muted">  <span class="t-cyan">score</span>  --from "Origin" --to "Destination"</span>');
+      appendLine('<span class="t-muted">         [--depart "YYYY-MM-DD HH:MM"] [--arrive "YYYY-MM-DD HH:MM"]</span>');
+      appendLine('<span class="t-muted">         [--via "Waypoint"] [--alternatives N] [--profile name]</span>');
+      appendLine('');
+      appendLine('<span class="t-muted">  <span class="t-cyan">tag</span>    &lt;LNO_ID&gt; &lt;tag&gt; [tag2…]  tag a trip record</span>');
+      appendLine('<span class="t-muted">  <span class="t-cyan">clear</span>  clear the sandbox</span>');
+      appendLine('<span class="t-muted">  <span class="t-cyan">route</span>  alias for score</span>');
+      appendLine('<span class="t-muted">  <span class="t-cyan">help</span>   show this message</span>');
+      appendLine('');
+      appendLine('<span class="t-muted">  Saved addresses (from Profile settings) can be used in place of any location.</span>');
+      appendLine('');
+      return;
+    }
+
+    if (cmd === "clear") {
+      clearTerminal();
+      return;
+    }
+
+    if (cmd === "tag") {
+      appendLine('<span class="t-prompt">llano&gt; </span><span class="t-cmd">' + escHtml(raw) + '</span>');
+      var tagParts = m[2].trim().split(/\s+/);
+      var tagTripId = tagParts[0];
+      var newTags   = tagParts.slice(1);
+      if (!tagTripId || !newTags.length) {
+        appendLine('<span class="t-muted">  Usage: tag &lt;LNO_ID&gt; &lt;tag&gt; [tag2…]</span>');
+        appendLine('');
+        return;
+      }
+      var tagTrip = trips.find(function(t) { return t.id === tagTripId; });
+      if (!tagTrip) {
+        appendLine('<span class="t-warn">  Trip ' + escHtml(tagTripId) + ' not found.</span>');
+        appendLine('');
+        return;
+      }
+      newTags.forEach(function(tag) { addTag(tagTripId, tag.toLowerCase().replace(/\s+/g, "-")); });
+      appendLine('<span class="t-good">  Tagged ' + escHtml(tagTripId) + ' · ' + newTags.map(escHtml).join(", ") + '</span>');
+      appendLine('');
+      return;
+    }
+
+    if (cmd !== "score" && cmd !== "route") {
+      appendLine('<span class="t-prompt">llano&gt; </span><span class="t-cmd">' + escHtml(raw) + '</span>');
+      appendLine('<span class="t-muted">  Unknown command. Type <span class="t-cyan">help</span> for available commands.</span>');
+      appendLine('');
+      return;
+    }
+
+    function parseArgs(s) {
+      var out = {}, re = /--(\w+)\s+(?:"([^"]+)"|(\S+))/g, match;
+      while ((match = re.exec(s)) !== null) out[match[1]] = match[2] !== undefined ? match[2] : match[3];
+      return out;
+    }
+    var args   = parseArgs(m[2]);
+
+    // Resolve saved address names → actual address values
+    var savedAddrs = getSavedAddresses();
+    function resolveAddr(val) {
+      if (!val) return val;
+      var match = savedAddrs.find(function(a) { return a.name === val.toLowerCase(); });
+      return match ? match.value : val;
+    }
+
+    var from   = resolveAddr(args["from"] || args["origin"] || "");
+    var to     = resolveAddr(args["to"]   || args["dest"]   || args["destination"] || "");
+    var via    = args["via"]  ? [resolveAddr(args["via"])]  : [];
+    var depart = args["depart"] || args["timestamp"] || null;
+    var arrive = args["arrive"] || null;
+    var alts   = Math.max(1, parseInt(args["alternatives"] || args["alt"] || "2", 10));
+
+    // Resolve --profile flag (or default profile) → saved truck profile flags
+    var profileFlags = {};
+    var profileName = args["profile"] || localStorage.getItem("llano_default_profile") || "";
+    if (profileName) {
+      var trucks = getSavedTrucks();
+      var prof = trucks.find(function(t) { return t.name === profileName.toLowerCase(); });
+      if (prof) {
+        var fl = prof.flags || {};
+        if (fl["st-notolls"])    profileFlags.use_tolls    = 0;
+        if (fl["st-nohwy"])      profileFlags.use_highways = 0;
+        if (fl["st-hazmat"])     profileFlags.hazmat       = true;
+        if (fl["st-53ft"])       profileFlags["truck[length]"] = 5300;
+        if (fl["st-oversize"])   profileFlags.low_clearance = true;
+      } else if (args["profile"]) {
+        appendLine('<span class="t-prompt">llano&gt; </span><span class="t-cmd">' + escHtml(raw) + '</span>');
+        appendLine('<span class="t-warn">  Profile "' + escHtml(profileName) + '" not found. Check Profile settings.</span>');
+        appendLine('');
+        return;
+      }
+    }
+
+    if (!from || !to) {
+      appendLine('<span class="t-prompt">llano&gt; </span><span class="t-cmd">' + escHtml(raw) + '</span>');
+      appendLine('<span class="t-muted">  Usage: score --from "Origin" --to "Destination" [--depart "YYYY-MM-DD HH:MM"] [--alternatives N]</span>');
+      appendLine('');
+      return;
+    }
+
+    // Formatted route header instead of raw command echo
+    function fmtHeaderTime(ts, full) {
+      var p = ts.replace("T", " ").split(/[\s\-:]/);
+      var d = new Date(+p[0], +p[1]-1, +p[2], +p[3]||0, +p[4]||0);
+      var time = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      if (full) {
+        var date = d.toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' });
+        return date + ' @ ' + time;
+      }
+      var date = d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+      return time + ' &middot; ' + date;
+    }
+    var timeLabel = arrive ? 'arrives' : 'departs';
+    var timeVal   = arrive ? fmtHeaderTime(arrive, true)
+                  : depart ? fmtHeaderTime(depart, true)
+                  : (function() {
+                      var n = new Date();
+                      return n.toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' }) +
+                             ' @ ' + n.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                    })();
+    var stops = [from].concat(via).concat([to]);
+    var hdrHtml = stops.map(function(s, i) {
+      return (i ? ' <span class="t-muted">→</span> ' : '') +
+             '<span style="color:var(--text)">' + escHtml(s) + '</span>';
+    }).join('');
+    var hdrTime = '<span class="t-muted">' + timeLabel + ' ' + timeVal + '</span>';
+    // Build wrapper block up-front so header+time+table are always grouped
+    document.querySelectorAll(".banner-line").forEach(function(el) { el.remove(); });
+    var wrapper = document.createElement("div");
+    wrapper.className = "table-block";
+    var _hd = document.createElement("div"); _hd.className = "t-line"; _hd.innerHTML = hdrHtml; wrapper.appendChild(_hd);
+    var _td = document.createElement("div"); _td.className = "t-line"; _td.innerHTML = hdrTime; wrapper.appendChild(_td);
+    appendNode(wrapper);
+
+    var stopSpinner = appendSpinner("Fetching routes · checking conditions · scoring…");
+
+    function toIso(ts) { return ts.replace(" ", "T"); }
+    var waypoints = [from].concat(via).concat([to]);
+    var body = { waypoints: waypoints, alternatives: alts };
+    if (depart) body.timestamp = toIso(depart);
+    if (arrive) body.arrive    = toIso(arrive);
+    Object.keys(profileFlags).forEach(function(k) { body[k] = profileFlags[k]; });
+
+    fetch("/score", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    })
+    .then(function(r) {
+      return r.text().then(function(text) {
+        if (!r.ok) {
+          var msg = text;
+          try { msg = JSON.parse(text).error || text; } catch(e) {}
+          throw new Error("HTTP " + r.status + ": " + msg.slice(0, 120));
+        }
+        try { return JSON.parse(text); }
+        catch(e) { throw new Error("Bad response (" + r.status + "): " + text.slice(0, 80)); }
+      });
+    })
+    .then(function(resp) {
+      var routes = Array.isArray(resp) ? resp : (resp && resp.routes ? resp.routes : []);
+      var _tid = !Array.isArray(resp) && resp ? resp.trip_id : null;
+      // Treat JSON null, {}, [], 0 all as "no trip_id"
+      var serverTripId = (_tid && typeof _tid !== "object" && _tid !== 0) ? _tid : null;
+      stopSpinner(function() {
+      try {
+
+      if (!Array.isArray(routes) || !routes.length) {
+        appendLine('<span class="t-muted">  No routes returned.</span>');
+        appendLine('');
+        return;
+      }
+
+      function sc(v) { return Array.isArray(v) ? v[0] : v; }
+      function fmtDur(secs) {
+        secs = Math.round(+secs);
+        var h = Math.floor(secs / 3600), mm = Math.floor((secs % 3600) / 60);
+        return h ? (h + "h " + (mm < 10 ? "0" : "") + mm + "m") : mm + "m";
+      }
+      function fmtClock(baseStr, deltaSecs) {
+        // Parse as local time (avoid Safari treating no-tz ISO as UTC)
+        var parts = baseStr.replace("T", " ").split(/[\s\-:]/);
+        var d = new Date(+parts[0], +parts[1]-1, +parts[2], +parts[3]||0, +parts[4]||0, +parts[5]||0);
+        d.setSeconds(d.getSeconds() + deltaSecs);
+        return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+      }
+
+      var fastestDur = Math.min.apply(null, routes.map(function(r) { return sc(r.duration_secs) || Infinity; }));
+
+      var sorted = routes.slice().sort(function(a, b) {
+        return (sc(b.trips_per_crash) || 0) - (sc(a.trips_per_crash) || 0);
+      });
+
+      // Baseline = safest route that ties for fastest (within 30s); fallback to index 0
+      var baselineIdx = 0;
+      for (var bi = 0; bi < sorted.length; bi++) {
+        if ((sc(sorted[bi].duration_secs) || Infinity) - fastestDur <= 30) {
+          baselineIdx = bi; break;
+        }
+      }
+      var baselineTpc = sc(sorted[baselineIdx].trips_per_crash) || 1;
+
+      currentFrom   = from;
+      currentTo     = to;
+      selectedRoute = 0;
+
+      // Hide the static demo section on first real result
+      var demo = document.getElementById("demo-section");
+      if (demo) demo.style.display = "none";
+
+      // Arrive column when --depart or no flag; Depart column when --arrive
+      var timeHeader = arrive ? "Depart" : "Arrive";
+
+      var tableId = "rtbl-" + (++tableCount);
+      wrapper.dataset.tableId = tableId;  // needed by deleteTable's querySelector
+      tableRoutes[tableId] = sorted;
+      tableParams[tableId] = { arrive: arrive, depart: depart };
+      activeTableId = tableId;
+      routeNames = sorted.map(function(r, i) {
+        var lbl = sc(r.label);
+        if (typeof lbl !== 'string') lbl = null;
+        return lbl || ("Route " + (i + 1));
+      });
+
+      // Disambiguate duplicate names: slower routes get a time delta suffix;
+      // ties get letter suffixes (A, B, …)
+      (function() {
+        var counts = {}, minDur = {};
+        routeNames.forEach(function(n, i) {
+          counts[n] = (counts[n] || 0) + 1;
+          var d = sc(sorted[i].duration_secs) || 0;
+          if (minDur[n] === undefined || d < minDur[n]) minDur[n] = d;
+        });
+        var letters = {};
+        routeNames = routeNames.map(function(name, i) {
+          if (counts[name] <= 1) return name;
+          var delta = Math.round((sc(sorted[i].duration_secs) || 0) - (minDur[name] || 0));
+          if (delta > 30) return name + " (+" + fmtDur(delta) + ")";
+          letters[name] = letters[name] || 0;
+          return name + " " + String.fromCharCode(65 + letters[name]++);
+        });
+      })();
+
+      // Build record for session storage and re-render
+      var record = {
+        id: tableId,
+        hdrRoute: hdrHtml,
+        hdrTime: hdrTime,
+        timeVal: timeVal,
+        sorted: sorted,
+        fastestDur: fastestDur,
+        baselineIdx: baselineIdx,
+        baselineTpc: baselineTpc,
+        routeNames: routeNames,
+        depart: depart,
+        arrive: arrive,
+        selectedRoute: 0
+      };
+
+      // Add delete button to pre-created wrapper (tripId wired after createTripRecord)
+      var delBtn = document.createElement("button");
+      delBtn.className = "table-block-del";
+      delBtn.title = "Remove this result";
+      delBtn.textContent = "✕";
+      wrapper.insertBefore(delBtn, wrapper.firstChild);
+
+      // Build table and append to wrapper
+      var table = document.createElement("table");
+      table.id = tableId;
+      table.className = "result-table";
+      table.innerHTML =
+        '<thead><tr>' +
+          '<th>Route</th><th>Time</th><th>+Time</th>' +
+          '<th>' + timeHeader + '</th><th>Miles</th><th>Rel. Risk</th><th>Safety</th>' +
+        '</tr></thead><tbody></tbody>';
+
+      var tbody = table.querySelector("tbody");
+      sorted.forEach(function(route, i) {
+        var tpc    = sc(route.trips_per_crash) || 0;
+        var tMult  = sc(route.temporal_mult)   || 1;
+        var wxMult = sc(route.wx_mult)         || 1;
+        var wxDays = sc(route.wx_forecast_days) || 0;
+        var baseTpc = tpc ? Math.round(tpc * tMult * wxMult) : 0;
+        var dur  = sc(route.duration_secs)   || 0;
+        var dist = sc(route.distance_mi);
+        var distStr = dist ? (Math.round(dist * 10) / 10).toLocaleString() + " mi" : "—";
+        var name = routeNames[i];
+        var isBaseline = (i === baselineIdx);
+
+        var delta    = dur - fastestDur;
+        var deltaStr = delta > 30 ? "+" + fmtDur(delta) : "—";
+
+        var rr      = tpc ? baselineTpc / tpc : null;
+        var rrStr   = isBaseline ? "1.0×" : (rr ? rr.toFixed(2) + "×" : "—");
+        var rrClass = isBaseline ? "t-muted" : (rr && rr < 1.0 ? "t-good" : (rr && rr > 1.15 ? "t-warn" : "t-muted"));
+
+        var tpcStr   = tpc ? "1 in " + tpc.toLocaleString() : "—";
+        var tpcClass = (tpc >= 1000 ? "t-good" : (tpc > 0 && tpc < 500 ? "t-warn" : "")) + " tpc-cell";
+        var tpcData  = ' data-tpc="' + tpc + '" data-base="' + baseTpc + '" data-tmult="' + tMult.toFixed(3) + '" data-wxmult="' + wxMult.toFixed(3) + '" data-wxdays="' + wxDays.toFixed(1) + '"';
+
+        var nameStyle = ' style="color:' + ROUTE_COLORS[i % ROUTE_COLORS.length] + '"';
+
+        var clockStr;
+        if (arrive) {
+          clockStr = fmtClock(arrive, -dur);
+        } else if (depart) {
+          clockStr = fmtClock(depart, dur);
+        } else {
+          clockStr = new Date(Date.now() + dur * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+        }
+
+        var tr = document.createElement("tr");
+        tr.id = tableId + "-row-" + i;
+        tr.onclick = (function(tid, idx) { return function() { selectRoute(tid, idx); }; })(tableId, i);
+        if (i === 0) tr.className = "selected";
+        tr.innerHTML =
+          '<td class="route-name-cell"><span class="route-name-text"' + nameStyle +
+            ' ondblclick="editRouteName(this,' + i + ')">' + escHtml(name) + '</span></td>' +
+          '<td>' + fmtDur(dur) + '</td>' +
+          '<td class="t-muted">' + deltaStr + '</td>' +
+          '<td class="t-muted">' + clockStr + '</td>' +
+          '<td class="t-muted">' + distStr + '</td>' +
+          '<td class="' + rrClass + '">' + rrStr + '</td>' +
+          '<td class="' + tpcClass + '"' + tpcData + ' onclick="showScoreBreakdown(event,this)">' + tpcStr + '</td>';
+        tbody.appendChild(tr);
+      });
+      wrapper.appendChild(table);
+
+      var hint = document.createElement("div");
+      hint.className = "t-line t-muted";
+      hint.style.cssText = "font-size:.78em;margin-top:4px;";
+      hint.textContent = "Click row to select · double-click route name to rename · ✦ Certify Route to generate report";
+      wrapper.appendChild(hint);
+
+      // Tag zone (tripId wired below after createTripRecord)
+      var tagZoneEl = document.createElement("div");
+      tagZoneEl.className = "tag-zone";
+      tagZoneEl.dataset.tripId = "";
+      tagZoneEl.draggable = false;
+      tagZoneEl.addEventListener("mousedown", function(e) { e.stopPropagation(); });
+      wrapper.appendChild(tagZoneEl);
+
+      // Show this table's routes on the map immediately
+      if (mapCollapsed) expandMap();
+      if (typeof updateMap === "function") { updateMap(sorted); highlightRoute(0); }
+
+      // Create trip record, then wire delete button and tag zone with resolved tripId
+      var tripId = createTripRecord(from, to, record, serverTripId);
+      wrapper.dataset.tripId = tripId;
+      tagZoneEl.dataset.tripId = tripId;
+      renderTagZone(tagZoneEl, tripId);
+      delBtn.onclick = (function(tid, tbid) {
+        return function(e) { e.stopPropagation(); deleteTable(tid, tbid); };
+      })(tripId, tableId);
+      } catch(renderErr) {
+        appendLine('<span style="color:var(--red)">  Render error: ' + escHtml(String(renderErr.message || renderErr)) + '</span>');
+      }
+      }); // end stopSpinner callback
+    })
+    .catch(function(err) {
+      stopSpinner(function() {
+        appendLine('<span class="t-warn">  Error: ' + escHtml(String(err.message || err)) + '</span>');
+        appendLine('');
+      });
+    });
   }
 
   function rerunQuery() {
@@ -1619,14 +3379,10 @@
   }
 
   function newRoute() {
+    clearTerminal();
+    renderSidebar();
     switchView("terminal");
-    document.getElementById("cmd-input").focus();
-    document.querySelectorAll(".trip-item").forEach(function(el) { el.classList.remove("active"); });
-  }
-
-  function loadTrip(el) {
-    document.querySelectorAll(".trip-item").forEach(function(e) { e.classList.remove("active"); });
-    el.classList.add("active");
+    setTimeout(function() { document.getElementById("cmd-input").focus(); }, 50);
   }
 
   // ── Members ──
@@ -1645,23 +3401,29 @@
     var email = document.getElementById("invite-email").value.trim();
     var role  = document.getElementById("invite-role").value;
     if (!email) return;
-    var id = "member-row-" + Date.now();
-    var name = email.split("@")[0];
-    var roleLabel = role.charAt(0).toUpperCase() + role.slice(1);
-    var row = document.createElement("tr");
-    row.id = id;
-    row.innerHTML =
-      '<td style="color:var(--text)">' + escHtml(name) + '</td>' +
-      '<td style="color:var(--muted)">' + escHtml(email) + '</td>' +
-      '<td><select class="role-select" onchange="updateRole(this)">' +
-        '<option' + (role==="admin"?" selected":"") + '>Admin</option>' +
-        '<option' + (role==="dispatcher"?" selected":"") + '>Dispatcher</option>' +
-        '<option' + (role==="viewer"?" selected":"") + '>Viewer</option>' +
-      '</select></td>' +
-      '<td style="color:var(--dim)">Invited</td>' +
-      '<td><button class="member-action" onclick="removeMember(\'' + id + '\')">Remove</button></td>';
-    document.querySelector("#members-table tbody").appendChild(row);
-    hideInvite();
+    fetch(API + "/auth/request", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email })
+    }).then(function() {
+      var id = "member-row-" + Date.now();
+      var name = email.split("@")[0];
+      var row = document.createElement("tr");
+      row.id = id;
+      row.innerHTML =
+        '<td style="color:var(--text)">' + escHtml(name) + '</td>' +
+        '<td style="color:var(--muted)">' + escHtml(email) + '</td>' +
+        '<td><select class="role-select" onchange="updateRole(this)">' +
+          '<option' + (role==="admin"?" selected":"") + '>Admin</option>' +
+          '<option' + (role==="dispatcher"?" selected":"") + '>Dispatcher</option>' +
+          '<option' + (role==="viewer"?" selected":"") + '>Viewer</option>' +
+        '</select></td>' +
+        '<td style="color:var(--dim)">Invited</td>' +
+        '<td><button class="member-action" onclick="removeMember(\'' + id + '\')">Remove</button></td>';
+      document.querySelector("#members-table tbody").appendChild(row);
+      hideInvite();
+    });
   }
 
   function removeMember(id) {
@@ -1676,21 +3438,246 @@
     // role change acknowledged — in real app would POST to API
   }
 
+  // ── Settings section nav ──
+  function showSettingsSection(id, el) {
+    document.querySelectorAll(".settings-pane").forEach(function(p) { p.style.display = "none"; });
+    document.querySelectorAll(".settings-nav-item").forEach(function(n) { n.classList.remove("active"); });
+    var pane = document.getElementById("spane-" + id);
+    if (pane) pane.style.display = "";
+    if (el) el.classList.add("active");
+    if (id === "profile") renderDefaultProfileSelect();
+  }
+
+  // ── Integrations ──────────────────────────────────────────────────────────────
+
+  var INT_KEYS = ["here", "pcmiler", "samsara", "motive"];
+
+  function intSetState(key, state, detail) {
+    var card   = document.getElementById("int-card-" + key);
+    var sts    = document.getElementById("int-status-" + key);
+    var inp    = document.getElementById("int-" + key);
+    var btn    = document.getElementById("int-action-" + key);
+    var footer = document.getElementById("int-footer-" + key);
+    if (!sts) return;
+
+    var msgs = { empty: "Not set", testing: "Testing…", connected: "Connected", error: detail || "Auth error" };
+    sts.textContent = msgs[state] || state;
+    sts.className   = "integration-status " + state;
+    if (card) card.classList.toggle("connected", state === "connected");
+
+    var isConnected = state === "connected";
+    var isTesting   = state === "testing";
+
+    if (btn) {
+      if (isConnected) {
+        btn.textContent = "Disconnect";
+        btn.className   = "int-btn danger int-action-btn";
+        btn.onclick     = function() { disconnectInt(key); };
+        btn.disabled    = false;
+      } else {
+        btn.textContent = isTesting ? "Testing…" : "Test & Save";
+        btn.className   = "int-btn primary int-action-btn";
+        btn.onclick     = function() { testAndSaveInt(key); };
+        btn.disabled    = isTesting;
+      }
+    }
+
+    if (footer) footer.style.visibility = isConnected ? "visible" : "hidden";
+    if (inp) {
+      inp.readOnly = isConnected;
+      if (!isConnected && !isTesting) inp.style.letterSpacing = "";
+    }
+  }
+
+  function loadIntegrations() {
+    fetch("/integrations", { credentials: "include" })
+      .then(function(r) { return r.ok ? r.json() : []; })
+      .then(function(items) {
+        INT_KEYS.forEach(function(k) { intSetState(k, "empty"); });
+        var arr = Array.isArray(items) ? items : [];
+        arr.forEach(function(item) {
+          var inp = document.getElementById("int-" + item.provider);
+          if (inp) inp.value = item.mask || "••••••••••••••••";
+          intSetState(item.provider, "connected");
+          var verEl = document.getElementById("int-verified-" + item.provider);
+          if (verEl && item.tested_at) verEl.textContent = "Last verified " + timeAgo(new Date(item.tested_at).getTime());
+        });
+      })
+      .catch(function() {});
+  }
+
+  function testAndSaveInt(key) {
+    var inp = document.getElementById("int-" + key);
+    if (!inp) return;
+    var val = inp.value.trim();
+    if (!val) return;
+    intSetState(key, "testing");
+    fetch("/integrations", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ provider: key, key: val })
+    })
+      .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+      .then(function(result) {
+        if (result.data.ok) {
+          inp.value = result.data.mask || "••••••••••••••••";
+          intSetState(key, "connected");
+          var verEl = document.getElementById("int-verified-" + key);
+          if (verEl) verEl.textContent = "Last verified just now";
+        } else {
+          intSetState(key, "error", result.data.detail || "Invalid key");
+          setTimeout(function() { intSetState(key, "empty"); }, 4000);
+        }
+      })
+      .catch(function() {
+        intSetState(key, "error", "Network error");
+        setTimeout(function() { intSetState(key, "empty"); }, 4000);
+      });
+  }
+
+  function disconnectInt(key) {
+    intSetState(key, "testing"); // spinner while request is in flight
+    fetch("/integrations/" + key, { method: "DELETE", credentials: "include" })
+      .then(function() {
+        var inp = document.getElementById("int-" + key);
+        if (inp) inp.value = "";
+        intSetState(key, "empty");
+      })
+      .catch(function() { intSetState(key, "empty"); });
+  }
+
+  function retestInt(key) {
+    var btn = document.getElementById("int-retest-" + key);
+    if (btn) { btn.textContent = "Testing…"; btn.disabled = true; }
+    fetch("/integrations", {
+      method: "POST", credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ provider: key })
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (btn) { btn.textContent = "Re-test"; btn.disabled = false; }
+        if (d.ok) {
+          var verEl = document.getElementById("int-verified-" + key);
+          if (verEl) verEl.textContent = "Last verified " + timeAgo(new Date(d.tested_at).getTime());
+        } else {
+          intSetState(key, "error", d.detail || "Auth error");
+          setTimeout(function() { intSetState(key, "empty"); }, 4000);
+        }
+      })
+      .catch(function() {
+        if (btn) { btn.textContent = "Re-test"; btn.disabled = false; }
+      });
+  }
+
+  function copyRevealedKey(el) {
+    var key = el.textContent;
+    if (!key) return;
+    navigator.clipboard.writeText(key).then(function() {
+      var hint = document.getElementById("key-reveal-hint");
+      if (hint) { hint.textContent = "Copied!"; hint.style.color = "var(--green)"; }
+      setTimeout(function() {
+        if (hint) { hint.textContent = "Click the key to copy · shown once, will not be displayed again."; hint.style.color = ""; }
+      }, 2000);
+    });
+  }
+
   function escHtml(s) {
-    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    return (s == null ? "" : String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  var _scorePopup = null;
+  function showScoreBreakdown(e, el) {
+    e.stopPropagation();
+    var popup = document.getElementById("score-popup");
+    if (!popup) return;
+    var tpc      = parseInt(el.dataset.tpc,  10) || 0;
+    var baseTpc  = parseInt(el.dataset.base, 10) || 0;
+    var tMult    = parseFloat(el.dataset.tmult)  || 1;
+    var wxMult   = parseFloat(el.dataset.wxmult) || 1;
+    var wxDays   = parseFloat(el.dataset.wxdays) || 0;
+    // Fallback: parse tpc from cell text ("1 in 3,624" → 3624)
+    if (!tpc) {
+      var m = el.textContent.replace(/,/g, "").match(/\d+/);
+      if (m) tpc = parseInt(m[0], 10);
+    }
+    if (!tpc) { popup.style.display = "none"; return; }
+    var tMultStr  = tMult.toFixed(2)  + "×";
+    var wxMultStr = wxMult.toFixed(2) + "×";
+    var tNote  = tMult  > 1.05 ? "↑ riskier than avg" : (tMult < 0.95 ? "↓ safer than avg" : "near avg");
+    var wxNote = wxMult > 1.05 ? "↑ weather penalty"  : (wxMult < 0.95 ? "↓ good conditions" : "no weather effect");
+    var wxDaysNote = wxDays > 5 ? '<div class="sp-caveat">~' + Math.round(wxDays) + '-day forecast — lower confidence</div>' : "";
+    popup.innerHTML =
+      '<div class="sp-title">Score breakdown</div>' +
+      '<div class="sp-row"><span class="sp-label">Road history</span><span class="sp-val">1 in ' + baseTpc.toLocaleString() + '</span></div>' +
+      '<div class="sp-row"><span class="sp-label">Time of day</span><span class="sp-val">' + tMultStr + '<span class="sp-note">' + tNote + '</span></span></div>' +
+      '<div class="sp-row"><span class="sp-label">Weather</span><span class="sp-val">' + wxMultStr + '<span class="sp-note">' + wxNote + '</span></span></div>' +
+      '<div class="sp-row"><span class="sp-label">Combined</span><span class="sp-val">1 in ' + tpc.toLocaleString() + '</span></div>' +
+      wxDaysNote;
+    // Position near the cell, staying in viewport
+    var rect = el.getBoundingClientRect();
+    var pw = 240, ph = 140;
+    var left = Math.min(rect.left, window.innerWidth - pw - 12);
+    var top  = rect.bottom + 6;
+    if (top + ph > window.innerHeight) top = rect.top - ph - 6;
+    popup.style.left    = left + "px";
+    popup.style.top     = top  + "px";
+    popup.style.display = "block";
+    _scorePopup = popup;
+  }
+  document.addEventListener("click", function() {
+    if (_scorePopup) { _scorePopup.style.display = "none"; _scorePopup = null; }
+  });
+
+  function copyTripId(id, el, e) {
+    if (e) e.stopPropagation();
+    // Visual feedback is synchronous — not gated on clipboard promise
+    var orig = el.textContent;
+    el.textContent = "copied!";
+    el.style.opacity = "1";
+    el.style.color = "var(--orange)";
+    setTimeout(function() {
+      el.textContent = orig;
+      el.style.opacity = "";
+      el.style.color = "";
+    }, 1200);
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(id).catch(function() {});
+      } else {
+        var ta = document.createElement("textarea");
+        ta.value = id;
+        ta.style.cssText = "position:fixed;opacity:0;pointer-events:none";
+        document.body.appendChild(ta);
+        ta.focus(); ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+    } catch(err) {}
+  }
+
+  function timeAgo(ts) {
+    var secs = Math.floor((Date.now() - ts) / 1000);
+    if (secs < 60) return "just now";
+    var mins = Math.floor(secs / 60);
+    if (mins < 60) return mins + "m ago";
+    var hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + "h " + (mins % 60) + "m ago";
+    var days = Math.floor(hrs / 24);
+    return days + "d ago";
   }
 
   // ── Ghost text ──
-  var SUGGESTION = 'score --from "San Antonio, TX" --to "Dallas, TX" --alternatives 3';
+  var SUGGESTION = 'score --from "Austin" --to "Round Rock"';
   var cmdInput = document.getElementById("cmd-input");
   var cmdGhost = document.getElementById("cmd-ghost");
+  var cmdHistory = [], histIdx = -1, histDraft = "";
 
   function updateGhost() {
-    var val = cmdInput.value;
-    if (val.length > 0 && SUGGESTION.startsWith(val)) {
+    if (cmdInput.value === "") {
       cmdGhost.textContent = SUGGESTION;
-      // offset ghost to align with typed text
-      cmdGhost.style.left = (val.length * 7.8) + "px";
+      cmdGhost.style.left = "0px";
       cmdGhost.style.display = "block";
     } else {
       cmdGhost.style.display = "none";
@@ -1698,51 +3685,87 @@
   }
 
   cmdInput.addEventListener("keydown", function(e) {
-    if (e.key === "ArrowRight" || e.key === "Tab") {
-      if (cmdGhost.style.display !== "none" && SUGGESTION.startsWith(cmdInput.value)) {
-        e.preventDefault();
-        if (e.key === "Tab") {
-          cmdInput.value = "";
-        } else {
-          cmdInput.value = SUGGESTION;
-        }
-        updateGhost();
-      }
+    if (e.key === "Tab") {
+      e.preventDefault();
+      cmdInput.value = "";
+      histIdx = -1;
+      updateGhost();
+    } else if (e.key === "ArrowRight" && cmdInput.value === "") {
+      e.preventDefault();
+      cmdInput.value = SUGGESTION;
+      updateGhost();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (!cmdHistory.length) return;
+      if (histIdx === -1) histDraft = cmdInput.value;
+      histIdx = Math.min(histIdx + 1, cmdHistory.length - 1);
+      cmdInput.value = cmdHistory[cmdHistory.length - 1 - histIdx];
+      updateGhost();
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (histIdx <= 0) { histIdx = -1; cmdInput.value = histDraft; updateGhost(); return; }
+      histIdx--;
+      cmdInput.value = cmdHistory[cmdHistory.length - 1 - histIdx];
+      updateGhost();
     }
   });
 
   updateGhost();
-  document.getElementById("cmd-input").focus();
+  initApp();
+
+  // ── Topbar clock ──
+  (function tickClock() {
+    var el = document.getElementById("topbar-clock");
+    if (el) {
+      var now = new Date();
+      el.textContent = now.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" })
+        + "  ·  " + now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    }
+    setTimeout(tickClock, 10000);
+  })();
+
+  setTimeout(loadDispatchesFromApi, 600);
+
+  // ── Sidebar → Terminal drag-and-drop ──
+  (function() {
+    var terminal = document.getElementById("terminal");
+    if (!terminal) return;
+    terminal.addEventListener("dragover", function(e) {
+      if (!e.dataTransfer.types || e.dataTransfer.types.indexOf("text/llano-trip-id") === -1) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "copy";
+      terminal.classList.add("drag-over");
+    });
+    terminal.addEventListener("dragleave", function(e) {
+      if (!terminal.contains(e.relatedTarget)) terminal.classList.remove("drag-over");
+    });
+    terminal.addEventListener("drop", function(e) {
+      terminal.classList.remove("drag-over");
+      var id = e.dataTransfer.getData("text/llano-trip-id");
+      if (!id) return;
+      e.preventDefault();
+      // Don't re-add if already in terminal
+      if (document.querySelector('.table-block[data-trip-id="' + id + '"]')) return;
+      loadTrip(id);
+    });
+  })();
 
   // ── Static Leaflet map ──
   var appMap = L.map("app-map", { zoomControl: false, attributionControl: false })
-    .setView([29.8, -98.5], 6);
+    .setView([31.0, -99.0], 6);
 
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-    maxZoom: 18
+  L.tileLayer("/maptile/v3/base/mc/{z}/{x}/{y}/png", {
+    maxZoom: 20
   }).addTo(appMap);
 
   L.control.zoom({ position: "bottomright" }).addTo(appMap);
 
-  // Approximate route polylines: SAT → DAL via three corridors
-  var routes = [
-    { // SH-130 Toll — loops east of Austin
-      coords: [[29.424, -98.495],[29.7,-97.9],[30.05,-97.65],[30.42,-97.75],[31.0,-97.46],[31.55,-97.15],[32.08,-96.8],[32.78,-96.8]],
-      color: "#06B6D4", weight: 3, opacity: 0.5
-    },
-    { // I-35 N — through Austin
-      coords: [[29.424,-98.495],[29.7,-98.1],[30.27,-97.74],[30.52,-97.65],[31.1,-97.37],[31.55,-97.15],[32.08,-96.8],[32.78,-96.8]],
-      color: "#F97316", weight: 4, opacity: 0.9
-    },
-    { // US-281 N — rural cutoff
-      coords: [[29.424,-98.495],[29.6,-98.48],[30.0,-98.43],[30.5,-98.35],[31.2,-98.1],[31.9,-97.7],[32.4,-97.3],[32.78,-96.8]],
-      color: "#06B6D4", weight: 3, opacity: 0.5
-    }
-  ];
+  var hotspotLayer = L.layerGroup().addTo(appMap);
+  L.control.layers(null, { "Hotspots": hotspotLayer }, { position: "topright", collapsed: false }).addTo(appMap);
 
-  var polylines = routes.map(function(r) {
-    return L.polyline(r.coords, { color: r.color, weight: r.weight, opacity: r.opacity }).addTo(appMap);
-  });
+  var polylines     = [];
+  var mapMarkers    = [];
+  var currentRoutes = [];
 
   function markerIcon(color) {
     return L.divIcon({
@@ -1751,8 +3774,23 @@
       iconSize: [12,12], iconAnchor: [6,6]
     });
   }
-  L.marker([29.424,-98.495], { icon: markerIcon("#F97316") }).addTo(appMap);
-  L.marker([32.78,-96.8],    { icon: markerIcon("#F97316") }).addTo(appMap);
+
+  var hsIcon = L.divIcon({ className: "", html: '<div class="hs-dot"></div>', iconSize: [11,11], iconAnchor: [5,5] });
+
+  function drawHotspots(idx) {
+    hotspotLayer.clearLayers();
+    var route = currentRoutes[idx];
+    if (!route || !route.hotspots || !route.hotspots.length || !route.route || !route.route.coordinates) return;
+    var coords = route.route.coordinates;
+    route.hotspots.forEach(function(hs) {
+      var frac = parseFloat(hs.route_fraction) || 0;
+      var i2   = Math.min(Math.round(frac * (coords.length - 1)), coords.length - 1);
+      var c    = coords[i2];
+      L.marker([c[1], c[0]], { icon: hsIcon })
+        .bindTooltip("Hotspot — " + (frac * 100).toFixed(0) + "% of route")
+        .addTo(hotspotLayer);
+    });
+  }
 
   // Highlight selected route
   function highlightRoute(idx) {
@@ -1764,15 +3802,127 @@
         pl.setStyle({ weight: 2, opacity: 0.3 });
       }
     });
+    drawHotspots(idx);
   }
-  highlightRoute(1); // I-35 N selected by default (index 1)
+  // Replace map contents with live scored routes (sorted safest-first)
+var ROUTE_COLORS = ["#F97316", "#06B6D4", "#22c55e", "#facc15", "#e879f9"];
 
-  // Hook into selectRoute
-  var _origSelectRoute = selectRoute;
-  selectRoute = function(idx) {
-    _origSelectRoute(idx);
-    highlightRoute(idx);
-  };
+
+  function updateMap(sortedRoutes, fitView) {
+    if (fitView === undefined) fitView = true;
+    currentRoutes = sortedRoutes;
+    // Clear old layers
+    polylines.forEach(function(pl) { appMap.removeLayer(pl); });
+    mapMarkers.forEach(function(m)  { appMap.removeLayer(m); });
+    polylines  = [];
+    mapMarkers = [];
+
+    var allLatLngs = [];
+    sortedRoutes.forEach(function(route, i) {
+      var coords = (route.route || {}).coordinates;
+      if (!coords || !coords.length) return;
+      // GeoJSON is [lon, lat]; Leaflet needs [lat, lon]
+      var latlngs = coords.map(function(c) { return [c[1], c[0]]; });
+      var isBest = (i === 0);
+      var pl = L.polyline(latlngs, {
+        color:        ROUTE_COLORS[i % ROUTE_COLORS.length],
+        weight:       isBest ? 4 : 2,
+        opacity:      isBest ? 1.0 : 0.4,
+        smoothFactor: 0
+      }).addTo(appMap);
+      polylines.push(pl);
+      allLatLngs = allLatLngs.concat(latlngs);
+    });
+
+    // Origin / destination markers from first route's waypoints
+    var wp = sortedRoutes[0] && sortedRoutes[0].waypoints;
+    if (wp && wp.length >= 2) {
+      mapMarkers.push(L.marker([wp[0][1], wp[0][0]],                   { icon: markerIcon("#F97316") }).addTo(appMap));
+      mapMarkers.push(L.marker([wp[wp.length-1][1], wp[wp.length-1][0]], { icon: markerIcon("#F97316") }).addTo(appMap));
+    }
+
+    if (fitView && allLatLngs.length) {
+      appMap.invalidateSize();
+      // Defer fitBounds until after any map-pane expand transition (250ms) settles
+      setTimeout(function() {
+        appMap.invalidateSize();
+        appMap.fitBounds(allLatLngs, { padding: [40, 40], maxZoom: 13 });
+      }, 260);
+    }
+  }
+
 </script>
+
+<!-- Certify overlay modal -->
+<div id="certify-overlay" onclick="if(event.target===this)hideCertify()">
+  <div id="certify-panel">
+    <div class="cp-header">
+      ✦ Certify Route &mdash; <span class="cp-header-route" id="cp-route-name">SH-130 Toll</span>
+    </div>
+    <div class="cp-body">
+      <div class="cp-field full">
+        <div class="cp-label">Report Label <span style="color:var(--dim);font-size:.85em;text-transform:none;letter-spacing:0"> — override route name on PDF</span></div>
+        <input class="cp-input" id="cp-label" placeholder="e.g. Austin bypass, Toll route…" />
+      </div>
+      <div class="cp-field">
+        <div class="cp-label">Driver ID</div>
+        <input class="cp-input" id="cp-driver-id" placeholder="ACM-2847" />
+      </div>
+      <div class="cp-field">
+        <div class="cp-label">Driver Name</div>
+        <input class="cp-input" id="cp-driver-name" placeholder="James Okafor" />
+      </div>
+      <div class="cp-field">
+        <div class="cp-label">Phone Number</div>
+        <input class="cp-input" id="cp-phone" placeholder="(210) 555-0142" />
+        <div class="cp-hint">Driver receives SMS with route + tracking link</div>
+      </div>
+      <div class="cp-field">
+        <div class="cp-label">Departure Time</div>
+        <input class="cp-input" id="cp-depart" placeholder="2026-03-30 10:00" />
+      </div>
+      <div class="cp-field">
+        <div class="cp-label">Load / Ref #</div>
+        <input class="cp-input" id="cp-load" placeholder="PO-98432" />
+      </div>
+      <div class="cp-field">
+        <div class="cp-label">Carrier / Fleet ID</div>
+        <input class="cp-input" id="cp-fleet" placeholder="ACME Logistics" />
+      </div>
+      <div class="cp-field full">
+        <div class="cp-label">Notes</div>
+        <input class="cp-input" id="cp-notes" placeholder="Optional — hazmat, oversized load, etc." />
+      </div>
+    </div>
+    <div id="cp-pricing">
+      <div class="cp-price-row">
+        <span class="cp-price-key">Safest available</span>
+        <span class="cp-price-val">1 in <span id="cp-tpc-safest">—</span>&ensp;<span style="color:var(--dim)">→</span>&ensp;<span id="cp-base-price">—</span> base</span>
+      </div>
+      <div class="cp-price-row" id="cp-delta-row">
+        <span class="cp-price-key">Selected route</span>
+        <span class="cp-price-val">1 in <span id="cp-tpc-selected">—</span>&ensp;<span class="cp-price-delta" id="cp-delta-pct"></span></span>
+      </div>
+      <div class="cp-price-divider"></div>
+      <div class="cp-price-row cp-price-total">
+        <span>Certification cost</span>
+        <span class="cp-price-val"><span id="cp-total-price">—</span>&ensp;&middot;&ensp;<span id="cp-total-credits">—</span></span>
+      </div>
+      <div class="cp-price-method">
+        Priced on expected liability: $200K avg incident cost &times; 1% documentation
+        mitigation rate &divide; trips-per-crash of selected route.
+        Safest available route sets the base; any risk delta above that adds a proportional premium.
+      </div>
+    </div>
+    <div class="cp-footer">
+      <div class="cp-credit-note">Balance: <span id="cp-credits-remaining">—</span></div>
+      <div class="cp-actions">
+        <button class="cp-btn cancel" onclick="hideCertify()">Cancel</button>
+        <button class="cp-btn generate" onclick="generateReport()">Generate Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+  <div id="score-popup"></div>
 </body>
 </html>

@@ -1601,10 +1601,8 @@ function submitWaitlist() {
     if (emailEl) { emailEl.focus(); emailEl.style.borderColor = "#ef4444"; }
     return;
   }
-  fetch("https://api.llano.io/waitlist", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: email })
+  fetch("https://api.llano.io/waitlist?email=" + encodeURIComponent(email), {
+    method: "POST"
   }).catch(function() {});  // fail silently — show thanks regardless
   if (formEl)   formEl.style.display   = "none";
   if (thanksEl) thanksEl.style.display = "inline";
