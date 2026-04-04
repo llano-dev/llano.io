@@ -664,7 +664,7 @@ h2, .page-section h2, .hero h2, section h2 {
 <section id="example">
   <div class="page-section">
     <div class="section-label">EXAMPLE</div>
-    <h2 class="anchored">Laredo → Dallas</h2>
+    <h2 class="anchored">San Antonio → Round Rock</h2>
     <p class="section-sub">Two alternatives scored and ranked by safety. The faster route carries meaningfully higher risk — a trade-off Llano surfaces before dispatch.</p>
 
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem;margin-top:2rem;">
@@ -780,12 +780,12 @@ h2, .page-section h2, .hero h2, section h2 {
         <div class="terminal-input-row">
           <span class="t-prompt-sym">$</span>
           <div style="position:relative;flex:1;display:flex;align-items:center;">
-            <span id="cmd-ghost" style="position:absolute;left:0;top:50%;transform:translateY(-50%);color:#3a3d4a;font-family:'JetBrains Mono',monospace;font-size:.8em;pointer-events:none;white-space:nowrap;overflow:hidden;width:100%">llano score --from "Laredo" --to "Dallas"</span>
+            <span id="cmd-ghost" style="position:absolute;left:0;top:50%;transform:translateY(-50%);color:#3a3d4a;font-family:'JetBrains Mono',monospace;font-size:.8em;pointer-events:none;white-space:nowrap;overflow:hidden;width:100%">llano score --from "San Antonio" --to "Round Rock, TX"</span>
             <input id="cmd-input" type="text" autocomplete="off" spellcheck="false" style="background:transparent;position:relative;z-index:1;">
           </div>
         </div>
         <div id="mobile-suggestion" style="display:none;padding:.45rem .6rem .1rem;">
-          <button onclick="acceptSuggestion()" style="background:#1a1d24;border:1px solid #2e3140;border-radius:4px;color:#3a3d4a;font-family:'JetBrains Mono',monospace;font-size:.72em;padding:.35rem .7rem;cursor:pointer;text-align:left;width:100%;">llano score --from "Laredo" --to "Dallas" <span style="color:#5a5f72;float:right;">tap to try →</span></button>
+          <button onclick="acceptSuggestion()" style="background:#1a1d24;border:1px solid #2e3140;border-radius:4px;color:#3a3d4a;font-family:'JetBrains Mono',monospace;font-size:.72em;padding:.35rem .7rem;cursor:pointer;text-align:left;width:100%;">llano score --from "San Antonio" --to "Round Rock, TX" <span style="color:#5a5f72;float:right;">tap to try →</span></button>
         </div>
       </div>
 
@@ -1104,7 +1104,7 @@ var output      = document.getElementById("term-output");
 var input       = document.getElementById("cmd-input");
 var placeholder = document.getElementById("map-placeholder");
 var ghost       = document.getElementById("cmd-ghost");
-var SUGGESTION  = 'llano score --from "Laredo" --to "Dallas"';
+var SUGGESTION  = 'llano score --from "San Antonio" --to "Round Rock, TX"';
 
 function updateGhost() {
   if (ghost && !isMobile) ghost.style.display = input.value === "" ? "block" : "none";
@@ -1472,7 +1472,7 @@ function execute(cmd) {
   }
 
   if (!cmd.startsWith("llano score")) {
-    line("Unknown command. Try: llano score --from \"Laredo, TX\" --to \"San Antonio, TX\"", "t-out-err");
+    line("Unknown command. Try: llano score --from \"San Antonio, TX\" --to \"Round Rock, TX\"", "t-out-err");
     blank();
     return;
   }
