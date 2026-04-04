@@ -1507,7 +1507,8 @@ function execute(cmd) {
         if (r.status === 401) throw new Error("Demo key invalid");
         if (!r.ok) throw new Error("API error " + r.status);
         return r.json();
-      }).then(function(routes) {
+      }).then(function(data) {
+        var routes = Array.isArray(data) ? data : (data.routes || []);
         stop("Scored " + routes.length + " route" + (routes.length !== 1 ? "s" : ""), function() {
           renderResults(routes, flags);
         });
