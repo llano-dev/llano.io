@@ -1588,7 +1588,7 @@ window.acceptSuggestion = function() {
 welcome();
 initMap();
 updateGhost();
-setTimeout(function() { if (!isMobile) input.focus(); }, 100);
+// Focus only when user scrolls to the demo section, not on page load
 
 })();
 
