@@ -1584,18 +1584,31 @@
       if (raw) trips = JSON.parse(raw);
     } catch(e) {}
   }
+  function getHiddenTripIds() {
+    try { return JSON.parse(localStorage.getItem("llano_hidden_trip_ids") || "[]"); } catch(e) { return []; }
+  }
+  function addHiddenTripIds(ids) {
+    try {
+      var existing = getHiddenTripIds();
+      var merged = existing.concat(ids.filter(function(id) { return existing.indexOf(id) === -1; }));
+      if (merged.length > 1000) merged = merged.slice(merged.length - 1000);
+      localStorage.setItem("llano_hidden_trip_ids", JSON.stringify(merged));
+    } catch(e) {}
+  }
+
   function loadTripsFromApi() {
+    var hiddenIds = getHiddenTripIds();
     fetch("/trips", { credentials: "include" })
       .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
       .then(function(serverTrips) {
         var changed = false;
         serverTrips.forEach(function(st) {
+          if (hiddenIds.indexOf(st.trip_id) !== -1) return; // hidden by a prior clear or delete
           var existing = trips.find(function(t) { return t.trip_id && t.trip_id === st.trip_id; });
           if (existing) {
             existing.tags      = (st.tags || existing.tags || []).filter(function(t) { return t && !/^\{/.test(t); });
             existing.certified = st.certified;
           } else {
-            // Only add if not already present as a local-only entry with matching from/to/time
             trips.push({
               id:        genLnoId(),
               trip_id:   st.trip_id,
@@ -2493,12 +2506,19 @@
 
   function deleteTrip(id, e) {
     e.stopPropagation();
+    var trip = trips.find(function(t) { return t.id === id; });
     trips = trips.filter(function(t) { return t.id !== id; });
     persistTrips();
     renderSidebar();
+    if (trip && trip.trip_id) {
+      addHiddenTripIds([trip.trip_id]);
+      fetch("/trips/" + trip.trip_id, { method: "DELETE", credentials: "include" }).catch(function() {});
+    }
   }
   function clearSidebar() {
     if (!trips.length) return;
+    var ids = trips.filter(function(t) { return t.trip_id; }).map(function(t) { return t.trip_id; });
+    addHiddenTripIds(ids);
     trips = [];
     try { localStorage.removeItem("llano_trips"); } catch(e) {}
     renderSidebar();
@@ -2941,35 +2961,38 @@
   }
 
   function appendSpinner(label) {
-    // Dots pass forward: gap → approaching dot → full mark → receding dot → gap
-    var frames = ["| |", "|·|", "|:|", "|·|", "| |"];
-    var i = 0;
-    var delay = 110; // ms between frames at full speed
-    var timer = null;
-
+    var OFFSETS = ["-0.35em","-0.18em","0em","0.18em","0.35em","0.18em","0em","-0.18em"];
+    var fi = 2; // start at center
+    function frame(f) {
+      return '<span style="color:var(--dim)">|</span>' +
+             '<span style="color:var(--orange);font-weight:700;display:inline-block;transform:translateY(' + OFFSETS[f] + ')">:</span>' +
+             '<span style="color:var(--dim)">|</span>';
+    }
     var div = document.createElement("div");
     div.className = "t-line t-muted";
-    div.innerHTML = '<span class="spinner-icon">' + frames[0] + '</span>  ' + label;
+    div.innerHTML = frame(fi) + '  <span style="color:var(--muted)">' + label + '</span>';
     appendNode(div);
 
-    function tick() {
-      i = (i + 1) % frames.length;
-      var icon = div.querySelector(".spinner-icon");
-      if (icon) icon.textContent = frames[i];
-    }
-    function schedule() { timer = setTimeout(function() { tick(); schedule(); }, delay); }
-    schedule();
-
-    // stop(callback): eases to a halt then calls callback
+    var timer = setInterval(function() {
+      fi = (fi + 1) % OFFSETS.length;
+      div.innerHTML = frame(fi) + '  <span style="color:var(--muted)">' + label + '</span>';
+    }, 120);
+    // stop(callback): slows to a halt at center, removes line, then calls callback
     return function stop(callback) {
-      clearTimeout(timer);
-      var easing = [160, 230, 330, 460, 620, 800];
+      clearInterval(timer);
+      var delays = [150, 210, 290, 390, 510];
       var s = 0;
-      function slowStep() {
-        if (s >= easing.length) { div.remove(); if (callback) callback(); return; }
-        timer = setTimeout(function() { tick(); s++; slowStep(); }, easing[s]);
+      function slowTick() {
+        if (s >= delays.length) {
+          div.innerHTML = frame(2) + '  <span style="color:var(--muted)">' + label + '</span>';
+          setTimeout(function() { div.remove(); if (callback) callback(); }, 180);
+          return;
+        }
+        fi = (fi + 1) % OFFSETS.length;
+        div.innerHTML = frame(fi) + '  <span style="color:var(--muted)">' + label + '</span>';
+        setTimeout(slowTick, delays[s++]);
       }
-      slowStep();
+      slowTick();
     };
   }
 
@@ -3044,7 +3067,14 @@
 
     function parseArgs(s) {
       var out = {}, re = /--(\w+)\s+(?:"([^"]+)"|(\S+))/g, match;
-      while ((match = re.exec(s)) !== null) out[match[1]] = match[2] !== undefined ? match[2] : match[3];
+      while ((match = re.exec(s)) !== null) {
+        var key = match[1], val = match[2] !== undefined ? match[2] : match[3];
+        if (key in out) {
+          out[key] = [].concat(out[key], val);
+        } else {
+          out[key] = val;
+        }
+      }
       return out;
     }
     var args   = parseArgs(m[2]);
@@ -3059,7 +3089,7 @@
 
     var from   = resolveAddr(args["from"] || args["origin"] || "");
     var to     = resolveAddr(args["to"]   || args["dest"]   || args["destination"] || "");
-    var via    = args["via"]  ? [resolveAddr(args["via"])]  : [];
+    var via    = args["via"]  ? [].concat(args["via"]).map(resolveAddr) : [];
     var depart = args["depart"] || args["timestamp"] || null;
     var arrive = args["arrive"] || null;
     var alts   = Math.max(1, parseInt(args["alternatives"] || args["alt"] || "2", 10));

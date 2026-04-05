@@ -82,12 +82,12 @@ ul.task-list li input[type="checkbox"] {
 <!-- margin-sidebar -->
     
 <!-- main -->
-<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><h1 class="title display-7">Know the Risk<br>Before You Route</h1></header>
 
 
 
 
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&amp;family=Exo+2:ital,wght@1,800&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -98,6 +98,18 @@ body, .quarto-container, #quarto-content, main {
   background: #13151a !important;
   color: #e2e4e9 !important;
   font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* Push content to very top — remove all Quarto top offsets */
+#quarto-content, #quarto-document-content, .quarto-container,
+main.content.column-page, main, .page-columns, .page-rows-contents {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+#title-block-header.quarto-title-block {
+  display: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 /* ── Shared layout ── */
@@ -144,22 +156,14 @@ h2, .page-section h2, .hero h2, section h2 {
 
 /* ── Hero ── */
 .hero {
-  min-height: 72vh;
   display: flex;
   align-items: center;
   border-bottom: 1px solid #1e2026;
 }
 .hero-inner {
   max-width: 960px;
-  margin: 0 auto;
-  padding: 4rem 1.5rem 5rem;
-}
-.hero-brand {
-  font-size: 1em;
-  font-weight: 600;
-  color: #F97316;
-  letter-spacing: .06em;
-  margin-bottom: 2rem;
+  margin: 0;
+  padding: 0.75rem 1.5rem 5rem 2rem;
 }
 .hero h1 {
   font-size: clamp(2rem, 4.5vw, 3rem);
@@ -584,14 +588,20 @@ h2, .page-section h2, .hero h2, section h2 {
 .waitlist-thanks { color: #22C55E; font-size: .85em; }
 </style>
 
-<!-- ── Sunset strip ───────────────────────────────────────────────────────── -->
-<div style="width:100vw;height:140px;background:linear-gradient(to bottom, #7c2d12 0%, #c2410c 25%, #F97316 55%, #fbbf24 78%, #0f1117 100%);opacity:.85;position:relative;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;"></div>
+<!-- ── Header image ──────────────────────────────────────────────────────── -->
+<div style="width:100vw;height:200px;position:relative;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;overflow:hidden;">
+  <img src="darkheader.svg" style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block;">
+</div>
+
+<!-- ── Logo (flush under header) ─────────────────────────────────────── -->
+<div style="padding: 0.1rem 0 0 1.5rem;">
+  <img src="logo-composite4.svg" alt="llano" style="height:270px;display:block;">
+</div>
 
 <!-- ── Hero ──────────────────────────────────────────────────────────────── -->
-<section class="hero" style="border-top:none;">
+<section class="hero" style="border-top:none;min-height:auto;">
   <div class="hero-inner">
-    <div class="hero-brand"><span style="color:#F97316">|:|</span> llano</div>
-    <h1>Know the Risk<br>Before You Route</h1>
+    
     <p>Route safety scoring for trucking fleets. Real crash history, live weather, and road geometry — ranked alternatives in a single API call.</p>
     <div class="hero-actions">
       <a class="btn-primary" href="#demo">Try the Demo</a>
