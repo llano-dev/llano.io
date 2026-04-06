@@ -158,7 +158,6 @@ h2, .page-section h2, .hero h2, section h2 {
 .hero {
   display: flex !important;
   align-items: center;
-  border-bottom: 1px solid #1e2026;
   padding: 0 !important;
   min-height: auto !important;
   max-width: none !important;
@@ -569,8 +568,7 @@ h2, .page-section h2, .hero h2, section h2 {
 
 /* ── CTA ── */
 .cta-section {
-  background: #0e1013;
-  border-top: 1px solid #1e2026;
+  background: transparent;
 }
 .cta-inner {
   max-width: 960px;
@@ -626,6 +624,8 @@ h2, .page-section h2, .hero h2, section h2 {
   pointer-events: auto;
   transform: translateY(0);
 }
+#sticky-nav img { display: block; }
+main.content.column-page { border: none !important; box-shadow: none !important; }
 @media (max-width: 768px) {
   #sticky-nav { display: none; }
 }
@@ -653,6 +653,9 @@ h2, .page-section h2, .hero h2, section h2 {
     <img class="logo" src="logo-composite4.svg" alt="llano" style="height:130px;display:block;">
   </div>
 </div>
+
+<!-- ── Header fade ───────────────────────────────────────────────────────── -->
+<div style="width:100vw;position:relative;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;height:48px;background:linear-gradient(to bottom,rgba(30,32,38,0.6),#13151a);pointer-events:none;margin-top:-1px;"></div>
 
 <!-- ── Hero ──────────────────────────────────────────────────────────────── -->
 <section class="hero" style="border-top:none;min-height:auto;">
@@ -1128,6 +1131,8 @@ best <span class="c-kw">&lt;-</span> resp[[1]]   <span class="c-cm"># sorted saf
     </div>
   </div>
 </section>
+
+<hr class="divider">
 
 <!-- ── CTA ────────────────────────────────────────────────────────────────── -->
 <section class="cta-section" id="about">
@@ -2076,7 +2081,7 @@ function submitWaitlist() {
 <footer class="footer">
   <div class="nav-footer">
     <div class="nav-footer-left">
-<p>© 2026 Llano. All rights reserved. &nbsp;|&nbsp; Made Deep in the ❤️</p>
+<p>© 2026 Llano. All rights reserved. &nbsp;|&nbsp; Made Deep in the <span style="color:#F97316">❤️</span></p>
 </div>   
     <div class="nav-footer-center">
       &nbsp;
