@@ -109,11 +109,6 @@ main.content.column-page, main, .page-columns, .page-rows-contents {
   padding-top: 0 !important;
   margin-top: 0 !important;
 }
-#quarto-content, #quarto-content > * {
-  background: #13151a !important;
-  border: none !important;
-  outline: none !important;
-}
 #title-block-header.quarto-title-block {
   display: none !important;
   margin: 0 !important;
@@ -174,8 +169,8 @@ h2, .page-section h2, .hero h2, section h2 {
 }
 .hero-inner {
   max-width: 960px;
-  margin: 0;
-  padding: 3rem 1.5rem 5rem 2rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
 }
 .hero-h1 {
   font-size: clamp(2rem, 4.5vw, 3rem);
@@ -457,7 +452,7 @@ h2, .page-section h2, .hero h2, section h2 {
 
 .audit-report { padding: 1.4rem 1.6rem; font-size: .8em; }
 .audit-report-header { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1rem; border-bottom: 1px solid #1e2026; padding-bottom: .8rem; }
-.audit-wordmark { font-size: 1.1em; font-weight: 600; color: #F97316; }
+.audit-wordmark img { height: 28px; display: block; }
 .audit-title-block { display: flex; flex-direction: column; }
 .audit-report-title { color: #e2e4e9; font-size: .95em; }
 .audit-report-period { color: #8b8fa8; font-size: .82em; }
@@ -902,7 +897,7 @@ main.content.column-page { border: none !important; box-shadow: none !important;
         </div>
         <div class="audit-report">
           <div class="audit-report-header">
-            <div class="audit-wordmark">|:| llano</div>
+            <div class="audit-wordmark"><img src="logo-composite4.svg" alt="llano"></div>
             <div class="audit-title-block">
               <span class="audit-report-title">Fleet Safety Audit Report</span>
               <span class="audit-report-period">Q1 2026 · January 1 – March 31</span>
