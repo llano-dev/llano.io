@@ -450,7 +450,7 @@ h2, .page-section h2, .hero h2, section h2 {
 .pdf-viewer-dot { width: 10px; height: 10px; border-radius: 50%; background: #2e3140; }
 .pdf-viewer-title { font-size: .73em; color: #8b8fa8; margin-left: .4rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.audit-report { padding: 1.4rem 1.6rem; font-size: .8em; }
+.audit-report { padding: 1.4rem 1.6rem; font-size: .8em; max-height: 480px; overflow-y: auto; }
 .audit-report-header { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1rem; border-bottom: 1px solid #1e2026; padding-bottom: .8rem; }
 .audit-wordmark img { height: 28px; display: block; }
 .audit-title-block { display: flex; flex-direction: column; }
@@ -486,9 +486,9 @@ h2, .page-section h2, .hero h2, section h2 {
 .audit-page-num { color: #8b8fa8; font-size: .76em; }
 
 .audit-props { display: flex; flex-direction: column; gap: 1.8rem; }
-.audit-prop { display: flex; gap: 1rem; align-items: flex-start; }
-.audit-prop-icon { font-size: 1.3em; flex-shrink: 0; width: 2rem; text-align: center; line-height: 1; padding-top: .1rem; }
-.audit-prop h3 { font-size: .88em; font-weight: 600; color: #e2e4e9; margin-bottom: .3rem; }
+.audit-prop { display: grid; grid-template-columns: 1rem 1fr; column-gap: .6rem; }
+.audit-prop-icon { color: #F97316; font-size: .6em; padding-top: .18em; }
+.audit-prop h3 { font-size: .88em; font-weight: 600; color: #e2e4e9; margin-top: 0; margin-bottom: .3rem; }
 .audit-prop p { font-size: .8em; color: #8b8fa8; line-height: 1.65; }
 
 /* ── Example ── */
@@ -574,19 +574,19 @@ h2, .page-section h2, .hero h2, section h2 {
   background: transparent;
 }
 .cta-inner {
-  max-width: 960px;
+  max-width: 560px;
   margin: 0 auto;
   padding: 5rem 1.5rem;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  flex-wrap: wrap;
+  text-align: center;
+  gap: 1.5rem;
 }
-.cta-inner h2 { font-size: 1.4em; margin-bottom: .4rem; }
-.cta-inner p { color: #8b8fa8; font-size: .85em; }
-.cta-actions { display: flex; gap: 1rem; align-items: center; flex-shrink: 0; }
-.waitlist-form { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+.cta-inner h2 { font-size: 1.9em; margin-bottom: .4rem; }
+.cta-inner > p { color: #8b8fa8; font-size: .95em; }
+.cta-actions { display: flex; flex-direction: column; gap: .4rem; width: 100%; }
+.waitlist-form { display: flex; gap: .5rem; align-items: center; width: 100%; }
 .waitlist-input {
   background: #1a1d24;
   border: 1px solid #2e3140;
@@ -594,7 +594,7 @@ h2, .page-section h2, .hero h2, section h2 {
   color: #e2e4e9;
   font-size: .85em;
   padding: .55rem 1rem;
-  width: 220px;
+  flex: 1;
   outline: none;
   transition: border-color .15s;
 }
@@ -630,6 +630,9 @@ h2, .page-section h2, .hero h2, section h2 {
 #sticky-nav img { display: block; }
 main.content.column-page { border: none !important; box-shadow: none !important; }
 @media (max-width: 768px) {
+  .waitlist-form { flex-direction: column; align-items: stretch; width: 100%; }
+  .waitlist-input { width: 100% !important; }
+  .cta-actions { width: 100%; }
   #sticky-nav { display: none; }
 }
 </style>
@@ -650,15 +653,13 @@ main.content.column-page { border: none !important; box-shadow: none !important;
 </script>
 
 <!-- ── Header ──────────────────────────────────────────────────────────── -->
-<div class="site-header" style="width:100vw;position:relative;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;height:160px;overflow:hidden;">
-  <img class="header-bg" src="darkheader.svg" style="position:absolute;width:100%;height:auto;top:-40px;display:block;">
-  <div style="position:relative;z-index:1;height:100%;display:flex;align-items:center;padding-left:1.5rem;">
+<div class="site-header" style="width:100vw;position:relative;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;height:220px;overflow:hidden;background:#13151a;">
+  <img class="header-bg" src="darkheader.svg" style="position:absolute;width:100%;height:auto;top:-60px;display:block;">
+  <div style="position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(to bottom,transparent,#13151a);z-index:2;pointer-events:none;"></div>
+  <div style="position:relative;z-index:3;height:100%;display:flex;align-items:center;padding-left:1.5rem;">
     <img class="logo" src="logo-composite4.svg" alt="llano" style="height:130px;display:block;">
   </div>
 </div>
-
-<!-- ── Header fade ───────────────────────────────────────────────────────── -->
-<div style="width:100vw;position:relative;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;height:48px;background:linear-gradient(to bottom,rgba(30,32,38,0.6),#13151a);pointer-events:none;margin-top:-1px;"></div>
 
 <!-- ── Hero ──────────────────────────────────────────────────────────────── -->
 <section class="hero" style="border-top:none;min-height:auto;">
@@ -954,41 +955,11 @@ main.content.column-page { border: none !important; box-shadow: none !important;
       </div>
 
       <div class="audit-props">
-        <div class="audit-prop">
-          <div class="audit-prop-icon">📋</div>
-          <div>
-            <h3 class="anchored">Insurer-Ready Format</h3>
-            <p>Third-party certified scores and methodology summaries designed to satisfy underwriter requirements — not self-reported safety claims.</p>
-          </div>
-        </div>
-        <div class="audit-prop">
-          <div class="audit-prop-icon">📈</div>
-          <div>
-            <h3 class="anchored">Trend Over Time</h3>
-            <p>Quarterly safety score history and period-over-period improvement give insurers the longitudinal data they need to price risk accurately.</p>
-          </div>
-        </div>
-        <div class="audit-prop">
-          <div class="audit-prop-icon">✅</div>
-          <div>
-            <h3 class="anchored">Compliance Tracking</h3>
-            <p>Track how often dispatchers act on Llano recommendations. Demonstrated safety culture is more credible than any self-reported metric.</p>
-          </div>
-        </div>
-        <div class="audit-prop">
-          <div class="audit-prop-icon">📍</div>
-          <div>
-            <h3 class="anchored">Hotspot Attribution</h3>
-            <p>Recurring risk concentrations mapped across your full route network — with incident correlation that builds actuarial credibility over time.</p>
-          </div>
-        </div>
-        <div class="audit-prop">
-          <div class="audit-prop-icon">⚖️</div>
-          <div>
-            <h3 class="anchored">Auditable for Litigation</h3>
-            <p>Every routing decision is timestamped, scored, and logged at dispatch. If an incident leads to litigation, you can show exactly what safety data was available, what alternatives were considered, and what choice was made — and why it was reasonable.</p>
-          </div>
-        </div>
+        <div class="audit-prop"><span class="audit-prop-icon">📋</span><div><h3 class="anchored">Insurer-Ready Format</h3><p>Third-party certified scores and methodology summaries designed to satisfy underwriter requirements — not self-reported safety claims.</p></div></div>
+        <div class="audit-prop"><span class="audit-prop-icon">📈</span><div><h3 class="anchored">Trend Over Time</h3><p>Quarterly safety score history and period-over-period improvement give insurers the longitudinal data they need to price risk accurately.</p></div></div>
+        <div class="audit-prop"><span class="audit-prop-icon">✅</span><div><h3 class="anchored">Compliance Tracking</h3><p>Track how often dispatchers act on Llano recommendations. Demonstrated safety culture is more credible than any self-reported metric.</p></div></div>
+        <div class="audit-prop"><span class="audit-prop-icon">📍</span><div><h3 class="anchored">Hotspot Attribution</h3><p>Recurring risk concentrations mapped across your full route network — with incident correlation that builds actuarial credibility over time.</p></div></div>
+        <div class="audit-prop"><span class="audit-prop-icon">⚖️</span><div><h3 class="anchored">Auditable for Litigation</h3><p>Every routing decision is timestamped, scored, and logged at dispatch. If an incident leads to litigation, you can show exactly what safety data was available, what alternatives were considered, and what choice was made — and why it was reasonable.</p></div></div>
       </div>
 
     </div>
@@ -1147,9 +1118,10 @@ best <span class="c-kw">&lt;-</span> resp[[1]]   <span class="c-cm"># sorted saf
     <div class="cta-actions">
       <div class="waitlist-form" id="waitlist-form">
         <input class="waitlist-input" id="waitlist-email" type="email" placeholder="your@email.com" autocomplete="email">
-        <button class="btn-primary" onclick="submitWaitlist()" style="cursor:pointer;border:none;">Get Free Access</button>
+        <button class="btn-primary" onclick="submitWaitlist()" style="cursor:pointer;border:none;white-space:nowrap;">Get Free Access</button>
       </div>
-      <span class="waitlist-thanks" id="waitlist-thanks" style="display:none;">Thanks! We'll be in touch.</span>
+      <span style="font-size:.72em;color:#5a5f72;">We'll send a magic link — no password needed</span>
+      <span class="waitlist-thanks" id="waitlist-thanks" style="display:none;">Check your email ✓</span>
     </div>
   </div>
 </section>
