@@ -179,8 +179,10 @@ h2, .page-section h2, .hero h2, section h2 {
   max-width: 700px;
 }
 @media (max-width: 768px) {
-  .site-header { height: 80px !important; }
-  .site-header img.logo { height: 64px !important; }
+  .site-header { height: 72px !important; }
+  .site-header img.logo { height: 56px !important; }
+  .site-header .header-bg { top: 0 !important; }
+  .hero-inner { padding: 2rem 1.25rem 3rem !important; }
 }
 .hero p {
   font-size: .95em;
@@ -598,11 +600,55 @@ h2, .page-section h2, .hero h2, section h2 {
 .waitlist-input:focus { border-color: #F97316; }
 .waitlist-input::placeholder { color: #5a5f72; }
 .waitlist-thanks { color: #22C55E; font-size: .85em; }
+
+/* ── Sticky nav ── */
+#sticky-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  background: rgba(19, 21, 26, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid #1e2026;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+#sticky-nav.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+@media (max-width: 768px) {
+  #sticky-nav { display: none; }
+}
 </style>
+
+<!-- ── Sticky nav ─────────────────────────────────────────────────────── -->
+<div id="sticky-nav">
+  <img src="logo-composite4.svg" alt="llano" style="height:40px;display:block;">
+</div>
+<script>
+(function() {
+  var nav = document.getElementById('sticky-nav');
+  var header = document.querySelector('.site-header');
+  window.addEventListener('scroll', function() {
+    var threshold = header ? header.offsetHeight : 160;
+    nav.classList.toggle('visible', window.scrollY > threshold);
+  }, { passive: true });
+})();
+</script>
 
 <!-- ── Header ──────────────────────────────────────────────────────────── -->
 <div class="site-header" style="width:100vw;position:relative;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;height:160px;overflow:hidden;">
-  <img src="darkheader.svg" style="position:absolute;width:100%;height:auto;top:-40px;display:block;">
+  <img class="header-bg" src="darkheader.svg" style="position:absolute;width:100%;height:auto;top:-40px;display:block;">
   <div style="position:relative;z-index:1;height:100%;display:flex;align-items:center;padding-left:1.5rem;">
     <img class="logo" src="logo-composite4.svg" alt="llano" style="height:130px;display:block;">
   </div>
