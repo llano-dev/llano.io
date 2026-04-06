@@ -602,6 +602,15 @@ h2, .page-section h2, .hero h2, section h2 {
 .waitlist-input::placeholder { color: #5a5f72; }
 .waitlist-thanks { color: #22C55E; font-size: .85em; }
 
+/* ── Header image hover ── */
+.site-header .header-bg {
+  filter: grayscale(1) brightness(0.28);
+  transition: filter 0.5s ease;
+}
+.site-header:hover .header-bg {
+  filter: grayscale(0) brightness(1);
+}
+
 /* ── Sticky nav ── */
 #sticky-nav {
   position: fixed;
@@ -633,19 +642,7 @@ main.content.column-page { border: none !important; box-shadow: none !important;
   .waitlist-form { flex-direction: column; align-items: stretch; width: 100%; }
   .waitlist-input { width: 100% !important; }
   .cta-actions { width: 100%; }
-  #sticky-nav {
-    top: 0.75rem;
-    left: auto;
-    right: 1rem;
-    width: auto;
-    height: auto;
-    padding: 0.35rem 0.65rem;
-    border-radius: 8px;
-    border-bottom: none;
-    border: 1px solid #2e3140;
-    transform: translateY(-16px);
-  }
-  #sticky-nav img { height: 28px; }
+  #sticky-nav { display: none; }
 }
 </style>
 
