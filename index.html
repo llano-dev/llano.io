@@ -93,6 +93,9 @@ ul.task-list li input[type="checkbox"] {
 
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
+* { user-select: none; -webkit-user-select: none; }
+input, textarea { user-select: text; -webkit-user-select: text; }
+.anchorjs-link, .anchor-section, .heading-anchor { display: none !important; }
 
 body, .quarto-container, #quarto-content, main {
   background: #13151a !important;
@@ -105,6 +108,12 @@ body, .quarto-container, #quarto-content, main {
 main.content.column-page, main, .page-columns, .page-rows-contents {
   padding-top: 0 !important;
   margin-top: 0 !important;
+}
+.page-columns, #quarto-content {
+  column-gap: 0 !important;
+  gap: 0 !important;
+  border: none !important;
+  outline: none !important;
 }
 #title-block-header.quarto-title-block {
   display: none !important;
@@ -610,7 +619,9 @@ h2, .page-section h2, .hero h2, section h2 {
   display: flex;
   align-items: center;
   padding: 0 1.5rem;
-  background: #13151a;
+  background: rgba(19, 21, 26, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid #1e2026;
   opacity: 0;
   pointer-events: none;
@@ -2079,7 +2090,7 @@ function submitWaitlist() {
 <footer class="footer">
   <div class="nav-footer">
     <div class="nav-footer-left">
-<p>© 2026 Llano. All rights reserved. &nbsp;|&nbsp; Made Deep in the <span style="color:#F97316">♥</span></p>
+<p>© 2026 Llano. All rights reserved. &nbsp;|&nbsp; Made Deep in the ❤️</p>
 </div>   
     <div class="nav-footer-center">
       &nbsp;
