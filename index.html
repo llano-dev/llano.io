@@ -156,9 +156,14 @@ h2, .page-section h2, .hero h2, section h2 {
 
 /* ── Hero ── */
 .hero {
-  display: flex;
+  display: flex !important;
   align-items: center;
   border-bottom: 1px solid #1e2026;
+  padding: 0 !important;
+  min-height: auto !important;
+  max-width: none !important;
+  margin: 0 !important;
+  grid-template-columns: none !important;
 }
 .hero-inner {
   max-width: 960px;
