@@ -82,7 +82,7 @@ ul.task-list li input[type="checkbox"] {
 <!-- margin-sidebar -->
     
 <!-- main -->
-<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><h1 class="title display-7">Know the Risk<br>Before You Route</h1></header>
+<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
 
 
@@ -170,13 +170,17 @@ h2, .page-section h2, .hero h2, section h2 {
   margin: 0;
   padding: 3rem 1.5rem 5rem 2rem;
 }
-.hero h1 {
+.hero-h1 {
   font-size: clamp(2rem, 4.5vw, 3rem);
   font-weight: 600;
   color: #e2e4e9;
   line-height: 1.2;
   margin-bottom: 1.25rem;
   max-width: 700px;
+}
+@media (max-width: 768px) {
+  .site-header { height: 80px !important; }
+  .site-header img.logo { height: 64px !important; }
 }
 .hero p {
   font-size: .95em;
@@ -597,17 +601,17 @@ h2, .page-section h2, .hero h2, section h2 {
 </style>
 
 <!-- ── Header ──────────────────────────────────────────────────────────── -->
-<div style="width:100vw;position:relative;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;height:160px;overflow:hidden;">
+<div class="site-header" style="width:100vw;position:relative;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;height:160px;overflow:hidden;">
   <img src="darkheader.svg" style="position:absolute;width:100%;height:auto;top:-40px;display:block;">
   <div style="position:relative;z-index:1;height:100%;display:flex;align-items:center;padding-left:1.5rem;">
-    <img src="logo-composite4.svg" alt="llano" style="height:130px;display:block;">
+    <img class="logo" src="logo-composite4.svg" alt="llano" style="height:130px;display:block;">
   </div>
 </div>
 
 <!-- ── Hero ──────────────────────────────────────────────────────────────── -->
 <section class="hero" style="border-top:none;min-height:auto;">
   <div class="hero-inner">
-    
+    <div class="hero-h1">Know the Risk<br>Before You Route</div>
     <p>Llano is route safety scoring for trucking fleets. Real crash history, live weather, and road geometry — ranked alternatives in a single API call.</p>
     <div class="hero-actions">
       <a class="btn-primary" href="#demo">Try the Demo</a>
