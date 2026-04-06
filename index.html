@@ -87,7 +87,7 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&amp;family=Exo+2:ital,wght@1,800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&amp;family=Exo+2:ital,wght@1,800&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -97,7 +97,7 @@ ul.task-list li input[type="checkbox"] {
 body, .quarto-container, #quarto-content, main {
   background: #13151a !important;
   color: #e2e4e9 !important;
-  font-family: 'JetBrains Mono', monospace !important;
+  font-family: 'Sora', sans-serif !important;
 }
 
 /* Push content to very top — remove all Quarto top offsets */
@@ -141,7 +141,7 @@ h2, .page-section h2, .hero h2, section h2 {
   color: #e2e4e9 !important;
   line-height: 1.25 !important;
   margin-bottom: 1rem !important;
-  font-family: 'JetBrains Mono', monospace !important;
+  font-family: 'Sora', sans-serif !important;
   border-bottom: none !important;
   border: none !important;
   padding-bottom: 0 !important;
@@ -163,7 +163,7 @@ h2, .page-section h2, .hero h2, section h2 {
 .hero-inner {
   max-width: 960px;
   margin: 0;
-  padding: 0.75rem 1.5rem 5rem 2rem;
+  padding: 0 1.5rem 5rem 2rem;
 }
 .hero h1 {
   font-size: clamp(2rem, 4.5vw, 3rem);
@@ -184,7 +184,7 @@ h2, .page-section h2, .hero h2, section h2 {
 .btn-primary {
   background: #F97316;
   color: #0e1013;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Sora', sans-serif;
   font-size: .82em;
   font-weight: 600;
   padding: .65rem 1.4rem;
@@ -195,7 +195,7 @@ h2, .page-section h2, .hero h2, section h2 {
 .btn-primary:hover { background: #fb923c; color: #0e1013; text-decoration: none; }
 .btn-ghost {
   color: #8b8fa8;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Sora', sans-serif;
   font-size: .82em;
   padding: .65rem 0;
   text-decoration: none;
@@ -315,6 +315,9 @@ h2, .page-section h2, .hero h2, section h2 {
   flex: 1;
   overflow-y: auto;
   overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  display: flex;
+  flex-direction: column;
   padding: .9rem 1.1rem .4rem;
   font-size: .8em;
   line-height: 1.65;
@@ -339,7 +342,7 @@ h2, .page-section h2, .hero h2, section h2 {
   border: none;
   outline: none;
   color: #e2e4e9;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Sora', sans-serif;
   font-size: .8em;
   caret-color: #F97316;
 }
@@ -533,7 +536,7 @@ h2, .page-section h2, .hero h2, section h2 {
   border: none;
   border-bottom: 2px solid transparent;
   color: #8b8fa8;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Sora', sans-serif;
   font-size: .75em;
   padding: .2rem .7rem;
   cursor: pointer;
@@ -590,19 +593,19 @@ h2, .page-section h2, .hero h2, section h2 {
 
 <!-- ── Header image ──────────────────────────────────────────────────────── -->
 <div style="width:100vw;height:200px;position:relative;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;overflow:hidden;">
-  <img src="darkheader.svg" style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block;">
+  <img src="darkheader.svg" style="position:absolute;width:100%;height:auto;top:-40px;display:block;">
 </div>
 
 <!-- ── Logo (flush under header) ─────────────────────────────────────── -->
-<div style="padding: 0.1rem 0 0 1.5rem;">
-  <img src="logo-composite4.svg" alt="llano" style="height:270px;display:block;">
+<div style="padding: 0.1rem 0 0 1.5rem; position:relative; z-index:1; margin-bottom:-5rem;">
+  <img src="logo-composite4.svg" alt="llano" style="height:370px;display:block;">
 </div>
 
 <!-- ── Hero ──────────────────────────────────────────────────────────────── -->
 <section class="hero" style="border-top:none;min-height:auto;">
   <div class="hero-inner">
     
-    <p>Route safety scoring for trucking fleets. Real crash history, live weather, and road geometry — ranked alternatives in a single API call.</p>
+    <p>Llano is route safety scoring for trucking fleets. Real crash history, live weather, and road geometry — ranked alternatives in a single API call.</p>
     <div class="hero-actions">
       <a class="btn-primary" href="#demo">Try the Demo</a>
       <a class="btn-ghost" href="#docs">API Docs →</a>
@@ -784,7 +787,7 @@ h2, .page-section h2, .hero h2, section h2 {
           <div class="t-dot t-dot-r"></div>
           <div class="t-dot t-dot-y"></div>
           <div class="t-dot t-dot-g"></div>
-          <span class="chrome-title"><span class="chrome-brand">|:|</span> llano — route safety scoring</span>
+          <span class="chrome-title"><span class="chrome-brand">|:|</span> llano</span>
         </div>
         <div class="terminal-output" id="term-output"></div>
         <div class="terminal-input-row">
@@ -1152,25 +1155,17 @@ function lineHTML(html) {
 
 // ── Welcome ───────────────────────────────────────────────────────────────────
 function welcome() {
-  var o = '#F97316', d = '#e2e4e9', m = '#8b8fa8', dm = '#5a5f72';
-  function ascii(s) {
-    var out = '';
-    for (var i = 0; i < s.length; i++) {
-      out += s[i] === '|'
-        ? '<span style="color:' + o + ';font-weight:600">|</span>'
-        : s[i];
-    }
-    return '<span style="color:' + d + '">' + out + '</span>';
-  }
-  var sep = '  ' + Array(36).join('\u2500');
+  var o = '#F97316', m = '#8b8fa8', b = '#2e3140';
+  var dot = '<span style="color:' + o + ';font-weight:700">\u25cf</span>';
+  function c(html) { lineHTML(html).style.textAlign = 'center'; }
+  output.style.justifyContent = 'center';
   blank();
-  lineHTML('<span style="color:#2a2d38">' + sep + '</span>');
-  lineHTML(ascii('  |    |    /\\    |\\  |   /--\\'));
-  lineHTML(ascii('  |    |   /  \\   | \\ |  /    \\'));
-  lineHTML(ascii('  |__  |__/____\\  |  \\|  \\____/'));
-  lineHTML('<span style="color:' + m + '">        route intelligence</span>');
-  lineHTML('<span style="color:#2a2d38">' + sep + '</span>');
-  lineHTML('<span style="color:' + dm + '">  Texas  \u00b7  early access</span>');
+  c('<span style="color:' + b + '">|</span>             <span style="color:' + b + '">|</span>');
+  c('<span style="color:' + b + '">|</span>      ' + dot + '      <span style="color:' + b + '">|</span>');
+  c('<span style="color:' + b + '">|</span>             <span style="color:' + b + '">|</span>');
+  c('<span style="color:' + b + '">|</span>      ' + dot + '      <span style="color:' + b + '">|</span>');
+  c('<span style="color:' + b + '">|</span>             <span style="color:' + b + '">|</span>');
+  c('<span style="color:' + m + '">route intelligence</span>');
   blank();
 }
 
@@ -1537,6 +1532,7 @@ function execute(cmd) {
 // ── Input ─────────────────────────────────────────────────────────────────────
 input.addEventListener("keydown", function(e) {
   if (e.key === "Enter") {
+    output.style.justifyContent = '';
     var cmd = input.value;
     history.unshift(cmd);
     histIdx = -1;
