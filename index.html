@@ -633,7 +633,19 @@ main.content.column-page { border: none !important; box-shadow: none !important;
   .waitlist-form { flex-direction: column; align-items: stretch; width: 100%; }
   .waitlist-input { width: 100% !important; }
   .cta-actions { width: 100%; }
-  #sticky-nav { display: none; }
+  #sticky-nav {
+    top: 0.75rem;
+    left: auto;
+    right: 1rem;
+    width: auto;
+    height: auto;
+    padding: 0.35rem 0.65rem;
+    border-radius: 8px;
+    border-bottom: none;
+    border: 1px solid #2e3140;
+    transform: translateY(-16px);
+  }
+  #sticky-nav img { height: 28px; }
 }
 </style>
 
@@ -654,7 +666,7 @@ main.content.column-page { border: none !important; box-shadow: none !important;
 
 <!-- ── Header ──────────────────────────────────────────────────────────── -->
 <div class="site-header" style="width:100vw;position:relative;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;height:220px;overflow:hidden;background:#13151a;">
-  <img class="header-bg" src="darkheader.svg" style="position:absolute;width:100%;height:auto;top:-60px;display:block;">
+  <img class="header-bg" src="darkheader.svg" style="position:absolute;width:calc(100% + 8px);height:auto;top:-60px;left:-4px;display:block;">
   <div style="position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(to bottom,transparent,#13151a);z-index:2;pointer-events:none;"></div>
   <div style="position:relative;z-index:3;height:100%;display:flex;align-items:center;padding-left:1.5rem;">
     <img class="logo" src="logo-composite4.svg" alt="llano" style="height:130px;display:block;">
@@ -1097,9 +1109,6 @@ best <span class="c-kw">&lt;-</span> resp[[1]]   <span class="c-cm"># sorted saf
           <span class="docs-field-name">hotspots</span>
           <span class="docs-field-type">array</span>
           <span class="docs-field-desc">High-risk segments along the route — each with a route fraction (0–1) and contributing factors.</span>
-        </div>
-        <div style="margin-top:1.25rem">
-          <a class="btn-ghost" href="#about">Get Free Access →</a>
         </div>
       </div>
     </div>
