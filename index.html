@@ -457,18 +457,18 @@ h2, .page-section h2, .hero h2, section h2 {
 .audit-report-title { color: #e2e4e9; font-size: .95em; }
 .audit-report-period { color: #8b8fa8; font-size: .82em; }
 
-.audit-client-strip { display: flex; justify-content: space-between; margin-bottom: 1rem; }
+.audit-client-strip { display: flex; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: .25rem; }
 .audit-client-name { color: #e2e4e9; font-weight: 600; }
 .audit-client-period { color: #8b8fa8; }
 
-.audit-score-row { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1rem; }
+.audit-score-row { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
 .audit-big-score { font-size: 2.4em; font-weight: 600; color: #e2e4e9; }
 .audit-big-score span { font-size: .45em; color: #8b8fa8; }
 .audit-grade-badge { background: #14532d; color: #34d399; padding: .15rem .55rem; border-radius: 3px; font-size: .8em; }
 .audit-trend { color: #34d399; font-size: .82em; }
 .audit-score-label { color: #8b8fa8; font-size: .82em; }
 
-.audit-kpis { display: grid; grid-template-columns: repeat(3,1fr); gap: .5rem; margin-bottom: 1rem; }
+.audit-kpis { display: grid; grid-template-columns: repeat(3,1fr); gap: .5rem; margin-bottom: 1rem; overflow: hidden; }
 .audit-kpi-num { font-size: 1.2em; font-weight: 600; color: #e2e4e9; }
 .audit-kpi-label { font-size: .76em; color: #8b8fa8; }
 
@@ -1128,7 +1128,7 @@ best <span class="c-kw">&lt;-</span> resp[[1]]   <span class="c-cm"># sorted saf
           <span class="docs-field-desc">High-risk segments along the route — each with a route fraction (0–1) and contributing factors.</span>
         </div>
         <div style="margin-top:1.25rem">
-          <a class="btn-ghost" href="#about">Get Access →</a>
+          <a class="btn-ghost" href="#about">Get Free Access →</a>
         </div>
       </div>
     </div>
@@ -1147,7 +1147,7 @@ best <span class="c-kw">&lt;-</span> resp[[1]]   <span class="c-cm"># sorted saf
     <div class="cta-actions">
       <div class="waitlist-form" id="waitlist-form">
         <input class="waitlist-input" id="waitlist-email" type="email" placeholder="your@email.com" autocomplete="email">
-        <button class="btn-primary" onclick="submitWaitlist()" style="cursor:pointer;border:none;">Get Access</button>
+        <button class="btn-primary" onclick="submitWaitlist()" style="cursor:pointer;border:none;">Get Free Access</button>
       </div>
       <span class="waitlist-thanks" id="waitlist-thanks" style="display:none;">Thanks! We'll be in touch.</span>
     </div>
