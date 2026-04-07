@@ -595,6 +595,7 @@ main.content.column-page { border: none !important; box-shadow: none !important;
     <p>Llano is route safety scoring for trucking fleets. Real crash history, live weather, and road geometry — ranked alternatives in a single API call.</p>
     <div class="hero-actions">
       <a class="btn-primary" href="#demo">Try the Demo</a>
+      <a class="btn-ghost" href="#waitlist-form">Get Free Access</a>
       <a class="btn-ghost" href="#docs">API Docs →</a>
     </div>
   </div>
