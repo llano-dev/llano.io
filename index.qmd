@@ -121,6 +121,7 @@ h2, .page-section h2, .hero h2, section h2 {
   border-radius: 5px;
   text-decoration: none;
   letter-spacing: .03em;
+  white-space: nowrap;
 }
 .btn-primary:hover { background: #fb923c; color: #0e1013; text-decoration: none; }
 .btn-ghost {
@@ -129,6 +130,7 @@ h2, .page-section h2, .hero h2, section h2 {
   font-size: .82em;
   padding: .65rem 0;
   text-decoration: none;
+  white-space: nowrap;
 }
 .btn-ghost:hover { color: #e2e4e9; text-decoration: none; }
 
@@ -367,7 +369,7 @@ h2, .page-section h2, .hero h2, section h2 {
 .pdf-viewer-dot { width: 10px; height: 10px; border-radius: 50%; background: #2e3140; }
 .pdf-viewer-title { font-size: .73em; color: #8b8fa8; margin-left: .4rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.audit-report { padding: 1.4rem 1.6rem; font-size: .8em; max-height: 480px; overflow-y: auto; overflow-x: auto; }
+.audit-report { padding: 1.4rem 1.6rem; font-size: .68em; max-height: 480px; overflow-y: auto; overflow-x: auto; }
 .audit-report-inner { min-width: 520px; }
 .audit-report-header { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1rem; border-bottom: 1px solid #1e2026; padding-bottom: .8rem; }
 .audit-wordmark img { height: 28px; display: block; }
@@ -1086,9 +1088,8 @@ function updateGhost() {
 
 // ── Map init (always visible, Texas overview) ─────────────────────────────────
 function initMap() {
-  leafMap = L.map("demo-map", { zoomControl: true, scrollWheelZoom: false });
+  leafMap = L.map("demo-map", { zoomControl: true, scrollWheelZoom: false, attributionControl: false });
   L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-    attribution: '\u00a9 <a href="https://openstreetmap.org">OSM</a> \u00a9 <a href="https://carto.com">CARTO</a>',
     subdomains: "abcd", maxZoom: 19
   }).addTo(leafMap);
   leafMap.setView([31.0, -99.5], 5);

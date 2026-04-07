@@ -50,7 +50,7 @@
     }
 
     #sidebar-header {
-      height: 52px;
+      height: 42px;
       padding: 0 14px;
       box-sizing: border-box;
       border-bottom: 1px solid var(--border);
@@ -409,7 +409,7 @@
     .table-block:hover .table-block-del { opacity: 1; }
     .table-block-del:hover { color: var(--red); }
     .table-block-refresh {
-      position: absolute; top: 0; right: 20px;
+      position: absolute; top: 0; right: 44px;
       background: none; border: none; cursor: pointer;
       color: var(--dim); font-size: .85em; padding: 2px 4px; line-height: 1;
       opacity: 0; transition: opacity .15s;
@@ -492,7 +492,7 @@
     #tag-filter-wrap { flex: 1; position: relative; min-width: 60px; display: flex; align-items: center; }
     .table-block-drag-handle {
       position: absolute; top: 0; right: 22px;
-      color: var(--dim); font-size: .85em; cursor: grab; line-height: 1;
+      color: var(--dim); font-size: 1.2em; cursor: grab; line-height: 1;
       opacity: 0; transition: opacity .15s; user-select: none;
       padding: 2px 4px;
     }
@@ -504,7 +504,7 @@
       margin: 10px 0 6px;
       border-collapse: collapse;
       width: 100%;
-      max-width: 660px;
+      max-width: 800px;
     }
     .result-table th {
       font-size: .75em;
@@ -539,15 +539,19 @@
       white-space: nowrap;
     }
     .route-name-input {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100%;
+      height: 100%;
       background: var(--surface2);
       border: 1px solid var(--orange);
       border-radius: 3px;
-      padding: 1px 5px;
+      padding: 0 4px;
+      margin: 0;
       font-family: var(--font);
       font-size: inherit;
       color: var(--text);
       outline: none;
-      width: 100%;
       box-sizing: border-box;
     }
 
@@ -1269,7 +1273,7 @@
   <!-- ── Sidebar ── -->
   <div id="sidebar">
     <div id="sidebar-header">
-      <img src="logo-short.svg" alt="Llano" style="height:34px;display:block;">
+      <img src="logo-short.svg" alt="Llano" style="height:26px;display:block;">
     </div>
 
     <div style="display:flex;gap:6px;margin:10px 10px 0;">
@@ -1368,8 +1372,8 @@
               <th>Time</th>
               <th>+Time</th>
               <th>Arrive</th>
-              <th>Rel. Risk</th>
-              <th>Safety</th>
+              <th>Relative Risk</th>
+              <th>Absolute Risk</th>
             </tr>
           </thead>
           <tbody>
@@ -1416,11 +1420,6 @@
                  autocomplete="off" spellcheck="false"
                  onkeydown="handleInput(event)" oninput="updateGhost()" />
         </div>
-        <div id="input-hints">
-          <span><span class="hint-key">→</span> accept suggestion</span>
-          <span><span class="hint-key">⇥</span> reset</span>
-          <button onclick="clearTerminal()" style="background:none;border:none;color:var(--dim);font-size:.68em;cursor:pointer;padding:0;margin-left:4px;font-family:var(--font);" title="Clear terminal">clear</button>
-        </div>
       </div>
     </div><!-- /terminal-pane -->
     <div id="split-divider"></div>
@@ -1445,7 +1444,7 @@
           <span class="board-sort-label">Sort&nbsp;</span>
           <select class="board-sort-select" onchange="sortBoard(this.value)">
             <option value="time">Time ↓</option>
-            <option value="rr">Rel. Risk</option>
+            <option value="rr">Relative Risk</option>
             <option value="status">Status</option>
             <option value="driver">Driver</option>
           </select>
@@ -1458,8 +1457,8 @@
               <th onclick="sortBoard('route')">Route <span class="sort-arrow">↕</span></th>
               <th onclick="sortBoard('driver')">Driver <span class="sort-arrow">↕</span></th>
               <th onclick="sortBoard('time')">Dep / ETA <span class="sort-arrow">↕</span></th>
-              <th onclick="sortBoard('rr')" class="sorted">Rel. Risk <span class="sort-arrow">↕</span></th>
-              <th>Safety</th>
+              <th onclick="sortBoard('rr')" class="sorted">Relative Risk <span class="sort-arrow">↕</span></th>
+              <th>Absolute Risk</th>
               <th>Ref #</th>
               <th></th>
             </tr>
@@ -1748,7 +1747,7 @@
 </div><!-- /layout -->
 
 <!-- Batch upload modal -->
-<div id="batch-modal" style="display:none" onclick="if(event.target===this)closeBatchModal()">
+<div id="batch-modal" style="display:none" onclick="if(event.target===this&&batchState!=='scoring')closeBatchModal()">
   <div id="batch-panel">
     <div id="batch-panel-header" onclick="if(document.getElementById('batch-modal').classList.contains('minimized'))maximizeBatchModal()">
       <div id="batch-panel-title">Batch Upload</div>
@@ -1769,7 +1768,7 @@
 <!-- Auth gate — shown when unauthenticated or link expired -->
 <div id="auth-gate" style="display:none;position:fixed;inset:0;background:var(--bg);
   flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;">
-  <div style="color:var(--orange);font-size:1.1em;font-weight:700;letter-spacing:.08em;">LLANO</div>
+  <img src="logo-composite5.svg" style="height:72px;width:auto;" alt="Llano" />
   <div id="gate-msg" style="color:var(--muted);font-size:.85em;max-width:320px;text-align:center;">
     Sign in to continue.
   </div>
@@ -2541,7 +2540,7 @@
         '<div class="trip-body">' +
           '<div class="trip-route">' + escHtml(trip.from||"?") + ' <span style="color:var(--dim)">→</span> ' + escHtml(trip.to||"?") + certBadge + '</div>' +
           '<div class="trip-meta">' + (trip.timeVal ? escHtml(trip.timeVal) : "") + '</div>' +
-          '<div class="trip-meta" style="margin-top:1px;">' + (trip.createdAt ? timeAgo(trip.createdAt) : "") + '</div>' +
+          '<div class="trip-meta" style="margin-top:1px;">' + (trip.createdAt ? timeAgo(trip.createdAt) : "") + (trip.refreshedAt && trip.refreshedAt > trip.createdAt + 5000 ? ' <span style="color:var(--dim)">· refreshed ' + timeAgo(trip.refreshedAt) + '</span>' : '') + '</div>' +
           (tagsHtml ? '<div class="trip-tags-row">' + tagsHtml + '</div>' : '') +
           '<div class="trip-lno">' + escHtml(trip.id) + '</div>' +
         '</div>';
@@ -2733,17 +2732,12 @@
 
       rb.classList.add("spinning"); rb.disabled = true;
 
-      var scoreBody = { waypoints: [rfrom].concat(record.via || []).concat([rto]) };
-      if (record.depart) scoreBody.timestamp = record.depart;
-      if (record.arrive) scoreBody.arrive    = record.arrive;
-      fetch("/score", {
-        method: "POST", credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(scoreBody)
-      }).then(function(r) { return r.json(); })
-      .then(function(resp) {
+      var serverTripId = trip2 && trip2.trip_id;
+      var n = (origRoutes && origRoutes.length) || 1;
+      console.log("[refresh] serverTripId=" + serverTripId + " n=" + n + " tid2=" + tid2);
+
+      function applyRoutes(routes) {
         var sc = function(v) { return Array.isArray(v) ? v[0] : v; };
-        var routes = Array.isArray(resp) ? resp : (resp && resp.routes ? resp.routes : []);
         if (!routes.length) throw new Error("no routes");
         var sorted = routes.slice().sort(function(a, b) { return (sc(b.trips_per_crash)||0) - (sc(a.trips_per_crash)||0); });
         var fd = Math.min.apply(null, sorted.map(function(r) { return sc(r.duration_secs) || Infinity; }));
@@ -2758,8 +2752,18 @@
           trip.payload.sorted = sorted; trip.payload.fastestDur = fd;
           trip.payload.baselineIdx = bi; trip.payload.baselineTpc = record.baselineTpc;
         }
+        if (trip) trip.refreshedAt = Date.now();
+        // Save rescored routes as a new DB trip record
+        if (trip && trip.from && trip.to) {
+          fetch("/trips", {
+            method: "POST", credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ from_label: trip.from, to_label: trip.to, routes: sorted })
+          }).then(function(r) { return r.json(); }).then(function(d) {
+            if (d.trip_id) { trip.trip_id = d.trip_id; persistTrips(); }
+          }).catch(function() {});
+        }
         persistTrips();
-        // Update table content in-place — never remove curWrapper from DOM so rb stays live
         var newBlock = buildTableBlock(record, tid);
         var oldTbl = curWrapper ? curWrapper.querySelector("table.result-table") : null;
         var newTbl = newBlock.querySelector("table.result-table");
@@ -2767,10 +2771,44 @@
         rb.classList.remove("spinning"); rb.disabled = false;
         if (typeof updateMap === "function") updateMap(sorted, false);
         if (typeof highlightRoute === "function") highlightRoute(record.selectedRoute || 0);
-      }).catch(function(err) {
+      }
+
+      function onError(err) {
         console.error("[refresh] error:", err);
         rb.classList.remove("spinning"); rb.disabled = false;
-      });
+      }
+
+      if (serverTripId) {
+        // Use /rescore per route — locked segment IDs keep scores stable
+        var promises = [];
+        for (var ri = 0; ri < n; ri++) {
+          (function(idx) {
+            var body = { trip_id: serverTripId, route_index: idx };
+            if (record.depart) body.timestamp = record.depart;
+            if (record.arrive) body.arrive    = record.arrive;
+            promises.push(fetch("/rescore", {
+              method: "POST", credentials: "include",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(body)
+            }).then(function(r) { return r.json(); }));
+          })(ri);
+        }
+        Promise.all(promises).then(applyRoutes).catch(onError);
+      } else {
+        // Fallback: fresh score (no server trip_id yet)
+        var scoreBody = { waypoints: [rfrom].concat(record.via || []).concat([rto]) };
+        if (record.depart) scoreBody.timestamp = record.depart;
+        if (record.arrive) scoreBody.arrive    = record.arrive;
+        fetch("/score", {
+          method: "POST", credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(scoreBody)
+        }).then(function(r) { return r.json(); })
+        .then(function(resp) {
+          var routes = Array.isArray(resp) ? resp : (resp && resp.routes ? resp.routes : []);
+          applyRoutes(routes);
+        }).catch(onError);
+      }
     };
     return rb;
   }
@@ -2903,7 +2941,7 @@
     table.innerHTML =
       '<thead><tr>' +
         '<th>Route</th><th>Time</th><th>+Time</th>' +
-        '<th>' + timeHeader + '</th><th>Miles</th><th>Rel. Risk</th><th>Safety</th>' +
+        '<th>' + timeHeader + '</th><th>Miles</th><th>Relative Risk</th><th>Absolute Risk</th>' +
       '</tr></thead><tbody></tbody>';
 
     var tbody = table.querySelector("tbody");
@@ -3024,6 +3062,7 @@
       from: from, to: to,
       timeVal:  record.timeVal || "",
       createdAt: Date.now(),
+      refreshedAt: Date.now(),
       tags: [],
       certified: false,
       tables: [record],
@@ -3157,22 +3196,21 @@
     var input = document.createElement("input");
     input.className = "route-name-input";
     input.value = current;
-    span.replaceWith(input);
+    // Keep span in DOM (controls cell height), just hide it — overlay input absolutely
+    span.style.visibility = "hidden";
+    span.parentNode.appendChild(input);
     input.focus();
     input.select();
     function commit() {
       var val = input.value.trim() || current;
       routeNames[idx] = val;
-      var newSpan = document.createElement("span");
-      newSpan.className = span.className;
-      if (span.style.cssText) newSpan.style.cssText = span.style.cssText;
-      newSpan.setAttribute("ondblclick", "editRouteName(this," + idx + ")");
-      newSpan.textContent = val;
-      input.replaceWith(newSpan);
+      span.textContent = val;
+      span.style.visibility = "";
+      input.remove();
     }
     input.addEventListener("blur", commit);
     input.addEventListener("keydown", function(e) {
-      if (e.key === "Enter") commit();
+      if (e.key === "Enter") { e.preventDefault(); commit(); }
       if (e.key === "Escape") { input.value = current; commit(); }
     });
   }
@@ -3620,6 +3658,13 @@
       return;
     }
 
+    if (!me) {
+      appendLine('<span class="t-prompt">llano&gt; </span><span class="t-cmd">' + escHtml(raw) + '</span>');
+      appendLine('<span class="t-warn">  Not signed in. Please sign in before scoring a route.</span>');
+      appendLine('');
+      return;
+    }
+
     function parseArgs(s) {
       var out = {}, re = /--(\w+)\s+(?:"([^"]+)"|(\S+))/g, match;
       while ((match = re.exec(s)) !== null) {
@@ -3866,7 +3911,7 @@
       table.innerHTML =
         '<thead><tr>' +
           '<th>Route</th><th>Time</th><th>+Time</th>' +
-          '<th>' + timeHeader + '</th><th>Miles</th><th>Rel. Risk</th><th>Safety</th>' +
+          '<th>' + timeHeader + '</th><th>Miles</th><th>Relative Risk</th><th>Absolute Risk</th>' +
         '</tr></thead><tbody></tbody>';
 
       var tbody = table.querySelector("tbody");
@@ -4320,6 +4365,7 @@
     var m = document.getElementById("batch-modal");
     m.style.display = "none";
     m.classList.remove("minimized");
+    document.getElementById("batch-panel-close").style.display = "";
     batchState    = "idle";
     batchRoutes   = [];
     batchFilename = "";
@@ -4361,7 +4407,7 @@
     document.getElementById("batch-action-btn").style.display = "none";
     document.getElementById("batch-cancel-btn").textContent = "Cancel";
     document.getElementById("batch-panel-title").textContent = "Batch Upload — reading file…";
-    setBatchBody('<div style="padding:32px 0;text-align:center;color:var(--muted);font-size:.85em;">Extracting routes with Claude…</div>');
+    setBatchBody('<div style="padding:32px 0;text-align:center;color:var(--muted);font-size:.85em;">Parsing routes with AI…</div>');
 
     var reader = new FileReader();
     reader.onerror = function() {
@@ -4505,9 +4551,11 @@
     if (!toScore.length) return;
     batchState = "scoring";
 
-    document.getElementById("batch-panel-title").textContent = "Batch Upload — scoring 0 / " + toScore.length;
+    document.getElementById("batch-panel-title").textContent = "Scoring 0 / " + toScore.length;
     document.getElementById("batch-action-btn").style.display = "none";
-    document.getElementById("batch-cancel-btn").textContent = "Close";
+    document.getElementById("batch-cancel-btn").textContent = "Cancel";
+    document.getElementById("batch-panel-close").style.display = "none";
+    minimizeBatchModal();
 
     var progressRows = toScore.map(function(r, i) {
       return '<div class="batch-prog-row" id="bpr-' + i + '">' +
@@ -4530,7 +4578,7 @@
       if (!ts || typeof ts !== "string") return undefined;
       var s = ts.replace(" ", "T");
       if (/^\d{4}-/.test(s)) {
-        // Placeholder year (e.g. 1900 from Claude) — keep time, use today's date
+        // Placeholder year (e.g. 1900 from AI parsing) — keep time, use today's date
         return parseInt(s.slice(0, 4), 10) >= 2000 ? s : (today + "T" + s.slice(11));
       }
       return today + "T" + s;
@@ -4538,10 +4586,15 @@
 
     function scoreNext(idx) {
       if (idx >= toScore.length) {
+        batchState = "done";
         document.getElementById("batch-panel-title").textContent =
-          "Batch Upload — done (" + done + " / " + toScore.length + " scored)";
+          "Batch done — " + done + " / " + toScore.length + " scored";
+        document.getElementById("batch-cancel-btn").textContent = "Close";
+        document.getElementById("batch-panel-close").style.display = "";
         return;
       }
+      document.getElementById("batch-panel-title").textContent =
+        "Scoring " + idx + " / " + toScore.length;
       var row = toScore[idx];
       var statusEl = document.getElementById("bps-" + idx);
       var scoreEl  = document.getElementById("bpc-" + idx);
@@ -4619,7 +4672,7 @@
               trips.unshift({
                 id: genLnoId(), trip_id: serverTripId,
                 from: row.from, to: row.to, timeVal: timeVal,
-                createdAt: Date.now(), tags: [tag],
+                createdAt: Date.now(), refreshedAt: Date.now(), tags: [tag],
                 certified: false, tables: [],
                 payload: {
                   id: tableId, sorted: sorted, routeNames: rNames,
@@ -4746,8 +4799,9 @@
   var appMap = L.map("app-map", { zoomControl: false, attributionControl: false })
     .setView([31.0, -99.0], 6);
 
-  L.tileLayer("/maptile/v3/base/mc/{z}/{x}/{y}/png", {
-    maxZoom: 20
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    maxZoom: 20,
+    subdomains: "abcd"
   }).addTo(appMap);
 
   L.control.zoom({ position: "bottomright" }).addTo(appMap);

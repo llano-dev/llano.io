@@ -113,7 +113,7 @@ h2 { letter-spacing: -0.02em; }
   max-width: 440px;
 }
 
-.hero-actions { display: flex; align-items: center; gap: 1.5rem; }
+.hero-actions { display: flex; align-items: center; gap: 1.5rem; flex-wrap: nowrap; }
 
 .hero-cta {
   display: inline-block;
@@ -1166,6 +1166,7 @@ pre { background: transparent !important; border: none !important; padding: 0 !i
 /* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 960px) {
   .hero { grid-template-columns: 1fr; padding: 5rem 2rem 3rem; min-height: unset; }
+  .hero-actions { gap: .9rem; }
   .hero-right { display: none; }
   .api-grid { grid-template-columns: 1fr; }
   .routes-grid { grid-template-columns: 1fr; }
