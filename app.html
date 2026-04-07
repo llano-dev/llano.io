@@ -50,11 +50,14 @@
     }
 
     #sidebar-header {
-      padding: 14px 14px 12px;
+      height: 42px;
+      padding: 0 14px;
+      box-sizing: border-box;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-shrink: 0;
     }
     #sidebar-logo { color: var(--orange); font-size: 1.1em; font-weight: 700; letter-spacing: .08em; }
     #sidebar-user { font-size: .75em; color: var(--dim); }
@@ -74,6 +77,20 @@
       width: calc(100% - 20px);
     }
     #new-route-btn:hover { border-color: var(--orange); color: var(--orange); }
+
+    #batch-upload-btn {
+      padding: 7px 10px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--dim);
+      font-family: var(--font);
+      font-size: .8em;
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+      flex-shrink: 0;
+    }
+    #batch-upload-btn:hover { border-color: var(--orange); color: var(--orange); }
 
     /* Filter tabs */
     #filter-tabs {
@@ -128,7 +145,7 @@
 
     .trip-item {
       padding: 7px 14px;
-      cursor: pointer;
+      cursor: grab;
       border-left: 2px solid transparent;
       transition: background .1s, border-color .1s;
       display: flex;
@@ -138,6 +155,35 @@
     }
     .trip-item:hover { background: var(--surface2); }
     .trip-item.active { background: var(--surface2); border-left-color: var(--orange); }
+    .trip-item.selected { background: rgba(249,115,22,.08); border-left-color: var(--orange); }
+    #trip-list-meta {
+      display: flex; align-items: center; justify-content: flex-end;
+      padding: 2px 14px 0; min-height: 18px;
+    }
+    #select-all-btn {
+      background: none; border: none; color: var(--dim); cursor: pointer;
+      font-size: .72em; font-family: var(--font); padding: 0;
+    }
+    #select-all-btn:hover { color: var(--text); }
+    #bulk-tag-bar {
+      display: none; padding: 8px 12px; border-top: 1px solid var(--border);
+      background: var(--surface); flex-shrink: 0; flex-direction: column; gap: 6px;
+    }
+    #bulk-tag-bar.visible { display: flex; }
+    #bulk-tag-bar-header { display: flex; align-items: center; justify-content: space-between; }
+    #bulk-tag-count { font-size: .72em; color: var(--orange); }
+    #bulk-tag-clear { background: none; border: none; color: var(--dim); cursor: pointer; font-size: .8em; font-family: var(--font); padding: 0; }
+    #bulk-tag-clear:hover { color: var(--text); }
+    #bulk-tag-input-row { display: flex; gap: 6px; }
+    #bulk-tag-input {
+      flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px;
+      padding: 4px 8px; color: var(--text); font-family: var(--font); font-size: .75em; outline: none;
+      transition: border-color .15s;
+    }
+    #bulk-tag-input:focus { border-color: var(--orange); }
+    #bulk-tag-add { background: none; border: 1px solid var(--border); border-radius: 4px; padding: 3px 8px; color: var(--dim); font-family: var(--font); font-size: .72em; cursor: pointer; transition: border-color .15s, color .15s; white-space: nowrap; }
+    #bulk-tag-add:hover { border-color: var(--orange); color: var(--orange); }
+    #bulk-common-tags { display: flex; flex-wrap: wrap; gap: 4px; }
     .trip-item[data-status="completed"] { opacity: .65; }
     .trip-delete {
       display: none;
@@ -156,6 +202,31 @@
     }
     .trip-item:hover .trip-delete { display: block; }
     .trip-delete:hover { color: var(--text); background: var(--border); }
+    .trip-drag-handle {
+      position: absolute;
+      left: 3px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--dim);
+      font-size: 11px;
+      opacity: .2;
+      pointer-events: none;
+      transition: opacity .15s;
+    }
+    .trip-item:hover .trip-drag-handle { opacity: .6; }
+    #drag-hint {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--dim);
+      font-size: .75em;
+      padding: 24px 18px;
+      opacity: .45;
+      pointer-events: none;
+      user-select: none;
+      animation: hint-pulse 2.8s ease-in-out infinite;
+    }
+    @keyframes hint-pulse { 0%,100% { opacity: .3; } 50% { opacity: .55; } }
 
     .trip-status-dot {
       width: 7px;
@@ -208,7 +279,9 @@
     .sl-completed { background: var(--surface2); color: var(--dim); }
 
     #sidebar-footer {
-      padding: 10px 12px;
+      height: 44px;
+      flex-shrink: 0;
+      padding: 0 12px;
       border-top: 1px solid var(--border);
       display: flex;
       align-items: center;
@@ -335,6 +408,16 @@
     }
     .table-block:hover .table-block-del { opacity: 1; }
     .table-block-del:hover { color: var(--red); }
+    .table-block-refresh {
+      position: absolute; top: 0; right: 20px;
+      background: none; border: none; cursor: pointer;
+      color: var(--dim); font-size: .85em; padding: 2px 4px; line-height: 1;
+      opacity: 0; transition: opacity .15s;
+    }
+    .table-block:hover .table-block-refresh { opacity: 1; }
+    .table-block-refresh:hover { color: var(--cyan); }
+    .table-block-refresh.spinning { animation: spin .7s linear infinite; opacity: 1; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .tag-zone {
       display: flex; flex-wrap: wrap; align-items: center; gap: 4px;
       margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border); min-height: 22px;
@@ -374,14 +457,39 @@
     #score-popup .sp-note { color: var(--dim); font-size: .88em; margin-left: 6px; font-weight: 400; }
     #score-popup .sp-caveat { color: var(--dim); font-size: .75em; margin-top: 8px; font-style: italic; }
     #tag-filter { padding: 8px 10px 6px; border-bottom: 1px solid var(--border); }
-    #tag-filter-input { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px; color: var(--muted); font-family: var(--font); font-size: .75em; outline: none; transition: border-color .15s, color .15s; }
-    #tag-filter-input:focus { border-color: var(--orange); color: var(--text); }
-    #sidebar-clear-btn { background: none; border: 1px solid var(--border); border-radius: 4px; padding: 3px 7px; color: var(--dim); font-family: var(--font); font-size: .7em; cursor: pointer; white-space: nowrap; transition: border-color .15s, color .15s; flex-shrink: 0; }
-    #sidebar-clear-btn:hover { border-color: var(--red, #ef4444); color: var(--red, #ef4444); }
-    #tag-cloud { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 0 2px; }
-    .tag-cloud-chip { font-size: .68em; padding: 2px 7px; border-radius: 3px; cursor: pointer; background: var(--surface2); color: var(--dim); border: 1px solid transparent; transition: color .1s, border-color .1s; }
-    .tag-cloud-chip:hover { color: var(--muted); border-color: var(--border); }
-    .tag-cloud-chip.active { color: var(--orange); border-color: var(--orange); background: rgba(249,115,22,.08); }
+    #tag-filter-bar {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 4px;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 4px;
+      padding: 4px 8px; cursor: text; min-height: 28px;
+      transition: border-color .15s;
+    }
+    #tag-filter-bar:focus-within { border-color: var(--orange); }
+    .filter-token {
+      display: flex; align-items: center; gap: 3px;
+      background: rgba(249,115,22,.1); color: var(--orange);
+      border: 1px solid rgba(249,115,22,.25); border-radius: 3px;
+      padding: 1px 5px; font-size: .68em; white-space: nowrap;
+    }
+    .filter-token.negated {
+      background: rgba(239,68,68,.08); color: var(--red);
+      border-color: rgba(239,68,68,.25);
+    }
+    .filter-token-x {
+      cursor: pointer; opacity: .5; background: none; border: none;
+      color: inherit; padding: 0; font-size: 1em; line-height: 1; font-family: var(--font);
+    }
+    .filter-token-x:hover { opacity: 1; }
+    #tag-filter-input {
+      flex: 1; width: 100%; background: transparent; border: none; outline: none;
+      color: var(--text); font-family: var(--font); font-size: .75em; padding: 0;
+    }
+    #tag-filter-input::placeholder { color: var(--dim); }
+    #tag-filter-ghost {
+      position: absolute; top: 0; left: 0; pointer-events: none;
+      color: var(--dim); font-family: var(--font); font-size: .75em;
+      white-space: pre; opacity: .5;
+    }
+    #tag-filter-wrap { flex: 1; position: relative; min-width: 60px; display: flex; align-items: center; }
     .table-block-drag-handle {
       position: absolute; top: 0; right: 22px;
       color: var(--dim); font-size: .85em; cursor: grab; line-height: 1;
@@ -634,6 +742,93 @@
       animation: hs-pulse 1.8s ease-in-out infinite;
     }
     .leaflet-container { background: #0f1117; }
+
+    /* ── Batch upload modal ── */
+    #batch-modal {
+      position: fixed; inset: 0; z-index: 1100;
+      background: rgba(0,0,0,.6); display: flex;
+      align-items: center; justify-content: center;
+      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    }
+    #batch-panel {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+      width: min(720px, 92vw); max-height: 80vh;
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    #batch-panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    #batch-panel-title { font-size: .88em; font-weight: 600; color: var(--text); }
+    #batch-panel-close {
+      background: none; border: none; color: var(--dim); cursor: pointer;
+      font-size: 1.1em; padding: 0; font-family: var(--font); line-height: 1;
+    }
+    #batch-panel-close:hover { color: var(--text); }
+    #batch-panel-body { flex: 1; overflow-y: auto; padding: 16px; }
+    #batch-panel-footer {
+      display: flex; gap: 8px; justify-content: flex-end;
+      padding: 12px 16px; border-top: 1px solid var(--border); flex-shrink: 0;
+    }
+    .batch-btn {
+      background: none; border: 1px solid var(--border); border-radius: 4px;
+      padding: 6px 14px; color: var(--muted); font-family: var(--font);
+      font-size: .78em; cursor: pointer; transition: border-color .15s, color .15s;
+    }
+    .batch-btn:hover { border-color: var(--orange); color: var(--orange); }
+    .batch-btn.primary { border-color: var(--orange); color: var(--orange); }
+    .batch-btn.primary:hover { background: rgba(249,115,22,.08); }
+    .batch-btn:disabled { opacity: .35; cursor: default; pointer-events: none; }
+    #batch-table { width: 100%; border-collapse: collapse; font-size: .78em; }
+    #batch-table th {
+      text-align: left; color: var(--dim); font-weight: 400; letter-spacing: .06em;
+      font-size: .85em; padding: 0 8px 8px; border-bottom: 1px solid var(--border);
+    }
+    #batch-table td { padding: 4px 4px; vertical-align: middle; }
+    .batch-cell-input {
+      width: 100%; background: transparent; border: 1px solid transparent;
+      border-radius: 3px; padding: 4px 6px; color: var(--text); font-family: var(--font);
+      font-size: 1em; outline: none; transition: border-color .15s;
+    }
+    .batch-cell-input:focus { border-color: var(--orange); background: var(--surface2); }
+    .batch-row-exclude { cursor: pointer; accent-color: var(--orange); width: 14px; height: 14px; }
+    .batch-row.excluded td { opacity: .3; }
+    #batch-progress-list { display: flex; flex-direction: column; gap: 6px; }
+    .batch-prog-row {
+      display: grid; grid-template-columns: 1.2em 1fr auto;
+      gap: 8px; align-items: center; font-size: .78em; padding: 4px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .batch-prog-status { text-align: center; }
+    .batch-prog-route { color: var(--muted); }
+    .batch-prog-score { color: var(--green); font-weight: 600; white-space: nowrap; }
+    .batch-prog-score.warn { color: var(--orange); }
+    .batch-prog-score.err  { color: var(--red); font-size: .88em; }
+    #batch-overall-bar-wrap {
+      height: 3px; background: var(--surface2); border-radius: 2px;
+      margin-bottom: 14px; overflow: hidden;
+    }
+    #batch-overall-bar { height: 100%; background: var(--orange); width: 0%; transition: width .3s ease; }
+    #batch-modal.minimized {
+      background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none;
+      pointer-events: none;
+      align-items: flex-end; justify-content: flex-end;
+      padding: 0 18px 56px 0;
+    }
+    #batch-modal.minimized #batch-panel {
+      pointer-events: all; width: 280px; max-height: none;
+      box-shadow: 0 4px 20px rgba(0,0,0,.5);
+    }
+    #batch-modal.minimized #batch-panel-body,
+    #batch-modal.minimized #batch-panel-footer { display: none; }
+    #batch-modal.minimized #batch-panel-header {
+      border-bottom: none; border-radius: 0 0 8px 8px; cursor: pointer;
+    }
+    #batch-mini-progress {
+      display: none; height: 3px; background: var(--surface2); overflow: hidden;
+    }
+    #batch-modal.minimized #batch-mini-progress { display: block; }
+    #batch-mini-progress-bar { height: 100%; background: var(--orange); width: 0%; transition: width .3s ease; }
     #terminal.drag-over { outline: 1px dashed var(--orange); outline-offset: -6px; }
     .trip-item.dragging { opacity: .5; }
     .leaflet-control-layers {
@@ -643,6 +838,7 @@
       box-shadow: 0 2px 8px rgba(0,0,0,.5) !important;
     }
     .leaflet-control-layers label { color: var(--text) !important; }
+    .leaflet-control-layers-toggle { display: none !important; }
     #map-toggle {
       font-size: .75em;
       padding: 4px 10px;
@@ -1016,8 +1212,10 @@
 
     /* ── Input bar ── */
     #input-bar {
+      height: 44px;
+      flex-shrink: 0;
       border-top: 1px solid var(--border);
-      padding: 8px 22px 4px;
+      padding: 0 22px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -1047,12 +1245,12 @@
       opacity: .5;
     }
     #input-hints {
-      padding: 3px 22px 7px;
       font-size: .68em;
       color: var(--dim);
       display: flex;
       gap: 14px;
       flex-shrink: 0;
+      margin-left: 12px;
     }
     .hint-key {
       display: inline-block;
@@ -1066,26 +1264,45 @@
   </style>
 </head>
 <body>
-<div id="layout">
+<div id="layout" style="display:none">
 
   <!-- ── Sidebar ── -->
   <div id="sidebar">
     <div id="sidebar-header">
-      <div id="sidebar-logo">LLANO</div>
+      <img src="logo-composite4.svg" alt="Llano" style="height:28px;display:block;">
     </div>
 
-    <button id="new-route-btn" onclick="newRoute()">+ New Route</button>
+    <div style="display:flex;gap:6px;margin:10px 10px 0;">
+      <button id="new-route-btn" onclick="newRoute()" style="flex:1;width:auto;margin:0;">+ New Route</button>
+      <button id="batch-upload-btn" onclick="document.getElementById('batch-file-input').click()">↑ Batch</button>
+    </div>
+    <input type="file" id="batch-file-input" accept=".csv,.txt,.xlsx" style="display:none" onchange="handleBatchFile(this.files[0]);this.value=''">
 
     <!-- Tag filter -->
     <div id="tag-filter">
-      <div style="display:flex;align-items:center;gap:6px;">
-        <input id="tag-filter-input" placeholder="filter by tag…" oninput="renderSidebar()" autocomplete="off" style="flex:1;min-width:0;" />
-        <button id="sidebar-clear-btn" onclick="clearSidebar()" title="Clear all trips from sidebar">Clear</button>
+      <div id="tag-filter-bar" onclick="document.getElementById('tag-filter-input').focus()">
+        <input id="tag-filter-input" placeholder="filter by tag…"
+               autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+               style="flex:1;min-width:60px;" />
       </div>
-      <div id="tag-cloud"></div>
     </div>
 
+    <div id="trip-list-meta">
+      <button id="select-all-btn" onclick="selectAll()">select all</button>
+    </div>
     <div id="trip-list"></div>
+
+    <div id="bulk-tag-bar">
+      <div id="bulk-tag-bar-header">
+        <span id="bulk-tag-count"></span>
+        <button id="bulk-tag-clear" onclick="clearSelection()">✕ deselect</button>
+      </div>
+      <div id="bulk-tag-input-row">
+        <input id="bulk-tag-input" placeholder="add tag…" autocomplete="off" autocorrect="off" spellcheck="false" />
+        <button id="bulk-tag-add" onclick="bulkAddTag()">+ add</button>
+      </div>
+      <div id="bulk-common-tags"></div>
+    </div>
 
     <div id="sf-credits"><span id="credit-count">—</span> balance</div>
 
@@ -1199,10 +1416,11 @@
                  autocomplete="off" spellcheck="false"
                  onkeydown="handleInput(event)" oninput="updateGhost()" />
         </div>
-      </div>
-      <div id="input-hints">
-        <span><span class="hint-key">→</span> accept suggestion</span>
-        <span><span class="hint-key">⇥</span> reset</span>
+        <div id="input-hints">
+          <span><span class="hint-key">→</span> accept suggestion</span>
+          <span><span class="hint-key">⇥</span> reset</span>
+          <button onclick="clearTerminal()" style="background:none;border:none;color:var(--dim);font-size:.68em;cursor:pointer;padding:0;margin-left:4px;font-family:var(--font);" title="Clear terminal">clear</button>
+        </div>
       </div>
     </div><!-- /terminal-pane -->
     <div id="split-divider"></div>
@@ -1529,6 +1747,25 @@
   </div><!-- /main -->
 </div><!-- /layout -->
 
+<!-- Batch upload modal -->
+<div id="batch-modal" style="display:none" onclick="if(event.target===this)closeBatchModal()">
+  <div id="batch-panel">
+    <div id="batch-panel-header" onclick="if(document.getElementById('batch-modal').classList.contains('minimized'))maximizeBatchModal()">
+      <div id="batch-panel-title">Batch Upload</div>
+      <div style="display:flex;gap:4px;">
+        <button id="batch-panel-minimize" onclick="event.stopPropagation();minimizeBatchModal()" title="Minimize" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:1.3em;padding:0 4px;font-family:var(--font);line-height:1;">−</button>
+        <button id="batch-panel-close" onclick="event.stopPropagation();closeBatchModal()">✕</button>
+      </div>
+    </div>
+    <div id="batch-mini-progress"><div id="batch-mini-progress-bar"></div></div>
+    <div id="batch-panel-body"></div>
+    <div id="batch-panel-footer">
+      <button class="batch-btn" id="batch-cancel-btn" onclick="closeBatchModal()">Cancel</button>
+      <button class="batch-btn primary" id="batch-action-btn" onclick="startBatchScoring()" style="display:none">Score All</button>
+    </div>
+  </div>
+</div>
+
 <!-- Auth gate — shown when unauthenticated or link expired -->
 <div id="auth-gate" style="display:none;position:fixed;inset:0;background:var(--bg);
   flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;">
@@ -1605,8 +1842,20 @@
         serverTrips.forEach(function(st) {
           if (hiddenIds.indexOf(st.trip_id) !== -1) return; // hidden by a prior clear or delete
           var existing = trips.find(function(t) { return t.trip_id && t.trip_id === st.trip_id; });
+          // Fallback: match local trip that never got a trip_id (auth resolved after scoring)
+          if (!existing) {
+            var approxTime = st.created_at ? new Date(st.created_at).getTime() : 0;
+            existing = trips.find(function(t) {
+              return !t.trip_id &&
+                     (t.from || "").trim().toLowerCase() === (st.from || "").trim().toLowerCase() &&
+                     (t.to   || "").trim().toLowerCase() === (st.to   || "").trim().toLowerCase() &&
+                     Math.abs((t.createdAt || 0) - approxTime) < 300000; // 5 min window
+            });
+            if (existing) { existing.trip_id = st.trip_id; changed = true; }
+          }
           if (existing) {
-            existing.tags      = (st.tags || existing.tags || []).filter(function(t) { return t && !/^\{/.test(t); });
+            var sTags = (st.tags || []).filter(function(t) { return t && !/^\{/.test(t); });
+            existing.tags      = sTags.length ? sTags : (existing.tags || []);
             existing.certified = st.certified;
           } else {
             trips.push({
@@ -1626,13 +1875,33 @@
         trips.sort(function(a, b) { return (b.createdAt||0) - (a.createdAt||0); });
         if (changed) persistTrips();
         renderSidebar();
+        // Re-render any tag zones already open in the terminal
+        trips.forEach(function(trip) {
+          document.querySelectorAll('.tag-zone[data-trip-id="' + trip.id + '"]').forEach(function(z) {
+            renderTagZone(z, trip.id);
+          });
+        });
       })
       .catch(function() {}); // silent — user may not be logged in yet
   }
   var trips = [];
   loadPersistedTrips();
   setTimeout(loadTripsFromApi, 500); // after auth/me resolves
+
+  // ── Terminal session persistence ──
+  var terminalTripIds = [];
+  try { terminalTripIds = JSON.parse(localStorage.getItem("llano_terminal") || "[]"); } catch(e) {}
+  function persistTerminal() {
+    try { localStorage.setItem("llano_terminal", JSON.stringify(terminalTripIds)); } catch(e) {}
+  }
+  function restoreTerminal() {
+    var ids = terminalTripIds.slice();
+    terminalTripIds = [];
+    ids.forEach(function(id) { loadTrip(id); });
+  }
   var activeTags = [];
+  var selectedTripIds = [];
+  var lastFilteredIds = [];
   var currentFilter   = "all";
   var credits = 0;
   var currentView = "terminal";
@@ -1644,11 +1913,109 @@
 
   const API = "";
 
+  renderSidebar(); // render immediately from localStorage — don't wait for API
+
+  // Enter on bulk tag input
+  document.getElementById("bulk-tag-input") && document.getElementById("bulk-tag-input").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") bulkAddTag();
+  });
+
+  // ── Tag filter input wiring ──
+  (function() {
+    var input = document.getElementById("tag-filter-input");
+    if (!input) return;
+    var suppressing = false;
+
+    function allUnusedTags() {
+      var tags = [];
+      trips.forEach(function(t) {
+        (t.tags||[]).forEach(function(tag) {
+          var activeRaw = activeTags.map(function(t) { return t.startsWith("!") ? t.slice(1) : t; });
+          if (tag && !/^\{/.test(tag) && activeRaw.indexOf(tag) === -1 && tags.indexOf(tag) === -1) tags.push(tag);
+        });
+      });
+      return tags;
+    }
+
+    function getMatch(val) {
+      if (!val) return null;
+      var v = val.toLowerCase();
+      var tags = allUnusedTags();
+      return tags.find(function(t) { return t.toLowerCase() === v; }) ||
+             tags.find(function(t) { return t.toLowerCase().indexOf(v) === 0; }) || null;
+    }
+
+    function commitTag(tag) {
+      if (!tag) return;
+      if (activeTags.indexOf(tag) === -1) activeTags.push(tag);
+      suppressing = true;
+      input.value = "";
+      suppressing = false;
+      renderSidebar();
+      input.focus();
+    }
+
+    input.addEventListener("input", function(e) {
+      if (suppressing) return;
+      var val = input.value;
+      var isDeleting = e.inputType && e.inputType.startsWith("delete");
+      if (!isDeleting) {
+        var match = getMatch(val.trim());
+        if (match && val.length < match.length) {
+          var typed = val.length;
+          suppressing = true;
+          input.value = match;
+          suppressing = false;
+          input.setSelectionRange(typed, match.length);
+        }
+      }
+      renderSidebar();
+    });
+
+    input.addEventListener("keydown", function(e) {
+      var val = input.value;
+      var selStart = input.selectionStart;
+      var selEnd   = input.selectionEnd;
+      var hasSelection = selEnd > selStart;
+
+      if (e.key === "Tab" || e.key === "Enter") {
+        e.preventDefault();
+        var toAdd = hasSelection ? val : (getMatch(val.trim()) || val.trim());
+        if (toAdd) commitTag(toAdd);
+        return;
+      }
+      if (e.key === "Backspace" && !val && activeTags.length) {
+        activeTags.pop();
+        renderSidebar();
+      }
+    });
+  })();
+
   // ── Bootstrap ──
   function initApp() {
     var params = new URLSearchParams(window.location.search);
     if (params.get("error") === "invalid_token") {
       showGate("That link has already been used or expired. Request a new one.");
+      return;
+    }
+
+    var authToken = params.get("auth_token");
+    if (authToken) {
+      // Clean token from URL immediately so it can't be bookmarked or replayed
+      history.replaceState(null, "", window.location.pathname);
+      fetch(API + "/auth/verify", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: authToken })
+      }).then(function(r) {
+        if (!r.ok) {
+          showGate("That link has already been used or expired. Request a new one.");
+        } else {
+          initApp(); // re-run now that cookie is set
+        }
+      }).catch(function() {
+        showGate("Could not reach the server. Try again.");
+      });
       return;
     }
 
@@ -1704,7 +2071,10 @@
 
         document.getElementById("cp-credits-remaining").textContent = fmtBal(credits);
 
+        document.getElementById("layout").style.display = "flex";
         document.getElementById("cmd-input").focus();
+        setTimeout(function() { if (typeof appMap !== "undefined") appMap.invalidateSize(); }, 50);
+        setTimeout(restoreTerminal, 100);
       })
       .catch(function() { showGate("Could not reach the server. Try again."); });
   }
@@ -2071,36 +2441,49 @@
     var list = document.getElementById("trip-list");
     if (!list) return;
 
-    // Tag cloud — all unique tags across trips
-    var cloud = document.getElementById("tag-cloud");
-    if (cloud) {
-      var allTags = [];
-      trips.forEach(function(t) { (t.tags || []).forEach(function(tag) { if (tag && !/^\{/.test(tag) && allTags.indexOf(tag) === -1) allTags.push(tag); }); });
-      allTags.sort();
-      cloud.innerHTML = "";
-      allTags.forEach(function(tag) {
-        var isActive = activeTags.indexOf(tag) !== -1;
-        var chip = document.createElement("span");
-        chip.className = "tag-cloud-chip" + (isActive ? " active" : "");
-        chip.textContent = tag;
-        chip.onclick = (function(t) { return function() {
-          var idx = activeTags.indexOf(t);
-          if (idx === -1) activeTags.push(t);
-          else activeTags.splice(idx, 1);
+    // Render active filter tokens inside the bar
+    var bar = document.getElementById("tag-filter-bar");
+    var input = document.getElementById("tag-filter-input");
+    if (bar && input) {
+      bar.querySelectorAll(".filter-token").forEach(function(el) { el.remove(); });
+      activeTags.forEach(function(tag) {
+        var isNeg = tag.startsWith("!");
+        var displayTag = isNeg ? "not " + tag.slice(1) : tag;
+        var token = document.createElement("span");
+        token.className = "filter-token" + (isNeg ? " negated" : "");
+        token.innerHTML = escHtml(displayTag) + '<button class="filter-token-x" title="Remove">×</button>';
+        // Click tag text to negate; click × to remove
+        token.querySelector(".filter-token-x").onclick = function(e) {
+          e.stopPropagation();
+          activeTags.splice(activeTags.indexOf(tag), 1);
           renderSidebar();
-        }; })(tag);
-        cloud.appendChild(chip);
+        };
+        var labelSpan = token.childNodes[0];
+        token.style.cursor = "pointer";
+        token.title = tag.startsWith("!") ? "Click to un-negate" : "Click to negate (exclude)";
+        token.addEventListener("click", function(e) {
+          if (e.target.classList.contains("filter-token-x")) return;
+          var idx = activeTags.indexOf(tag);
+          if (idx === -1) return;
+          activeTags[idx] = tag.startsWith("!") ? tag.slice(1) : ("!" + tag);
+          renderSidebar();
+        });
+        bar.insertBefore(token, input);
       });
     }
+
 
     var filterEl = document.getElementById("tag-filter-input");
     var textFilter = filterEl ? filterEl.value.trim().toLowerCase() : "";
 
-    // Show ALL trips — sidebar is the full sequential query history
-    var filtered = trips.slice().sort(function(a, b) { return (b.createdAt||0) - (a.createdAt||0); });
+    // Show all non-hidden trips — sidebar is the full sequential query history
+    var filtered = trips.slice().filter(function(t) { return !t.hidden; }).sort(function(a, b) { return (b.createdAt||0) - (a.createdAt||0); });
     if (activeTags.length) {
       filtered = filtered.filter(function(t) {
-        return activeTags.every(function(at) { return (t.tags||[]).indexOf(at) !== -1; });
+        return activeTags.every(function(at) {
+          if (at.startsWith("!")) return (t.tags||[]).indexOf(at.slice(1)) === -1;
+          return (t.tags||[]).indexOf(at) !== -1;
+        });
       });
     }
     if (textFilter) {
@@ -2112,10 +2495,18 @@
       });
     }
 
+    lastFilteredIds = filtered.map(function(t) { return t.id; });
+    var saBtn = document.getElementById("select-all-btn");
+    if (saBtn) {
+      var allSelected = lastFilteredIds.length > 0 && lastFilteredIds.every(function(id) { return selectedTripIds.indexOf(id) !== -1; });
+      saBtn.textContent = allSelected ? "deselect all" : "select all";
+    }
+
     list.innerHTML = "";
     if (!filtered.length) {
       list.innerHTML = '<div style="padding:20px 14px;font-size:.78em;color:var(--dim)">' +
         (trips.length ? 'No trips match the current filter.' : 'No trips yet.<br>Score a route to get started.') + '</div>';
+      syncBulkBar();
       return;
     }
     filtered.forEach(function(trip) {
@@ -2128,24 +2519,116 @@
       var item = document.createElement("div");
       item.className = "trip-item";
       item.dataset.tripId = trip.id;
+      if (selectedTripIds.indexOf(trip.id) !== -1) item.classList.add("selected");
+      item.addEventListener("click", function(e) {
+        if (e.metaKey || e.ctrlKey) {
+          e.preventDefault();
+          var idx = selectedTripIds.indexOf(trip.id);
+          if (idx === -1) selectedTripIds.push(trip.id);
+          else selectedTripIds.splice(idx, 1);
+          renderSidebar();
+        }
+      });
       item.draggable = true;
       item.addEventListener("dragstart", function(e) {
-        e.dataTransfer.setData("text/llano-trip-id", trip.id);
+        e.dataTransfer.setData("text/plain", "llano:" + trip.id);
         e.dataTransfer.effectAllowed = "copy";
         item.classList.add("dragging");
       });
       item.addEventListener("dragend", function() { item.classList.remove("dragging"); });
       item.innerHTML =
+        '<span class="trip-drag-handle">⠿</span>' +
         '<div class="trip-body">' +
           '<div class="trip-route">' + escHtml(trip.from||"?") + ' <span style="color:var(--dim)">→</span> ' + escHtml(trip.to||"?") + certBadge + '</div>' +
           '<div class="trip-meta">' + (trip.timeVal ? escHtml(trip.timeVal) : "") + '</div>' +
           '<div class="trip-meta" style="margin-top:1px;">' + (trip.createdAt ? timeAgo(trip.createdAt) : "") + '</div>' +
           (tagsHtml ? '<div class="trip-tags-row">' + tagsHtml + '</div>' : '') +
           '<div class="trip-lno">' + escHtml(trip.id) + '</div>' +
-        '</div>' +
-        '<button class="trip-delete" onclick="deleteTrip(\'' + escHtml(trip.id) + '\',event)" title="Remove">×</button>';
+        '</div>';
       list.appendChild(item);
     });
+    syncBulkBar();
+  }
+
+  // ── Bulk selection + tagging ─────────────────────────────────────────────
+
+  function syncBulkBar() {
+    var bar = document.getElementById("bulk-tag-bar");
+    var countEl = document.getElementById("bulk-tag-count");
+    var commonEl = document.getElementById("bulk-common-tags");
+    if (!bar) return;
+    var n = selectedTripIds.length;
+    if (!n) { bar.classList.remove("visible"); return; }
+    bar.classList.add("visible");
+    countEl.textContent = n + " selected";
+    // Common tags across all selected trips
+    var selected = trips.filter(function(t) { return selectedTripIds.indexOf(t.id) !== -1; });
+    var commonTags = [];
+    if (selected.length) {
+      commonTags = (selected[0].tags || []).filter(function(tag) {
+        return tag && !/^\{/.test(tag) && selected.every(function(t) { return (t.tags||[]).indexOf(tag) !== -1; });
+      });
+    }
+    commonEl.innerHTML = "";
+    commonTags.forEach(function(tag) {
+      var chip = document.createElement("span");
+      chip.className = "filter-token";
+      chip.style.cssText = "cursor:pointer;";
+      chip.innerHTML = escHtml(tag) + '<button class="filter-token-x" title="Remove from selected">×</button>';
+      chip.querySelector(".filter-token-x").onclick = function(e) {
+        e.stopPropagation();
+        bulkRemoveTag(tag);
+      };
+      commonEl.appendChild(chip);
+    });
+  }
+
+  function bulkAddTag() {
+    var input = document.getElementById("bulk-tag-input");
+    var tag = input ? input.value.trim() : "";
+    if (!tag) return;
+    selectedTripIds.forEach(function(id) {
+      var trip = trips.find(function(t) { return t.id === id; });
+      if (trip && (trip.tags||[]).indexOf(tag) === -1) {
+        if (!trip.tags) trip.tags = [];
+        trip.tags.push(tag);
+        if (trip.trip_id) fetch("/trips/" + trip.trip_id + "/tags", { method: "POST", credentials: "include", headers: {"Content-Type":"application/json"}, body: JSON.stringify({tags: trip.tags}) }).catch(function(){});
+      }
+    });
+    if (input) input.value = "";
+    persistTrips();
+    renderSidebar();
+  }
+
+  function bulkRemoveTag(tag) {
+    selectedTripIds.forEach(function(id) {
+      var trip = trips.find(function(t) { return t.id === id; });
+      if (trip && trip.tags) {
+        trip.tags = trip.tags.filter(function(t) { return t !== tag; });
+        if (trip.trip_id) fetch("/trips/" + trip.trip_id + "/tags", { method: "POST", credentials: "include", headers: {"Content-Type":"application/json"}, body: JSON.stringify({tags: trip.tags}) }).catch(function(){});
+      }
+    });
+    persistTrips();
+    renderSidebar();
+  }
+
+  function clearSelection() {
+    selectedTripIds = [];
+    renderSidebar();
+  }
+
+  function selectAll() {
+    var allSelected = lastFilteredIds.length > 0 && lastFilteredIds.every(function(id) { return selectedTripIds.indexOf(id) !== -1; });
+    if (allSelected) {
+      // Deselect all filtered
+      selectedTripIds = selectedTripIds.filter(function(id) { return lastFilteredIds.indexOf(id) === -1; });
+    } else {
+      // Add all filtered that aren't already selected
+      lastFilteredIds.forEach(function(id) {
+        if (selectedTripIds.indexOf(id) === -1) selectedTripIds.push(id);
+      });
+    }
+    renderSidebar();
   }
 
   // ── Tag management ───────────────────────────────────────────────────────
@@ -2232,6 +2715,66 @@
 
   // ── Table record helpers ──────────────────────────────────────────────────
 
+  function makeRefreshBtn(record, wrapperRef) {
+    var rb = document.createElement("button");
+    rb.className = "table-block-refresh";
+    rb.title = "Refresh scores at current time";
+    rb.textContent = "↻";
+    rb.onclick = function(e) {
+      e.stopPropagation();
+      var curWrapper2 = wrapperRef || rb.closest(".table-block");
+      var tid2 = curWrapper2 ? curWrapper2.dataset.tripId : null;
+      var trip2 = tid2 ? trips.find(function(t) { return t.id === tid2; }) : null;
+      var rfrom = record.from || (trip2 && trip2.from) || "";
+      var rto   = record.to   || (trip2 && trip2.to)   || "";
+
+      var origRoutes = record.sorted;
+      if ((!origRoutes || !origRoutes.length) && (!rfrom || !rto)) return;
+
+      rb.classList.add("spinning"); rb.disabled = true;
+
+      var scoreBody = { waypoints: [rfrom].concat(record.via || []).concat([rto]) };
+      if (record.depart) scoreBody.timestamp = record.depart;
+      if (record.arrive) scoreBody.arrive    = record.arrive;
+      fetch("/score", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(scoreBody)
+      }).then(function(r) { return r.json(); })
+      .then(function(resp) {
+        var sc = function(v) { return Array.isArray(v) ? v[0] : v; };
+        var routes = Array.isArray(resp) ? resp : (resp && resp.routes ? resp.routes : []);
+        if (!routes.length) throw new Error("no routes");
+        var sorted = routes.slice().sort(function(a, b) { return (sc(b.trips_per_crash)||0) - (sc(a.trips_per_crash)||0); });
+        var fd = Math.min.apply(null, sorted.map(function(r) { return sc(r.duration_secs) || Infinity; }));
+        var bi = 0; for (; bi < sorted.length; bi++) { if ((sc(sorted[bi].duration_secs)||Infinity) - fd <= 30) break; }
+        record.sorted = sorted; record.fastestDur = fd; record.baselineIdx = bi;
+        record.baselineTpc = sc(sorted[bi].trips_per_crash) || 1;
+        record.routeNames = sorted.map(function(r, i) { return (record.routeNames && record.routeNames[i]) || ("Route " + (i+1)); });
+        var curWrapper = wrapperRef || rb.closest(".table-block");
+        var tid = curWrapper ? curWrapper.dataset.tripId : null;
+        var trip = tid ? trips.find(function(t) { return t.id === tid; }) : null;
+        if (trip && trip.payload && trip.payload.id === record.id) {
+          trip.payload.sorted = sorted; trip.payload.fastestDur = fd;
+          trip.payload.baselineIdx = bi; trip.payload.baselineTpc = record.baselineTpc;
+        }
+        persistTrips();
+        // Update table content in-place — never remove curWrapper from DOM so rb stays live
+        var newBlock = buildTableBlock(record, tid);
+        var oldTbl = curWrapper ? curWrapper.querySelector("table.result-table") : null;
+        var newTbl = newBlock.querySelector("table.result-table");
+        if (oldTbl && newTbl) oldTbl.parentNode.replaceChild(newTbl, oldTbl);
+        rb.classList.remove("spinning"); rb.disabled = false;
+        if (typeof updateMap === "function") updateMap(sorted, false);
+        if (typeof highlightRoute === "function") highlightRoute(record.selectedRoute || 0);
+      }).catch(function(err) {
+        console.error("[refresh] error:", err);
+        rb.classList.remove("spinning"); rb.disabled = false;
+      });
+    };
+    return rb;
+  }
+
   function buildTableBlock(record, tripId) {
     // Populate global lookup tables so selectRoute / updateMap keep working
     tableRoutes[record.id] = record.sorted;
@@ -2267,6 +2810,9 @@
       return function(e) { e.stopPropagation(); deleteTable(tid, tbid); };
     })(tripId, record.id);
     wrapper.appendChild(delBtn);
+
+    // Refresh button
+    wrapper.appendChild(makeRefreshBtn(record, wrapper));
 
     // Drag handle (shown on hover, left of header)
     var dragHandle = document.createElement("span");
@@ -2433,7 +2979,8 @@
     return wrapper;
   }
 
-  function clearTerminal() {
+  function clearTerminal(skipPersist) {
+    if (!skipPersist) { terminalTripIds = []; persistTerminal(); }
     var terminal = document.getElementById("terminal");
     var cursor   = document.getElementById("cursor-line");
     if (!terminal) return;
@@ -2455,18 +3002,19 @@
     terminal.appendChild(w);
     if (cursor) terminal.appendChild(cursor);
     else { var cl = document.createElement("div"); cl.id = "cursor-line"; terminal.appendChild(cl); }
+    setTimeout(function() { if (typeof syncDragHint === "function") syncDragHint(); }, 50);
+    if (typeof updateMap === "function") updateMap([], false);
+    if (typeof appMap !== "undefined") appMap.setView([31.0, -99.0], 6);
   }
 
   function deleteTable(tripId, tableId) {
-    var trip = tripId
-      ? trips.find(function(t) { return t.id === tripId; })
-      : trips.find(function(t) { return t.tables && t.tables.some(function(tb) { return tb.id === tableId; }); });
-    if (trip && trip.tables) trip.tables = trip.tables.filter(function(tb) { return tb.id !== tableId; });
+    // Remove from terminal view only — trip stays intact in sidebar
     var block = document.querySelector('.table-block[data-table-id="' + tableId + '"]');
     if (block) block.remove();
+    terminalTripIds = terminalTripIds.filter(function(id) { return id !== tripId; });
+    persistTerminal();
     if (!document.querySelectorAll(".table-block").length) clearTerminal();
-    persistTrips();
-    renderSidebar();
+    else if (typeof updateGhost === "function") updateGhost();
   }
 
   function createTripRecord(from, to, record, serverTripId) {
@@ -2490,7 +3038,10 @@
         arrive:       record.arrive,
         timeVal:      record.timeVal,
         hdrRoute:     record.hdrRoute,
-        hdrTime:      record.hdrTime
+        hdrTime:      record.hdrTime,
+        from:         record.from || from,
+        to:           record.to   || to,
+        via:          record.via  || []
       },
       bestRoute: record.routeNames[0] || null,
       bestRR: record.baselineTpc && record.sorted[0]
@@ -2504,25 +3055,6 @@
     return trip.id;
   }
 
-  function deleteTrip(id, e) {
-    e.stopPropagation();
-    var trip = trips.find(function(t) { return t.id === id; });
-    trips = trips.filter(function(t) { return t.id !== id; });
-    persistTrips();
-    renderSidebar();
-    if (trip && trip.trip_id) {
-      addHiddenTripIds([trip.trip_id]);
-      fetch("/trips/" + trip.trip_id, { method: "DELETE", credentials: "include" }).catch(function() {});
-    }
-  }
-  function clearSidebar() {
-    if (!trips.length) return;
-    var ids = trips.filter(function(t) { return t.trip_id; }).map(function(t) { return t.trip_id; });
-    addHiddenTripIds(ids);
-    trips = [];
-    try { localStorage.removeItem("llano_trips"); } catch(e) {}
-    renderSidebar();
-  }
 
   function loadTrip(id) {
     var trip = trips.find(function(t) { return t.id === id; });
@@ -2541,18 +3073,26 @@
     if (!tables || !tables.length) {
       switchView("terminal");
       appendLine('<span class="t-muted">  Route data unavailable — rescore to restore.</span>');
+      if (trip.from && trip.to) {
+        var cmd = 'score --from "' + trip.from + '" --to "' + trip.to + '"';
+        var input = document.getElementById("cmd-input");
+        if (input) { input.value = cmd; input.focus(); }
+      }
       return;
     }
 
     document.querySelectorAll(".banner-line").forEach(function(el) { el.remove(); });
     tables.forEach(function(record) { appendNode(buildTableBlock(record, trip.id)); });
+    if (typeof updateGhost === "function") updateGhost();
     var last = tables[tables.length - 1];
-    if (typeof updateMap === "function") {
-      updateMap(last.sorted, false); highlightRoute(last.selectedRoute || 0);
+    if (typeof updateMap === "function" && last.sorted && last.sorted.length) {
+      updateMap(last.sorted, true); highlightRoute(last.selectedRoute || 0);
       if (mapCollapsed) expandMap();
     }
     switchView("terminal");
     setTimeout(function() { document.getElementById("cmd-input").focus(); }, 50);
+    // Track open trips for cross-session restore
+    if (terminalTripIds.indexOf(id) === -1) { terminalTripIds.push(id); persistTerminal(); }
   }
 
   // ── Board filter ──
@@ -2604,8 +3144,9 @@
     if (cp) cp.textContent = routeNames[rowIdx] || "";
 
     if (tableId && tableRoutes[tableId]) {
+      var switchingTable = (tableId !== activeTableId);
       activeTableId = tableId;
-      if (typeof updateMap === "function") updateMap(tableRoutes[tableId], false);
+      if (typeof updateMap === "function") updateMap(tableRoutes[tableId], switchingTable);
       if (typeof highlightRoute === "function") highlightRoute(rowIdx);
     }
   }
@@ -2978,7 +3519,7 @@
       div.innerHTML = frame(fi) + '  <span style="color:var(--muted)">' + label + '</span>';
     }, 120);
     // stop(callback): slows to a halt at center, removes line, then calls callback
-    return function stop(callback) {
+    var stop = function(callback) {
       clearInterval(timer);
       var delays = [150, 210, 290, 390, 510];
       var s = 0;
@@ -2994,6 +3535,11 @@
       }
       slowTick();
     };
+    stop.setLabel = function(newLabel) {
+      label = newLabel;
+      div.innerHTML = frame(fi) + '  <span style="color:var(--muted)">' + label + '</span>';
+    };
+    return stop;
   }
 
   function handleInput(e) {
@@ -3156,7 +3702,20 @@
     var _td = document.createElement("div"); _td.className = "t-line"; _td.innerHTML = hdrTime; wrapper.appendChild(_td);
     appendNode(wrapper);
 
-    var stopSpinner = appendSpinner("Fetching routes · checking conditions · scoring…");
+    var stopSpinner = appendSpinner("Geocoding…");
+    var _spinnerSeq = [
+      [900,  "Routing and scoring…"],
+      [3500, "Still working…"]
+    ];
+    var _spinnerTimers = _spinnerSeq.map(function(step) {
+      return setTimeout(function() { stopSpinner.setLabel && stopSpinner.setLabel(step[1]); }, step[0]);
+    });
+    var _origStop = stopSpinner;
+    stopSpinner = function(cb) {
+      _spinnerTimers.forEach(clearTimeout);
+      _origStop(cb);
+    };
+    stopSpinner.setLabel = _origStop.setLabel;
 
     function toIso(ts) { return ts.replace(" ", "T"); }
     var waypoints = [from].concat(via).concat([to]);
@@ -3279,15 +3838,17 @@
         routeNames: routeNames,
         depart: depart,
         arrive: arrive,
+        from: from, to: to, via: via,
         selectedRoute: 0
       };
 
-      // Add delete button to pre-created wrapper (tripId wired after createTripRecord)
+      // Add delete + refresh buttons to pre-created wrapper (tripId wired after createTripRecord)
       var delBtn = document.createElement("button");
       delBtn.className = "table-block-del";
       delBtn.title = "Remove this result";
       delBtn.textContent = "✕";
       wrapper.insertBefore(delBtn, wrapper.firstChild);
+      wrapper.insertBefore(makeRefreshBtn(record, wrapper), wrapper.firstChild);
 
       // Build table and append to wrapper
       var table = document.createElement("table");
@@ -3374,6 +3935,7 @@
       wrapper.dataset.tripId = tripId;
       tagZoneEl.dataset.tripId = tripId;
       renderTagZone(tagZoneEl, tripId);
+      if (terminalTripIds.indexOf(tripId) === -1) { terminalTripIds.push(tripId); persistTerminal(); }
       delBtn.onclick = (function(tid, tbid) {
         return function(e) { e.stopPropagation(); deleteTable(tid, tbid); };
       })(tripId, tableId);
@@ -3740,6 +4302,369 @@
     }
   });
 
+  // ── Batch upload ──────────────────────────────────────────────────────────
+  var batchRoutes   = [];
+  var batchFilename = "";
+  var batchState    = "idle";
+
+  function closeBatchModal() {
+    var m = document.getElementById("batch-modal");
+    m.style.display = "none";
+    m.classList.remove("minimized");
+    batchState    = "idle";
+    batchRoutes   = [];
+    batchFilename = "";
+  }
+
+  function minimizeBatchModal() {
+    document.getElementById("batch-modal").classList.add("minimized");
+    var mainBar = document.getElementById("batch-overall-bar");
+    var miniBar = document.getElementById("batch-mini-progress-bar");
+    if (mainBar && miniBar) miniBar.style.width = mainBar.style.width;
+  }
+
+  function maximizeBatchModal() {
+    document.getElementById("batch-modal").classList.remove("minimized");
+  }
+
+  function setBatchBody(html) {
+    document.getElementById("batch-panel-body").innerHTML = html;
+  }
+
+  function handleBatchFile(file) {
+    if (!file) return;
+    var ext = file.name.split(".").pop().toLowerCase();
+    if (ext === "xlsx" || ext === "xls") {
+      batchFilename = file.name.replace(/\.[^.]+$/, "");
+      document.getElementById("batch-modal").style.display = "flex";
+      document.getElementById("batch-action-btn").style.display = "none";
+      document.getElementById("batch-cancel-btn").textContent = "Cancel";
+      document.getElementById("batch-panel-title").textContent = "Batch Upload — unsupported format";
+      setBatchBody('<div style="padding:32px 0;text-align:center;font-size:.85em;">' +
+        '<div style="color:var(--red);margin-bottom:10px;">Excel files aren\'t supported directly.</div>' +
+        '<div style="color:var(--muted);">Open in Excel/Sheets → File → Download as CSV, then re-upload.</div>' +
+        '</div>');
+      return;
+    }
+    batchFilename = file.name.replace(/\.[^.]+$/, "");
+    batchState = "parsing";
+    document.getElementById("batch-modal").style.display = "flex";
+    document.getElementById("batch-action-btn").style.display = "none";
+    document.getElementById("batch-cancel-btn").textContent = "Cancel";
+    document.getElementById("batch-panel-title").textContent = "Batch Upload — reading file…";
+    setBatchBody('<div style="padding:32px 0;text-align:center;color:var(--muted);font-size:.85em;">Extracting routes with Claude…</div>');
+
+    var reader = new FileReader();
+    reader.onerror = function() {
+      document.getElementById("batch-panel-title").textContent = "Batch Upload — error";
+      setBatchBody('<div style="padding:32px 0;text-align:center;color:var(--red);font-size:.85em;">Could not read file. Try saving as CSV (UTF-8).</div>');
+    };
+    reader.onload = function(e) {
+      var csvText = e.target.result;
+      var body;
+      try { body = JSON.stringify({ csv_text: csvText, filename: file.name }); }
+      catch(jsonErr) {
+        document.getElementById("batch-panel-title").textContent = "Batch Upload — error";
+        setBatchBody('<div style="padding:32px 0;text-align:center;color:var(--red);font-size:.85em;">File contains characters that can\'t be sent. Try saving as CSV (UTF-8).</div>');
+        return;
+      }
+      fetch("/batch-parse", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: body
+      })
+      .then(function(r) {
+        return r.text().then(function(text) {
+          var data;
+          try { data = JSON.parse(text); } catch(e) { data = { error: text.slice(0, 200) }; }
+          return { ok: r.ok, data: data };
+        });
+      })
+      .then(function(result) {
+        if (!result.ok || !result.data || !result.data.routes || !result.data.routes.length) {
+          var msg = (result.data && (result.data.error || result.data.message)) || "No routes found.";
+          document.getElementById("batch-panel-title").textContent = "Batch Upload — error";
+          setBatchBody('<div style="padding:32px 0;text-align:center;color:var(--red);font-size:.85em;">' + escHtml(msg) + '</div>');
+          return;
+        }
+        var str1 = function(v) { return Array.isArray(v) ? (v[0] || "") : (v || ""); };
+        batchRoutes = result.data.routes.map(function(r) {
+          return {
+            from:   str1(r.from),
+            to:     str1(r.to),
+            via:    Array.isArray(r.via) ? r.via.map(str1) : [],
+            depart: str1(r.depart),
+            arrive: str1(r.arrive),
+            include: true
+          };
+        });
+        if (result.data.filename) batchFilename = result.data.filename;
+        renderBatchPreview();
+      })
+      .catch(function(err) {
+        document.getElementById("batch-panel-title").textContent = "Batch Upload — error";
+        setBatchBody('<div style="padding:32px 0;text-align:center;color:var(--red);font-size:.85em;">' + escHtml(String(err.message || err)) + '</div>');
+      });
+    };
+    reader.readAsText(file);
+  }
+
+  function renderBatchPreview() {
+    batchState = "preview";
+    var n = batchRoutes.filter(function(r) { return r.include; }).length;
+    document.getElementById("batch-panel-title").textContent =
+      "Batch Upload — " + batchRoutes.length + " routes found";
+    var btn = document.getElementById("batch-action-btn");
+    btn.textContent = "Score " + n + " Routes";
+    btn.style.display = "";
+    btn.disabled = (n === 0);
+
+    // Get existing tags for autocomplete suggestions in title row
+    var allTags = [];
+    trips.forEach(function(t) { (t.tags||[]).forEach(function(tag) { if (tag && allTags.indexOf(tag) === -1) allTags.push(tag); }); });
+
+    // Only show optional columns that have at least one value
+    var hasVia    = batchRoutes.some(function(r) { return r.via && r.via.length; });
+    var hasDepart = batchRoutes.some(function(r) { return r.depart; });
+    var hasArrive = batchRoutes.some(function(r) { return r.arrive; });
+
+    var rows = batchRoutes.map(function(row, i) {
+      var cells =
+        '<td style="width:20px;text-align:center;">' +
+          '<input type="checkbox" class="batch-row-exclude" ' + (row.include ? "checked" : "") +
+          ' onchange="batchToggleRow(' + i + ',this.checked)">' +
+        '</td>' +
+        '<td><input class="batch-cell-input" value="' + escHtml(row.from) + '" placeholder="Origin"' +
+          ' onchange="batchRoutes[' + i + '].from=this.value"></td>' +
+        '<td><input class="batch-cell-input" value="' + escHtml(row.to) + '" placeholder="Destination"' +
+          ' onchange="batchRoutes[' + i + '].to=this.value"></td>';
+      if (hasVia)
+        cells += '<td><input class="batch-cell-input" value="' + escHtml((row.via||[]).join("; ")) + '" placeholder="stop 1; stop 2"' +
+          ' onchange="batchRoutes[' + i + '].via=this.value.split(\';\').map(function(s){return s.trim();}).filter(Boolean)" style="color:var(--muted);"></td>';
+      if (hasDepart)
+        cells += '<td><input class="batch-cell-input" value="' + escHtml(row.depart) + '" placeholder="2026-04-10T08:00"' +
+          ' onchange="batchRoutes[' + i + '].depart=this.value" style="color:var(--muted);"></td>';
+      if (hasArrive)
+        cells += '<td><input class="batch-cell-input" value="' + escHtml(row.arrive) + '" placeholder="arrive by…"' +
+          ' onchange="batchRoutes[' + i + '].arrive=this.value" style="color:var(--muted);"></td>';
+      return '<tr class="batch-row' + (row.include ? "" : " excluded") + '" data-idx="' + i + '">' + cells + '</tr>';
+    }).join("");
+
+    var thead = '<tr><th style="width:20px;"></th><th>FROM</th><th>TO</th>' +
+      (hasVia    ? '<th>VIA</th>'    : '') +
+      (hasDepart ? '<th>DEPART</th>' : '') +
+      (hasArrive ? '<th>ARRIVE</th>' : '') +
+      '</tr>';
+
+    var tagSuggestions = allTags.length
+      ? '<div style="margin-top:8px;font-size:.72em;color:var(--dim);">existing tags: ' +
+          allTags.slice(0,8).map(function(t) {
+            return '<span style="cursor:pointer;color:var(--muted);margin-right:4px;" onclick="document.getElementById(\'batch-tag-input\').value=\'' + escHtml(t) + '\'">' + escHtml(t) + '</span>';
+          }).join("") +
+        '</div>'
+      : "";
+
+    setBatchBody(
+      '<div style="margin-bottom:10px;">' +
+        '<label style="font-size:.72em;color:var(--dim);letter-spacing:.05em;text-transform:uppercase;">Tag for these routes</label>' +
+        '<div style="display:flex;gap:6px;margin-top:4px;">' +
+          '<input id="batch-tag-input" class="batch-cell-input" value="' + escHtml(batchFilename) + '"' +
+          ' placeholder="tag name…" style="width:200px;border-color:var(--border);">' +
+        '</div>' +
+        tagSuggestions +
+      '</div>' +
+      '<table id="batch-table"><thead>' + thead + '</thead><tbody>' + rows + '</tbody></table>'
+    );
+  }
+
+  function batchToggleRow(i, checked) {
+    batchRoutes[i].include = checked;
+    var n = batchRoutes.filter(function(r) { return r.include; }).length;
+    var btn = document.getElementById("batch-action-btn");
+    btn.textContent = "Score " + n + " Routes";
+    btn.disabled = (n === 0);
+    var row = document.querySelector('.batch-row[data-idx="' + i + '"]');
+    if (row) row.classList.toggle("excluded", !checked);
+  }
+
+  function startBatchScoring() {
+    var tagInput = document.getElementById("batch-tag-input");
+    var tag = tagInput ? tagInput.value.trim() : batchFilename;
+    if (!tag) tag = "batch";
+    var toScore = batchRoutes.filter(function(r) { return r.include && r.from && r.to; });
+    if (!toScore.length) return;
+    batchState = "scoring";
+
+    document.getElementById("batch-panel-title").textContent = "Batch Upload — scoring 0 / " + toScore.length;
+    document.getElementById("batch-action-btn").style.display = "none";
+    document.getElementById("batch-cancel-btn").textContent = "Close";
+
+    var progressRows = toScore.map(function(r, i) {
+      return '<div class="batch-prog-row" id="bpr-' + i + '">' +
+        '<span class="batch-prog-status" id="bps-' + i + '">·</span>' +
+        '<span class="batch-prog-route">' + escHtml(r.from) + ' → ' + escHtml(r.to) + '</span>' +
+        '<span class="batch-prog-score" id="bpc-' + i + '"></span>' +
+        '</div>';
+    }).join("");
+
+    setBatchBody(
+      '<div id="batch-overall-bar-wrap"><div id="batch-overall-bar"></div></div>' +
+      '<div id="batch-progress-list">' + progressRows + '</div>'
+    );
+
+    var done = 0;
+
+    // Prepend today's date if the value is a time-only string (no YYYY- prefix).
+    var today = new Date().toISOString().slice(0, 10);
+    var withDate = function(ts) {
+      if (!ts || typeof ts !== "string") return undefined;
+      var s = ts.replace(" ", "T");
+      if (/^\d{4}-/.test(s)) {
+        // Placeholder year (e.g. 1900 from Claude) — keep time, use today's date
+        return parseInt(s.slice(0, 4), 10) >= 2000 ? s : (today + "T" + s.slice(11));
+      }
+      return today + "T" + s;
+    };
+
+    function scoreNext(idx) {
+      if (idx >= toScore.length) {
+        document.getElementById("batch-panel-title").textContent =
+          "Batch Upload — done (" + done + " / " + toScore.length + " scored)";
+        return;
+      }
+      var row = toScore[idx];
+      var statusEl = document.getElementById("bps-" + idx);
+      var scoreEl  = document.getElementById("bpc-" + idx);
+      if (statusEl) statusEl.textContent = "…";
+
+      var waypoints = [row.from].concat(row.via || []).concat([row.to]);
+      var scoreBody = { waypoints: waypoints };
+      var wd;
+      if (row.depart && (wd = withDate(String(row.depart)))) scoreBody.timestamp = wd;
+      if (row.arrive && (wd = withDate(String(row.arrive)))) scoreBody.arrive    = wd;
+      console.log("[batch] scoreNext idx=" + idx + " body=", scoreBody);
+      fetch("/score", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(scoreBody)
+      })
+      .then(function(r) {
+        console.log("[batch] fetch resolved idx=" + idx + " status=" + r.status);
+        return r.text().then(function(text) {
+          console.log("[batch] text resolved idx=" + idx + " len=" + text.length);
+          var data;
+          try { data = JSON.parse(text); } catch(e) { data = { error: text.slice(0, 120) }; }
+          return { ok: r.ok, data: data };
+        });
+      })
+      .then(function(result) {
+        console.log("[batch] result then idx=" + idx + " ok=" + result.ok);
+        try {
+          var sc = function(v) { return Array.isArray(v) ? v[0] : v; };
+          if (result.ok && result.data) {
+            var resp   = result.data;
+            var routes = Array.isArray(resp) ? resp : (resp && resp.routes ? resp.routes : []);
+            var serverTripId = (!Array.isArray(resp) && resp && resp.trip_id &&
+              typeof resp.trip_id !== "object" && resp.trip_id !== 0) ? resp.trip_id : null;
+            var sorted = routes.slice().sort(function(a, b) {
+              return (sc(b.trips_per_crash)||0) - (sc(a.trips_per_crash)||0);
+            });
+            var best = sorted[0];
+            var tpc  = best ? (sc(best.trips_per_crash) || 0) : 0;
+
+            if (statusEl) { statusEl.textContent = "✓"; statusEl.style.color = "var(--green)"; }
+            if (scoreEl) {
+              scoreEl.textContent = tpc ? ("1 in " + Math.round(tpc).toLocaleString()) : "—";
+              scoreEl.className = "batch-prog-score" + (tpc > 0 && tpc < 200 ? " warn" : "");
+            }
+
+            if (sorted.length) {
+              var fmtDurB = function(s) { s=Math.round(+s); var h=Math.floor(s/3600),m=Math.floor((s%3600)/60); return h?(h+"h "+(m<10?"0":"")+m+"m"):m+"m"; };
+              var fastestDur  = Math.min.apply(null, routes.map(function(r) { return sc(r.duration_secs) || Infinity; }));
+              var baselineIdx = 0;
+              for (var bi = 0; bi < sorted.length; bi++) {
+                if ((sc(sorted[bi].duration_secs)||Infinity) - fastestDur <= 30) { baselineIdx = bi; break; }
+              }
+              var baselineTpc = sc(sorted[baselineIdx].trips_per_crash) || 1;
+              var rNames = sorted.map(function(r, i) {
+                var lbl = sc(r.label);
+                return (typeof lbl === "string" && lbl) ? lbl : ("Route " + (i + 1));
+              });
+              var fmtBatchTime = function(ts) {
+                var p = ts.replace("T", " ").split(/[\s\-:]/);
+                var d = new Date(+p[0], +p[1]-1, +p[2], +p[3]||0, +p[4]||0);
+                var date = d.toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' });
+                var time = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                return date + ' @ ' + time;
+              };
+              var batchDepart = row.depart ? withDate(String(row.depart)) : null;
+              var batchArrive = row.arrive ? withDate(String(row.arrive)) : null;
+              var batchTimeLabel = batchArrive ? 'arrives' : 'departs';
+              var batchTimeStr   = batchArrive ? fmtBatchTime(batchArrive)
+                                 : batchDepart ? fmtBatchTime(batchDepart)
+                                 : fmtBatchTime(today + "T" + new Date().toTimeString().slice(0, 8));
+              var timeVal = batchTimeStr;
+              var tableId = "btbl-" + Math.random().toString(36).slice(2, 10);
+              trips.unshift({
+                id: genLnoId(), trip_id: serverTripId,
+                from: row.from, to: row.to, timeVal: timeVal,
+                createdAt: Date.now(), tags: [tag],
+                certified: false, tables: [],
+                payload: {
+                  id: tableId, sorted: sorted, routeNames: rNames,
+                  fastestDur: fastestDur, baselineIdx: baselineIdx, baselineTpc: baselineTpc,
+                  depart: row.depart || null, arrive: row.arrive || null, timeVal: timeVal,
+                  from: row.from, to: row.to, via: row.via || [],
+                  hdrRoute: '<span class="t-prompt">llano&gt; </span><span class="t-cmd">score --from "' + escHtml(row.from) + '" --to "' + escHtml(row.to) + '"</span>',
+                  hdrTime: '<span class="t-muted">  ' + batchTimeLabel + ' ' + batchTimeStr + '</span>',
+                  selectedRoute: 0
+                }
+              });
+              done++;
+            }
+          } else {
+            var errMsg = (result.data && (result.data.error || result.data.message)) || "error";
+            if (statusEl) { statusEl.textContent = "✗"; statusEl.style.color = "var(--red)"; }
+            if (scoreEl) { scoreEl.textContent = errMsg.slice(0, 40); scoreEl.className = "batch-prog-score err"; }
+          }
+        } catch(e) {
+          if (statusEl) { statusEl.textContent = "✗"; statusEl.style.color = "var(--red)"; }
+          if (scoreEl) { scoreEl.textContent = String(e.message||e).slice(0,40); scoreEl.className = "batch-prog-score err"; }
+        }
+        setTimeout(function() { advanceBatch(idx); }, 0);
+      })
+      .catch(function(err) {
+        console.error("[batch] catch idx=" + idx, err);
+        if (statusEl) { statusEl.textContent = "✗"; statusEl.style.color = "var(--red)"; }
+        if (scoreEl) { scoreEl.textContent = String(err.message||err).slice(0,40); scoreEl.className = "batch-prog-score err"; }
+        setTimeout(function() { advanceBatch(idx); }, 0);
+      });
+    }
+
+    function advanceBatch(idx) {
+      console.log("[batch] advanceBatch idx=" + idx);
+      try {
+        var pct = ((idx + 1) / toScore.length * 100).toFixed(0);
+        var bar = document.getElementById("batch-overall-bar");
+        if (bar) bar.style.width = pct + "%";
+        var miniBar = document.getElementById("batch-mini-progress-bar");
+        if (miniBar) miniBar.style.width = pct + "%";
+        var titleEl = document.getElementById("batch-panel-title");
+        if (titleEl) titleEl.textContent = idx + 1 >= toScore.length
+          ? "Batch Upload — done (" + done + " / " + toScore.length + " scored)"
+          : "Batch Upload — scoring " + (idx + 1) + " / " + toScore.length;
+        try { persistTrips(); } catch(pe) { console.error("[batch] persistTrips error:", pe); }
+        console.log("[batch] trips.length after unshift:", trips.length);
+        try { renderSidebar(); } catch(re) { console.error("[batch] renderSidebar error:", re); }
+      } catch(ae) {}
+      setTimeout(function() { scoreNext(idx + 1); }, 0);
+    }
+
+    scoreNext(0);
+  }
+
   updateGhost();
   initApp();
 
@@ -3760,8 +4685,33 @@
   (function() {
     var terminal = document.getElementById("terminal");
     if (!terminal) return;
+
+    // Drag hint — visible whenever terminal has no table blocks
+    function syncDragHint() {
+      var hasBlocks = !!document.querySelector(".table-block");
+      var existing  = document.getElementById("drag-hint");
+      if (hasBlocks && existing) { existing.remove(); return; }
+      if (!hasBlocks && !existing && trips.some(function(t) { return !t.hidden; })) {
+        var hint = document.createElement("div");
+        hint.id = "drag-hint";
+        hint.innerHTML = '⠿ drag a saved route from the sidebar to load it here';
+        terminal.appendChild(hint);
+      }
+    }
+    function hideDragHint() {
+      var hint = document.getElementById("drag-hint");
+      if (hint) hint.remove();
+    }
+    setTimeout(syncDragHint, 800);
+
+    function hasLlanoType(dt) {
+      if (!dt || !dt.types) return false;
+      var t = dt.types;
+      if (typeof t.contains === "function") return t.contains("text/plain");
+      return Array.prototype.indexOf.call(t, "text/plain") !== -1;
+    }
     terminal.addEventListener("dragover", function(e) {
-      if (!e.dataTransfer.types || e.dataTransfer.types.indexOf("text/llano-trip-id") === -1) return;
+      if (!hasLlanoType(e.dataTransfer)) return;
       e.preventDefault();
       e.dataTransfer.dropEffect = "copy";
       terminal.classList.add("drag-over");
@@ -3771,9 +4721,12 @@
     });
     terminal.addEventListener("drop", function(e) {
       terminal.classList.remove("drag-over");
-      var id = e.dataTransfer.getData("text/llano-trip-id");
+      var raw = e.dataTransfer.getData("text/plain");
+      if (!raw || raw.indexOf("llano:") !== 0) return;
+      var id = raw.slice(6);
       if (!id) return;
       e.preventDefault();
+      hideDragHint();
       // Don't re-add if already in terminal
       if (document.querySelector('.table-block[data-trip-id="' + id + '"]')) return;
       loadTrip(id);
@@ -3790,8 +4743,28 @@
 
   L.control.zoom({ position: "bottomright" }).addTo(appMap);
 
-  var hotspotLayer = L.layerGroup().addTo(appMap);
-  L.control.layers(null, { "Hotspots": hotspotLayer }, { position: "topright", collapsed: false }).addTo(appMap);
+  var hotspotLayer = L.layerGroup(); // not added to map — off by default
+  // Custom hotspot toggle — avoids the stray white box that L.control.layers generates
+  // from its internal base-layers container and separator divs.
+  var HotspotControl = L.Control.extend({
+    options: { position: "topright" },
+    onAdd: function() {
+      var div = L.DomUtil.create("div", "leaflet-control-layers leaflet-control-layers-expanded");
+      L.DomEvent.disableClickPropagation(div);
+      L.DomEvent.disableScrollPropagation(div);
+      var label = L.DomUtil.create("label", "", div);
+      label.style.cssText = "display:flex;align-items:center;gap:6px;cursor:pointer;margin:0;padding:2px 0;";
+      var cb = L.DomUtil.create("input", "leaflet-control-layers-selector", label);
+      cb.type = "checkbox"; cb.checked = false;
+      var span = L.DomUtil.create("span", "", label);
+      span.textContent = "Hotspots";
+      L.DomEvent.on(cb, "change", function() {
+        if (cb.checked) hotspotLayer.addTo(appMap); else appMap.removeLayer(hotspotLayer);
+      });
+      return div;
+    }
+  });
+  new HotspotControl().addTo(appMap);
 
   var polylines     = [];
   var mapMarkers    = [];
