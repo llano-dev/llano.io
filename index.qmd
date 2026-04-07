@@ -1131,31 +1131,35 @@ function welcome() {
 
 // ── Spinner ───────────────────────────────────────────────────────────────────
 function spinner(msg) {
-  var OFFSETS = ["-0.35em","-0.18em","0em","0.18em","0.35em","0.18em","0em","-0.18em"];
-  var fi = 2;  // start and rest at center (0em = standard |:|)
-  function frame(f) {
-    return '<span style="color:#3a3d4a">|</span>' +
-           '<span style="color:#F97316;font-weight:700;display:inline-block;transform:translateY(' + OFFSETS[f] + ')">:</span>' +
-           '<span style="color:#3a3d4a">|</span>';
+  var YS = ['-0.34em','-0.17em','0em','0.17em','0.34em'];
+  var P  = YS.length;
+  var fi = 0;
+  function dash(pos) {
+    var col = pos === P-1 ? '#F97316' :
+              pos === P-2 ? '#e2e4e9' :
+              pos === P-3 ? '#8b8fa8' : '#3a3d4a';
+    return '<span style="color:' + col + ';display:inline-block;transform:translateY(' + YS[pos] + ') scaleY(0.45)">|</span>';
   }
-  var el = lineHTML(frame(fi) + '  <span style="color:#8b8fa8">' + msg + "</span>");
-  var tid = setInterval(function () {
-    fi = (fi + 1) % OFFSETS.length;
-    el.innerHTML = frame(fi) + '  <span style="color:#8b8fa8">' + msg + "</span>";
-  }, 120);
-
+  function frame(f) {
+    return '<span style="color:#3a3d4a">|</span>' + dash(f % P) + '<span style="color:#3a3d4a">|</span>';
+  }
+  var el = lineHTML(frame(fi) + '  <span style="color:#8b8fa8">' + msg + '</span>');
+  var tid = setInterval(function() {
+    fi = (fi + 1) % P;
+    el.innerHTML = frame(fi) + '  <span style="color:#8b8fa8">' + msg + '</span>';
+  }, 160);
   function stop(done, callback) {
     clearInterval(tid);
-    var delays = [150, 210, 290, 390, 510];
+    var delays = [200, 280, 380, 500, 650];
     var step = 0;
     function slowTick() {
       if (step >= delays.length) {
-        el.innerHTML = frame(2) + '  <span style="color:#8b8fa8">' + (done || msg) + "</span>";
+        el.innerHTML = frame(fi) + '  <span style="color:#8b8fa8">' + (done || msg) + '</span>';
         if (callback) requestAnimationFrame(function() { setTimeout(callback, 180); });
         return;
       }
-      fi = (fi + 1) % OFFSETS.length;
-      el.innerHTML = frame(fi) + '  <span style="color:#8b8fa8">' + msg + "</span>";
+      fi = (fi + 1) % P;
+      el.innerHTML = frame(fi) + '  <span style="color:#8b8fa8">' + msg + '</span>';
       setTimeout(slowTick, delays[step++]);
     }
     slowTick();
