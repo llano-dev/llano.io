@@ -367,7 +367,8 @@ h2, .page-section h2, .hero h2, section h2 {
 .pdf-viewer-dot { width: 10px; height: 10px; border-radius: 50%; background: #2e3140; }
 .pdf-viewer-title { font-size: .73em; color: #8b8fa8; margin-left: .4rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.audit-report { padding: 1.4rem 1.6rem; font-size: .8em; max-height: 480px; overflow-y: auto; }
+.audit-report { padding: 1.4rem 1.6rem; font-size: .8em; max-height: 480px; overflow-y: auto; overflow-x: auto; }
+.audit-report-inner { min-width: 520px; }
 .audit-report-header { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1rem; border-bottom: 1px solid #1e2026; padding-bottom: .8rem; }
 .audit-wordmark img { height: 28px; display: block; }
 .audit-title-block { display: flex; flex-direction: column; }
@@ -823,6 +824,7 @@ main.content.column-page { border: none !important; box-shadow: none !important;
           <span class="pdf-viewer-title">acme-logistics-safety-audit-q1-2026.pdf</span>
         </div>
         <div class="audit-report">
+          <div class="audit-report-inner">
           <div class="audit-report-header">
             <div class="audit-wordmark"><img src="logo-composite4.svg" alt="llano"></div>
             <div class="audit-title-block">
@@ -877,6 +879,7 @@ main.content.column-page { border: none !important; box-shadow: none !important;
             </div>
             <span class="audit-page-num">p. 1 of 8</span>
           </div>
+          </div><!-- audit-report-inner -->
         </div>
       </div>
 
