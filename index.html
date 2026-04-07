@@ -996,7 +996,7 @@ main.content.column-page { border: none !important; box-shadow: none !important;
 
         <pre class="code-body" id="docs-pane-curl"><code><span class="c-cm"># Option A — pass your router key, Llano calls it on your behalf</span>
 <span class="c-fn">curl</span> -s -X POST https://api.llano.io/score \
-  -H <span class="c-str">"X-API-Key: lno_..."</span> \
+  -H <span class="c-str">"X-API-Key: llno_..."</span> \
   -H <span class="c-str">"Content-Type: application/json"</span> \
   -d <span class="c-str">'{
     "waypoints":    [[-99.5075, 27.5035], [-98.4936, 29.4241]],
@@ -1007,7 +1007,7 @@ main.content.column-page { border: none !important; box-shadow: none !important;
 
 <span class="c-cm"># Option B — pass raw GeoJSON from your existing pipeline</span>
 <span class="c-fn">curl</span> -s -X POST https://api.llano.io/score \
-  -H <span class="c-str">"X-API-Key: lno_..."</span> \
+  -H <span class="c-str">"X-API-Key: llno_..."</span> \
   -H <span class="c-str">"Content-Type: application/json"</span> \
   -d <span class="c-str">'{
     "route":  { "type": "LineString", "coordinates": [...] },
@@ -1016,7 +1016,7 @@ main.content.column-page { border: none !important; box-shadow: none !important;
 
 <span class="c-cm"># Option C — no router, Llano plans and scores alternatives</span>
 <span class="c-fn">curl</span> -s -X POST https://api.llano.io/score \
-  -H <span class="c-str">"X-API-Key: lno_..."</span> \
+  -H <span class="c-str">"X-API-Key: llno_..."</span> \
   -H <span class="c-str">"Content-Type: application/json"</span> \
   -d <span class="c-str">'{
     "waypoints":    [[-99.5075, 27.5035], [-98.4936, 29.4241]],
@@ -1029,7 +1029,7 @@ main.content.column-page { border: none !important; box-shadow: none !important;
 <span class="c-cm"># Option A — pass your router key, Llano calls it on your behalf</span>
 resp = requests.<span class="c-fn">post</span>(
     <span class="c-str">"https://api.llano.io/score"</span>,
-    headers={<span class="c-str">"X-API-Key"</span>: <span class="c-str">"lno_..."</span>},
+    headers={<span class="c-str">"X-API-Key"</span>: <span class="c-str">"llno_..."</span>},
     json={
         <span class="c-str">"waypoints"</span>:    [[-99.5075, 27.5035], [-98.4936, 29.4241]],
         <span class="c-str">"arrive"</span>:       <span class="c-str">"2026-04-20T18:00"</span>,
@@ -1044,7 +1044,7 @@ resp = requests.<span class="c-fn">post</span>(
 <span class="c-cm"># Option B — pass raw GeoJSON from your existing pipeline</span>
 resp = requests.<span class="c-fn">post</span>(
     <span class="c-str">"https://api.llano.io/score"</span>,
-    headers={<span class="c-str">"X-API-Key"</span>: <span class="c-str">"lno_..."</span>},
+    headers={<span class="c-str">"X-API-Key"</span>: <span class="c-str">"llno_..."</span>},
     json={<span class="c-str">"route"</span>: your_linestring_geojson,
           <span class="c-str">"arrive"</span>: <span class="c-str">"2026-04-20T18:00"</span>}
 )
@@ -1060,7 +1060,7 @@ best   = routes[0]
 
 <span class="c-cm"># Option A — pass your router key, Llano calls it on your behalf</span>
 resp <span class="c-kw">&lt;-</span> <span class="c-fn">request</span>(<span class="c-str">"https://api.llano.io/score"</span>) |&gt;
-  <span class="c-fn">req_headers</span>(<span class="c-str">"X-API-Key"</span> = <span class="c-str">"lno_..."</span>) |&gt;
+  <span class="c-fn">req_headers</span>(<span class="c-str">"X-API-Key"</span> = <span class="c-str">"llno_..."</span>) |&gt;
   <span class="c-fn">req_body_json</span>(<span class="c-fn">list</span>(
     waypoints    = <span class="c-fn">list</span>(<span class="c-fn">c</span>(-99.5075, 27.5035), <span class="c-fn">c</span>(-98.4936, 29.4241)),
     arrive       = <span class="c-str">"2026-04-20T18:00"</span>,
@@ -1073,7 +1073,7 @@ resp <span class="c-kw">&lt;-</span> <span class="c-fn">request</span>(<span cla
 
 <span class="c-cm"># Option B — pass raw GeoJSON from your existing pipeline</span>
 resp <span class="c-kw">&lt;-</span> <span class="c-fn">request</span>(<span class="c-str">"https://api.llano.io/score"</span>) |&gt;
-  <span class="c-fn">req_headers</span>(<span class="c-str">"X-API-Key"</span> = <span class="c-str">"lno_..."</span>) |&gt;
+  <span class="c-fn">req_headers</span>(<span class="c-str">"X-API-Key"</span> = <span class="c-str">"llno_..."</span>) |&gt;
   <span class="c-fn">req_body_json</span>(<span class="c-fn">list</span>(route  = your_linestring_geojson,
                      arrive = <span class="c-str">"2026-04-20T18:00"</span>)) |&gt;
   <span class="c-fn">req_perform</span>() |&gt;
