@@ -596,7 +596,7 @@ main.content.column-page { border: none !important; box-shadow: none !important;
     <div class="hero-actions">
       <a class="btn-primary" href="#demo">Try the Demo</a>
       <a class="btn-ghost" href="#waitlist-form">Get Free Access</a>
-      <a class="btn-ghost" href="#docs">API Docs →</a>
+      <a class="btn-ghost" href="#docs">API Docs</a>
     </div>
   </div>
 </section>
