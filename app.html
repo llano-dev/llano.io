@@ -50,7 +50,7 @@
     }
 
     #sidebar-header {
-      height: 42px;
+      height: 52px;
       padding: 0 14px;
       box-sizing: border-box;
       border-bottom: 1px solid var(--border);
@@ -1269,7 +1269,7 @@
   <!-- ── Sidebar ── -->
   <div id="sidebar">
     <div id="sidebar-header">
-      <img src="logo-composite4.svg" alt="Llano" style="height:28px;display:block;">
+      <img src="logo-short.svg" alt="Llano" style="height:34px;display:block;">
     </div>
 
     <div style="display:flex;gap:6px;margin:10px 10px 0;">
@@ -3502,34 +3502,43 @@
   }
 
   function appendSpinner(label) {
-    var OFFSETS = ["-0.35em","-0.18em","0em","0.18em","0.35em","0.18em","0em","-0.18em"];
-    var fi = 2; // start at center
-    function frame(f) {
-      return '<span style="color:var(--dim)">|</span>' +
-             '<span style="color:var(--orange);font-weight:700;display:inline-block;transform:translateY(' + OFFSETS[f] + ')">:</span>' +
-             '<span style="color:var(--dim)">|</span>';
+    // Road center dashes: two | between lane markers, cycling top→bottom (far→close)
+    var YS = ['-0.34em', '-0.17em', '0em', '0.17em', '0.34em'];
+    var P  = YS.length;
+    var fi = 0;
+
+    function dash(pos) {
+      var col = pos === P-1 ? 'var(--orange)' :
+                pos === P-2 ? 'var(--text)'   :
+                pos === P-3 ? 'var(--muted)'  : 'var(--dim)';
+      return '<span style="color:' + col + ';display:inline-block;transform:translateY(' + YS[pos] + ') scaleY(0.45)">|</span>';
     }
+
+    function frame(f) {
+      return '<span style="color:var(--dim)">|</span>\u00a0' +
+             dash(f % P) +
+             '\u00a0<span style="color:var(--dim)">|</span>';
+    }
+
     var div = document.createElement("div");
     div.className = "t-line t-muted";
     div.innerHTML = frame(fi) + '  <span style="color:var(--muted)">' + label + '</span>';
     appendNode(div);
 
     var timer = setInterval(function() {
-      fi = (fi + 1) % OFFSETS.length;
+      fi = (fi + 1) % P;
       div.innerHTML = frame(fi) + '  <span style="color:var(--muted)">' + label + '</span>';
-    }, 120);
-    // stop(callback): slows to a halt at center, removes line, then calls callback
+    }, 160);
     var stop = function(callback) {
       clearInterval(timer);
-      var delays = [150, 210, 290, 390, 510];
+      var delays = [200, 280, 380, 500, 650];
       var s = 0;
       function slowTick() {
         if (s >= delays.length) {
-          div.innerHTML = frame(2) + '  <span style="color:var(--muted)">' + label + '</span>';
           setTimeout(function() { div.remove(); if (callback) callback(); }, 180);
           return;
         }
-        fi = (fi + 1) % OFFSETS.length;
+        fi = (fi + 1) % P;
         div.innerHTML = frame(fi) + '  <span style="color:var(--muted)">' + label + '</span>';
         setTimeout(slowTick, delays[s++]);
       }
