@@ -1,0 +1,667 @@
+---
+title: ""
+page-layout: full
+---
+
+```{=html}
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body, .quarto-container, #quarto-content, main {
+  background: #13151a !important;
+  color: #e2e4e9 !important;
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
+.demo-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.demo-header {
+  margin-bottom: 1.5rem;
+}
+.demo-logo {
+  color: #F97316;
+  font-size: 1.1em;
+  font-weight: 600;
+  letter-spacing: .05em;
+  margin-bottom: .4rem;
+}
+.demo-tagline {
+  color: #8b8fa8;
+  font-size: .85em;
+}
+.demo-tagline span {
+  color: #e2e4e9;
+}
+
+/* ── Terminal ── */
+.terminal-shell {
+  background: #0e1013;
+  border: 1px solid #2e3140;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.terminal-chrome {
+  background: #1a1c22;
+  padding: .5rem .9rem;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  border-bottom: 1px solid #2e3140;
+}
+.t-dot { width: 11px; height: 11px; border-radius: 50%; }
+.t-dot-r { background: #ff5f57; }
+.t-dot-y { background: #febc2e; }
+.t-dot-g { background: #28c840; }
+.t-chrome-title { color: #8b8fa8; font-size: .8em; margin-left: .4rem; }
+.t-brand { color: #F97316; }
+
+.terminal-output {
+  padding: 1rem 1.2rem .5rem;
+  min-height: 260px;
+  max-height: 480px;
+  overflow-y: auto;
+  font-size: .82em;
+  line-height: 1.65;
+}
+
+.terminal-output::-webkit-scrollbar { width: 4px; }
+.terminal-output::-webkit-scrollbar-track { background: transparent; }
+.terminal-output::-webkit-scrollbar-thumb { background: #2e3140; border-radius: 2px; }
+
+.t-out-line { white-space: pre; color: #e2e4e9; }
+.t-out-muted { color: #8b8fa8; }
+.t-out-cmd   { color: #e2e4e9; }
+.t-out-err   { color: #f87171; }
+.t-out-ok    { color: #34d399; }
+.t-out-orange { color: #F97316; }
+
+.terminal-input-row {
+  display: flex;
+  align-items: center;
+  padding: .4rem 1.2rem .8rem;
+  gap: .5rem;
+  border-top: 1px solid #1e2026;
+}
+.t-prompt-sym { color: #F97316; font-size: .82em; user-select: none; }
+#cmd-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #e2e4e9;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .82em;
+  caret-color: #F97316;
+}
+#cmd-input::placeholder { color: #3a3d4a; }
+
+/* ── Route table ── */
+.route-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .82em;
+  margin: .5rem 0;
+}
+.route-table th {
+  color: #8b8fa8;
+  font-weight: 400;
+  padding: .15rem .6rem;
+  text-align: left;
+  border-bottom: 1px solid #2e3140;
+}
+.route-table td {
+  padding: .25rem .6rem;
+  border-bottom: 1px solid #1e2026;
+  color: #e2e4e9;
+}
+.route-table tr:last-child td { border-bottom: none; }
+.route-table .td-rank  { color: #F97316; text-align: center; }
+.route-table .td-muted { color: #8b8fa8; text-align: right; }
+.route-table .td-safety { color: #e2e4e9; }
+.route-table .td-rr   { color: #8b8fa8; text-align: right; }
+.td-rr-best { color: #F97316 !important; }
+.t-divider { color: #2e3140; }
+
+/* ── Map ── */
+#map-container {
+  margin-top: 1.25rem;
+  border: 1px solid #2e3140;
+  border-radius: 8px;
+  overflow: hidden;
+  display: none;
+}
+#demo-map { height: 380px; background: #0e1013; }
+
+.leaflet-container { background: #13151a !important; }
+.leaflet-control-zoom a {
+  background: #1a1c22 !important; color: #e2e4e9 !important;
+  border-color: #2e3140 !important;
+}
+.leaflet-control-attribution {
+  background: rgba(14,16,19,.8) !important; color: #8b8fa8 !important;
+}
+.leaflet-control-attribution a { color: #8b8fa8 !important; }
+.info.legend {
+  background: rgba(26,28,34,.95) !important; color: #e2e4e9 !important;
+  border: 1px solid #2e3140; border-radius: 6px; padding: .5rem .8rem;
+  font-family: 'JetBrains Mono', monospace; font-size: .78em;
+}
+
+/* ── Hint ── */
+.demo-hint {
+  margin-top: 1rem;
+  color: #3a3d4a;
+  font-size: .76em;
+  line-height: 1.7;
+}
+.demo-hint span { color: #8b8fa8; }
+
+/* ── Hotspot animations ── */
+@keyframes hs-pulse { 0%,100%{stroke-opacity:.85} 50%{stroke-opacity:.15} }
+@keyframes hs-glow  { 0%,100%{stroke-opacity:.18} 50%{stroke-opacity:.04} }
+.hs-core { animation: hs-pulse 2.4s ease-in-out infinite; }
+.hs-halo { animation: hs-glow  2.4s ease-in-out infinite; }
+</style>
+
+<div class="demo-wrap">
+
+  <div class="demo-header">
+    <div class="demo-logo"><span class="t-brand">|:|</span> llano <span style="color:#2e3140">—</span> <span style="color:#8b8fa8;font-weight:400">route safety scoring</span></div>
+    <div class="demo-tagline">Texas routes only &nbsp;·&nbsp; <span>llano score --from "..." --to "..." --arrive "YYYY-MM-DD HH:MM"</span></div>
+  </div>
+
+  <div class="terminal-shell">
+    <div class="terminal-chrome">
+      <div class="t-dot t-dot-r"></div>
+      <div class="t-dot t-dot-y"></div>
+      <div class="t-dot t-dot-g"></div>
+      <span class="t-chrome-title"><span class="t-brand">|:|</span> llano — demo</span>
+    </div>
+    <div class="terminal-output" id="term-output"></div>
+    <div class="terminal-input-row">
+      <span class="t-prompt-sym">$</span>
+      <input id="cmd-input" type="text" autocomplete="off" spellcheck="false"
+             placeholder='llano score --from "Laredo, TX" --to "San Antonio, TX"'/>
+    </div>
+  </div>
+
+  <div id="map-container">
+    <div id="demo-map"></div>
+  </div>
+
+  <div class="demo-hint">
+    Supported flags: &nbsp;
+    <span>--from</span> &nbsp;
+    <span>--to</span> &nbsp;
+    <span>--via</span> &nbsp;
+    <span>--depart "YYYY-MM-DD HH:MM"</span> &nbsp;
+    <span>--arrive "YYYY-MM-DD HH:MM"</span> &nbsp;
+    <span>--alts N</span>
+  </div>
+
+</div>
+
+<script>
+(function () {
+
+// ── Config ────────────────────────────────────────────────────────────────────
+var API_URL  = "https://api.llano.io/score";
+var DEMO_KEY = "lno_d2c3ef2868d60aa08b9ef41ef8017cc9e4765529c027d07e";
+var COLORS   = ["#F97316","#06B6D4","#22C55E","#EAB308","#A855F7"];
+
+// Texas bounding box
+var TX_BBOX = { minLat: 25.8, maxLat: 36.5, minLon: -106.6, maxLon: -93.5 };
+
+// ── State ─────────────────────────────────────────────────────────────────────
+var history = [];
+var histIdx = -1;
+var leafMap = null;
+
+// ── DOM ───────────────────────────────────────────────────────────────────────
+var output = document.getElementById("term-output");
+var input  = document.getElementById("cmd-input");
+
+// ── Output helpers ────────────────────────────────────────────────────────────
+function line(text, cls) {
+  var el = document.createElement("div");
+  el.className = "t-out-line" + (cls ? " " + cls : "");
+  el.textContent = text;
+  output.appendChild(el);
+  output.scrollTop = output.scrollHeight;
+  return el;
+}
+
+function blank() { line(""); }
+
+function lineHTML(html, cls) {
+  var el = document.createElement("div");
+  el.className = "t-out-line" + (cls ? " " + cls : "");
+  el.innerHTML = html;
+  output.appendChild(el);
+  output.scrollTop = output.scrollHeight;
+  return el;
+}
+
+// ── Welcome ───────────────────────────────────────────────────────────────────
+function welcome() {
+  lineHTML('<span style="color:#F97316">|:|</span> <span style="color:#e2e4e9">Llano</span> <span style="color:#8b8fa8">— truck route safety scoring (demo)</span>');
+  line("Type a command below. Press ↑ for history.", "t-out-muted");
+  blank();
+  lineHTML('<span style="color:#8b8fa8">Example:</span>');
+  lineHTML('<span style="color:#8b8fa8">  llano score --from "Laredo, TX" --to "San Antonio, TX" --arrive "2026-04-20 18:00"</span>');
+  blank();
+}
+
+// ── Flag parser ───────────────────────────────────────────────────────────────
+function parseFlags(cmd) {
+  // strip leading "llano score"
+  cmd = cmd.replace(/^\s*llano\s+score\s*/, "");
+  var flags = { via: [] };
+  var re = /--(\w+)\s+(?:"([^"]*)"|(\S+))/g;
+  var m;
+  while ((m = re.exec(cmd)) !== null) {
+    var key = m[1];
+    var val = m[2] !== undefined ? m[2] : m[3];
+    if (key === "via") { flags.via.push(val); }
+    else               { flags[key] = val; }
+  }
+  return flags;
+}
+
+// ── Geocode via Nominatim ─────────────────────────────────────────────────────
+function geocode(address) {
+  var url = "https://nominatim.openstreetmap.org/search?" +
+    "q=" + encodeURIComponent(address) +
+    "&format=json&limit=1&countrycodes=us,mx";
+  return fetch(url, { headers: { "Accept": "application/json",
+                                  "User-Agent": "llano-demo/1.0" } })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.length) throw new Error("Could not geocode: " + address);
+      var lon = parseFloat(data[0].lon);
+      var lat = parseFloat(data[0].lat);
+      if (lat < TX_BBOX.minLat || lat > TX_BBOX.maxLat ||
+          lon < TX_BBOX.minLon || lon > TX_BBOX.maxLon) {
+        throw new Error("Address outside Texas: " + address);
+      }
+      return [lon, lat];
+    });
+}
+
+// ── Formatting ────────────────────────────────────────────────────────────────
+function fmtDur(secs) {
+  secs = parseInt(secs, 10);
+  var h = Math.floor(secs / 3600);
+  var m = Math.floor((secs % 3600) / 60);
+  return h > 0 ? h + "h " + String(m).padStart(2,"0") + "m" : m + "m";
+}
+function fmtNum(n) {
+  return parseInt(n, 10).toLocaleString();
+}
+function scalar(v) {
+  return Array.isArray(v) ? v[0] : v;
+}
+
+// ── Spinner — |:| logo with colon sliding down like a passing lane marker ─────
+function spinner(msg) {
+  var OFFSETS = ["-0.35em", "-0.18em", "0em", "0.18em", "0.35em", "0.18em", "0em", "-0.18em"];
+  var fi = 0;
+
+  function frame(f) {
+    return '<span style="color:#3a3d4a">|</span>' +
+           '<span style="color:#F97316;font-weight:700;display:inline-block;transform:translateY(' + OFFSETS[f] + ')">:</span>' +
+           '<span style="color:#3a3d4a">|</span>';
+  }
+
+  var el = lineHTML(frame(fi) + '  <span style="color:#8b8fa8">' + msg + "</span>");
+
+  var tid = setInterval(function () {
+    fi = (fi + 1) % OFFSETS.length;
+    el.innerHTML = frame(fi) + '  <span style="color:#8b8fa8">' + msg + "</span>";
+  }, 120);
+
+  return function (done) {
+    clearInterval(tid);
+    el.innerHTML =
+      '  <span style="color:#34d399">\u2713</span>  ' +
+      '<span style="color:#8b8fa8">' + (done || msg) + "</span>";
+  };
+}
+
+// ── Render results ────────────────────────────────────────────────────────────
+function renderResults(routes, flags) {
+  // Sort by trips_per_crash desc (safest first)
+  var ranked = routes.slice().sort(function(a, b) {
+    return (scalar(b.trips_per_crash)||0) - (scalar(a.trips_per_crash)||0);
+  });
+
+  var durVals = ranked.map(function(r) { return scalar(r.duration)||scalar(r.duration_secs)||0; });
+  var fastestDur = Math.min.apply(null, durVals);
+
+  blank();
+
+  // Header
+  var departureLine = flags.depart
+    ? "  depart " + flags.depart
+    : flags.arrive
+      ? "  arrive " + flags.arrive
+      : "";
+  var fromTo = (flags.from||"") + "  →  " + (flags.to||"");
+  line(fromTo + (departureLine ? "  " + departureLine : ""), "t-out-muted");
+  blank();
+
+  // Table header
+  var tbl = document.createElement("table");
+  tbl.className = "route-table";
+  var thead = tbl.createTHead();
+  var hrow = thead.insertRow();
+  ["","Route","Time","+Time","Safety","RR"].forEach(function(h) {
+    var th = document.createElement("th");
+    th.textContent = h;
+    hrow.appendChild(th);
+  });
+
+  var tbody = tbl.createTBody();
+  ranked.forEach(function(r, i) {
+    var tpc  = scalar(r.trips_per_crash) || 0;
+    var dur  = scalar(r.duration) || scalar(r.duration_secs) || 0;
+    var lbl  = scalar(r.name) || scalar(r.label) || ("Route " + (i+1));
+    var extra = dur - fastestDur;
+    var isBest = i === 0;
+    var rr = tpc > 0 && !isBest
+      ? (scalar(ranked[0].trips_per_crash) / tpc).toFixed(2) + "\u00d7"
+      : "1.0\u00d7";
+
+    var row = tbody.insertRow();
+    row.style.opacity = isBest ? "1" : "0.75";
+
+    var cells = [
+      { text: isBest ? "\u2605" : String(i+1), cls: "td-rank" },
+      { text: lbl },
+      { text: fmtDur(dur) },
+      { text: extra > 0 ? "+" + fmtDur(extra) : "", cls: "td-muted" },
+      { text: tpc > 0 ? "1 in " + fmtNum(tpc) + " trips" : "\u2014", cls: "td-safety" },
+      { text: rr, cls: "td-rr" + (isBest ? " td-rr-best" : "") }
+    ];
+
+    cells.forEach(function(c) {
+      var td = document.createElement("td");
+      td.textContent = c.text;
+      if (c.cls) td.className = c.cls;
+      row.appendChild(td);
+    });
+  });
+
+  var wrapper = document.createElement("div");
+  wrapper.className = "t-out-line";
+  wrapper.style.overflowX = "auto";
+  wrapper.appendChild(tbl);
+  output.appendChild(wrapper);
+  output.scrollTop = output.scrollHeight;
+
+  blank();
+
+  // Map
+  renderMap(ranked);
+}
+
+// ── Leaflet map ───────────────────────────────────────────────────────────────
+function routeSubseg(lngs, lats, frac, half) {
+  half = half || 0.015;
+  var n = lngs.length;
+  if (n < 2) return { lngs: lngs, lats: lats };
+  var cumD = [0];
+  for (var i = 1; i < n; i++) {
+    var dx = lngs[i]-lngs[i-1], dy = lats[i]-lats[i-1];
+    cumD.push(cumD[i-1] + Math.sqrt(dx*dx+dy*dy));
+  }
+  var total = cumD[n-1];
+  var lo = Math.max(0, (frac-half)*total);
+  var hi = Math.min(total, (frac+half)*total);
+  var rl = [], ra = [];
+  for (var j = 0; j < n; j++) {
+    if (cumD[j] >= lo && cumD[j] <= hi) { rl.push(lngs[j]); ra.push(lats[j]); }
+  }
+  if (!rl.length) {
+    var best = 0;
+    var bestD = Infinity;
+    for (var k = 0; k < n; k++) {
+      var d = Math.abs(cumD[k]/total - frac);
+      if (d < bestD) { bestD = d; best = k; }
+    }
+    rl = [lngs[best]]; ra = [lats[best]];
+  }
+  return { lngs: rl, lats: ra };
+}
+
+function extractCoords(coordinates) {
+  if (!coordinates || !coordinates.length) return { lngs: [], lats: [] };
+  if (Array.isArray(coordinates[0]) && typeof coordinates[0][0] === "number") {
+    return {
+      lngs: coordinates.map(function(p) { return p[0]; }),
+      lats: coordinates.map(function(p) { return p[1]; })
+    };
+  }
+  return { lngs: [], lats: [] };
+}
+
+function renderMap(ranked) {
+  var container = document.getElementById("map-container");
+  container.style.display = "block";
+
+  if (leafMap) { leafMap.remove(); leafMap = null; }
+  leafMap = L.map("demo-map", { zoomControl: true, scrollWheelZoom: false });
+
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    attribution: '\u00a9 <a href="https://openstreetmap.org">OSM</a> \u00a9 <a href="https://carto.com">CARTO</a>',
+    subdomains: "abcd", maxZoom: 19
+  }).addTo(leafMap);
+
+  var allLngs = [], allLats = [];
+
+  // Routes — worst first so best sits on top
+  for (var i = ranked.length - 1; i >= 0; i--) {
+    var r = ranked[i];
+    if (!r.route || !r.route.coordinates) continue;
+    var xy = extractCoords(r.route.coordinates);
+    if (!xy.lngs.length) continue;
+
+    var latlngs = xy.lats.map(function(lat, j) { return [lat, xy.lngs[j]]; });
+    var color = COLORS[i % COLORS.length];
+    var lbl = scalar(r.name) || scalar(r.label) || ("Route " + (i+1));
+    var tpc = scalar(r.trips_per_crash) || 0;
+    var dur = scalar(r.duration) || scalar(r.duration_secs) || 0;
+
+    L.polyline(latlngs, {
+      color: color, weight: i === 0 ? 5 : 3.5,
+      opacity: i === 0 ? 0.9 : 0.5
+    }).bindPopup(
+      "<b style='color:" + color + "'>" + lbl + "</b><br>" +
+      "1 in " + fmtNum(tpc) + " trips<br>" + fmtDur(dur)
+    ).addTo(leafMap);
+
+    allLngs = allLngs.concat(xy.lngs);
+    allLats = allLats.concat(xy.lats);
+  }
+
+  // Hotspots on best route
+  var best = ranked[0];
+  if (best && best.route && best.route.coordinates && best.hotspots) {
+    var bxy = extractCoords(best.route.coordinates);
+    best.hotspots.forEach(function(hs) {
+      var frac = parseFloat(hs.route_fraction) || 0;
+      var seg = routeSubseg(bxy.lngs, bxy.lats, frac, 0.015);
+      if (!seg.lngs.length) return;
+      var ll = seg.lats.map(function(lat, j) { return [lat, seg.lngs[j]]; });
+      L.polyline(ll, { color:"#e11d48", weight:18, opacity:0.18,
+        className:"hs-halo" }).addTo(leafMap);
+      L.polyline(ll, { color:"#e11d48", weight:9, opacity:0.35,
+        className:"hs-halo" }).addTo(leafMap);
+      L.polyline(ll, { color:"#ff2d55", weight:3, opacity:0.9,
+        className:"hs-core" }).addTo(leafMap)
+        .bindTooltip("Hotspot — " + (frac*100).toFixed(1) + "% of route");
+    });
+  }
+
+  // Waypoint markers
+  if (best && best.waypoints) {
+    var labels = "ABCDEFGHIJ";
+    best.waypoints.forEach(function(wp, j) {
+      L.circleMarker([wp[1], wp[0]], {
+        radius: 10, color: "#F97316", fillColor: "#F97316",
+        fillOpacity: 0.9, weight: 0
+      }).bindTooltip(labels[j] || String(j+1), {
+        permanent: true, direction: "center",
+        className: "leaflet-tooltip",
+        offset: [0, 0]
+      }).addTo(leafMap);
+    });
+  }
+
+  // Legend
+  var legendItems = ranked.map(function(r, i) {
+    var lbl = scalar(r.name) || scalar(r.label) || ("Route " + (i+1));
+    var tpc = scalar(r.trips_per_crash) || 0;
+    return "<i style='background:" + COLORS[i%COLORS.length] +
+           ";display:inline-block;width:18px;height:3px;margin-right:6px;vertical-align:middle'></i>" +
+           lbl + " — 1 in " + fmtNum(tpc);
+  }).join("<br>");
+
+  L.control.layers().addTo(leafMap);
+  var legend = L.control({ position: "bottomright" });
+  legend.onAdd = function() {
+    var d = L.DomUtil.create("div", "info legend");
+    d.innerHTML = "<b style='color:#8b8fa8;font-size:.75em'>ROUTES</b><br>" + legendItems;
+    return d;
+  };
+  legend.addTo(leafMap);
+
+  if (allLngs.length) {
+    leafMap.fitBounds([
+      [Math.min.apply(null,allLats), Math.min.apply(null,allLngs)],
+      [Math.max.apply(null,allLats), Math.max.apply(null,allLngs)]
+    ], { padding: [30, 30] });
+  }
+}
+
+// ── Execute command ───────────────────────────────────────────────────────────
+function execute(cmd) {
+  cmd = cmd.trim();
+  if (!cmd) return;
+
+  // Echo command
+  lineHTML('<span style="color:#F97316">$</span> <span class="t-out-cmd">' +
+           cmd.replace(/</g,"&lt;") + '</span>');
+
+  if (!cmd.startsWith("llano score")) {
+    if (cmd === "llano trips" || cmd === "help") {
+      line("Commands: llano score --from ... --to ...", "t-out-muted");
+    } else {
+      line("Unknown command. Try: llano score --from \"Laredo, TX\" --to \"San Antonio, TX\"", "t-out-err");
+    }
+    blank();
+    return;
+  }
+
+  var flags = parseFlags(cmd);
+
+  if (!flags.from) { line("Error: --from is required", "t-out-err"); blank(); return; }
+  if (!flags.to)   { line("Error: --to is required",   "t-out-err"); blank(); return; }
+  if (flags.depart && flags.arrive) {
+    line("Error: --depart and --arrive are mutually exclusive", "t-out-err"); blank(); return;
+  }
+
+  var stopGeo = spinner("Geocoding addresses...");
+  input.disabled = true;
+
+  var addresses = [flags.from].concat(flags.via || []).concat([flags.to]);
+  var geocodePromises = addresses.map(function(a) { return geocode(a); });
+
+  Promise.all(geocodePromises)
+    .then(function(coords) {
+      stopGeo("Geocoded " + addresses.length + " address" + (addresses.length > 1 ? "es" : ""));
+
+      var stopScore = spinner("Routing and scoring...");
+
+      var timestamp = flags.depart
+        ? flags.depart.replace(" ", "T")
+        : null;
+      var arrive = flags.arrive
+        ? flags.arrive.replace(" ", "T")
+        : null;
+      var alts = parseInt(flags.alts || flags.alternatives || 2, 10);
+
+      return fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-API-Key": DEMO_KEY
+        },
+        body: JSON.stringify({
+          waypoints:    coords,
+          timestamp:    timestamp,
+          arrive:       arrive,
+          alternatives: alts,
+          origin_label: addresses[0],
+          dest_label:   addresses[addresses.length - 1]
+        })
+      })
+      .then(function(r) {
+        if (r.status === 429) throw new Error("Rate limit reached — try again in a moment");
+        if (r.status === 401) throw new Error("Demo key invalid");
+        if (!r.ok) throw new Error("API error " + r.status);
+        return r.json();
+      })
+      .then(function(data) {
+        var routes = Array.isArray(data) ? data : (data.routes || []);
+        stopScore("Scored " + routes.length + " route" + (routes.length !== 1 ? "s" : ""));
+        renderResults(routes, flags);
+      });
+    })
+    .catch(function(err) {
+      line("Error: " + err.message, "t-out-err");
+      blank();
+    })
+    .finally(function() {
+      input.disabled = false;
+      input.focus();
+    });
+}
+
+// ── Input handling ────────────────────────────────────────────────────────────
+input.addEventListener("keydown", function(e) {
+  if (e.key === "Enter") {
+    var cmd = input.value;
+    history.unshift(cmd);
+    histIdx = -1;
+    input.value = "";
+    execute(cmd);
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault();
+    if (histIdx < history.length - 1) {
+      histIdx++;
+      input.value = history[histIdx];
+    }
+  } else if (e.key === "ArrowDown") {
+    e.preventDefault();
+    if (histIdx > 0) { histIdx--; input.value = history[histIdx]; }
+    else             { histIdx = -1; input.value = ""; }
+  }
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+welcome();
+setTimeout(function() { input.focus(); }, 100);
+
+})();
+</script>
+```

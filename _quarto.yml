@@ -1,28 +1,18 @@
 project:
   type: website
   output-dir: _site
+  resources:
+    - app.html
+    - darkheader.svg
 
 website:
   title: "Llano"
-  favicon: logo.png
-  navbar:
-    left:
-      - text: "API"
-        href: "#"
-      - text: "Docs"
-        href: "#"
-      - text: "About"
-        href: "#"
-      - text: "Pricing"
-        href: "#"
-    right:
-      - text: "Get Access"
-        href: "#"
+  favicon: favicon.ico
   page-footer:
-    left: "© 2026 Llano. All rights reserved. &nbsp;|&nbsp; Made with ❤️ in Texas"
+    left: "© 2026 Llano. All rights reserved. &nbsp;|&nbsp; Made Deep in the ❤️"
     right:
-      - text: "contact@llano.io"
-        href: "mailto:contact@llano.io"
+      - text: "hello@llano.io"
+        href: "mailto:hello@llano.io"
 
 format:
   html:
