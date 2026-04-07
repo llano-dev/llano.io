@@ -1040,7 +1040,7 @@ best <span class="c-kw">&lt;-</span> resp[[1]]   <span class="c-cm"># sorted saf
     </div>
     <div class="cta-actions">
       <div class="waitlist-form" id="waitlist-form">
-        <input class="waitlist-input" id="waitlist-email" type="email" placeholder="your@email.com" autocomplete="email"/>
+        <input class="waitlist-input" id="waitlist-email" type="email" placeholder="your@email.com" autocomplete="email" autocorrect="off" autocapitalize="off" spellcheck="false"/>
         <button class="btn-primary" onclick="submitWaitlist()" style="cursor:pointer;border:none;white-space:nowrap;">Get Free Access</button>
       </div>
       <span style="font-size:.72em;color:#5a5f72;">We'll send a magic link — no password needed</span>
