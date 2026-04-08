@@ -310,7 +310,7 @@ h2, .page-section h2, .hero h2, section h2 {
   border: 1px solid #2e3140;
   border-radius: 8px;
   overflow: hidden;
-  height: 420px;
+  height: 100%;
 }
 .terminal-chrome {
   background: #1a1c22;
@@ -590,15 +590,6 @@ h2, .page-section h2, .hero h2, section h2 {
 .c-key { color: #06B6D4; }
 
 .docs-fields { display: flex; flex-direction: column; gap: 1.1rem; }
-.docs-fields-wrap { position: relative; }
-.docs-fields-wrap::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 4rem;
-  background: linear-gradient(to bottom, transparent, #0f1117);
-  pointer-events: none;
-}
 .docs-field { display: grid; grid-template-columns: auto 1fr; gap: .5rem 1rem; align-items: baseline; }
 .docs-field-name { font-size: .8em; color: #F97316; font-weight: 600; white-space: nowrap; }
 .docs-field-type { font-size: .72em; color: #8b8fa8; grid-column: 1; }
@@ -1119,7 +1110,7 @@ best <span class="c-kw">&lt;-</span> resp[[1]]   <span class="c-cm"># sorted saf
       </div>
 
       <div class="docs-fields-wrap">
-      <div class="docs-fields" style="max-height:32rem;overflow:hidden;">
+      <div class="docs-fields">
         <div style="font-size:.78em;color:#F97316;margin-bottom:1rem;letter-spacing:.06em">ROUTER AGNOSTIC</div>
         <div style="font-size:.82em;color:#8b8fa8;line-height:1.7;margin-bottom:1.5rem">
           Pass your PC*Miler, TomTom, or HERE API key and we'll call your router on your behalf. Or send raw coordinates, or let Llano route from scratch. The scored response is identical either way.
@@ -1166,7 +1157,6 @@ best <span class="c-kw">&lt;-</span> resp[[1]]   <span class="c-cm"># sorted saf
           <span class="docs-field-desc">Human-readable route name inferred from major roads (e.g. "I-35 N through Austin").</span>
         </div>
       </div>
-      <div style="font-size:.78em;color:#5a5f72;margin-top:.5rem;">...and more. Full reference at <a href="#docs" style="color:#8b8fa8;">api.llano.io/docs</a>.</div>
       </div>
     </div>
   </div>
@@ -1438,7 +1428,7 @@ function renderResults(routes, flags) {
   wrap.className = "t-out-line";
   wrap.appendChild(tbl);
   output.appendChild(wrap);
-  output.scrollTop = output.scrollHeight;
+  output.scrollTop = 0;
   blank();
 
   renderMap(ranked);
