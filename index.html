@@ -1117,17 +1117,42 @@ best <span class="c-kw">&lt;-</span> resp[[1]]   <span class="c-cm"># sorted saf
         <div class="docs-field">
           <span class="docs-field-name">trips_per_crash</span>
           <span class="docs-field-type">number</span>
-          <span class="docs-field-desc">Expected trips between crashes on this route at this time. Higher is safer. Ranked descending.</span>
+          <span class="docs-field-desc">Expected trips between crashes on this route under current conditions. Higher is safer. Ranked descending.</span>
+        </div>
+        <div class="docs-field">
+          <span class="docs-field-name">relative_risk</span>
+          <span class="docs-field-type">number</span>
+          <span class="docs-field-desc">Crash probability relative to the fastest available route. 1.0 is the baseline. 0.62 means 38% safer; 1.3 means 30% riskier.</span>
         </div>
         <div class="docs-field">
           <span class="docs-field-name">dynamic_mult</span>
           <span class="docs-field-type">number</span>
-          <span class="docs-field-desc">Dynamic multiplier on crash probability. 1.0 = clear baseline. Values above 1.0 indicate elevated risk from current conditions.</span>
+          <span class="docs-field-desc">Real-time multiplier applied to the base crash rate. Reflects current weather, time-of-day, and incident conditions. 1.0 = clear baseline.</span>
+        </div>
+        <div class="docs-field">
+          <span class="docs-field-name">duration_secs</span>
+          <span class="docs-field-type">number</span>
+          <span class="docs-field-desc">Estimated drive time in seconds for this route and departure time.</span>
+        </div>
+        <div class="docs-field">
+          <span class="docs-field-name">distance_mi</span>
+          <span class="docs-field-type">number</span>
+          <span class="docs-field-desc">Route distance in miles.</span>
         </div>
         <div class="docs-field">
           <span class="docs-field-name">hotspots</span>
           <span class="docs-field-type">array</span>
-          <span class="docs-field-desc">High-risk segments along the route — each with a route fraction (0–1) and contributing factors.</span>
+          <span class="docs-field-desc">High-risk segments along the route. Each entry includes <code>route_fraction</code> (0–1 position along the route), <code>severity</code>, and <code>factors</code> (e.g. curvature, grade, historical crash density).</span>
+        </div>
+        <div class="docs-field">
+          <span class="docs-field-name">route</span>
+          <span class="docs-field-type">object</span>
+          <span class="docs-field-desc">GeoJSON LineString of the scored path. Drop directly into Mapbox, Leaflet, or any GeoJSON-compatible renderer.</span>
+        </div>
+        <div class="docs-field">
+          <span class="docs-field-name">label</span>
+          <span class="docs-field-type">string</span>
+          <span class="docs-field-desc">Human-readable route name inferred from major roads (e.g. "I-35 N through Austin").</span>
         </div>
       </div>
     </div>
