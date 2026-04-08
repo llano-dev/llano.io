@@ -1343,12 +1343,6 @@ function renderResults(routes, flags) {
   var showTimeCol = true;  // always show — default depart = now
 
   blank();
-  var fromTo = (flags.from||"") + "  \u2192  " + (flags.to||"");
-  var tsLabel = hasDepart ? "  depart " + flags.depart
-              : hasArrive ? "  arrive " + flags.arrive
-              : "  depart " + fmtDateTime(anchorTS);
-  lineHTML('<span style="color:#8b8fa8">' + fromTo + "  " + tsLabel + "</span>");
-  blank();
 
   var tbl = document.createElement("table");
   tbl.className = "route-table";
@@ -1566,6 +1560,17 @@ function execute(cmd) {
     line("Error: --depart and --arrive are mutually exclusive", "t-out-err"); blank(); return;
   }
 
+  // Prettified header — mirrors portal format
+  var _esc = function(s) { return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); };
+  lineHTML('<span style="color:#e2e4e9">' + _esc(flags.from) + ' <span style="color:#5a5f72">\u2192</span> ' + _esc(flags.to) + '</span>');
+  var _ts = flags.depart ? parseTS(flags.depart) : flags.arrive ? parseTS(flags.arrive) : new Date();
+  var _months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  var _h = _ts.getHours(), _m = _ts.getMinutes(), _ampm = _h >= 12 ? "PM" : "AM";
+  _h = _h % 12 || 12;
+  var _prettyTS = _months[_ts.getMonth()] + " " + _ts.getDate() + ", " + _ts.getFullYear() + " @ " + _h + ":" + String(_m).padStart(2,"0") + " " + _ampm;
+  lineHTML('<span style="color:#5a5f72">' + (flags.arrive ? "arrives" : "departs") + ' ' + _prettyTS + '</span>');
+  blank();
+
   var stop = spinner("Geocoding...");
   input.disabled = true;
 
@@ -1665,7 +1670,9 @@ if (isMobile) {
 
 window.acceptSuggestion = function() {
   if (mobileSuggestion) mobileSuggestion.style.display = "none";
-  execute(SUGGESTION);
+  input.value = SUGGESTION;
+  updateGhost();
+  input.focus();
 };
 welcome();
 initMap();
