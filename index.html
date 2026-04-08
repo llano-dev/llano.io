@@ -354,7 +354,7 @@ h2, .page-section h2, .hero h2, section h2 {
 .t-prompt-sym { padding-top: .1em; }
 .t-prompt-sym { color: #F97316; user-select: none; font-family: 'JetBrains Mono', monospace; font-size: .8em; }
 @keyframes t-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-.t-cursor { display: inline-block; width: 2px; height: .8em; background: #F97316; animation: t-blink 1s step-end infinite; vertical-align: middle; margin-right: 1px; }
+.t-cursor { display: inline-block; width: 2px; height: .8em; background: #F97316; animation: t-blink 1s step-end infinite; vertical-align: middle; margin-right: 1px; visibility: hidden; }
 #cmd-input {
   width: 100%;
   background: transparent;
@@ -1197,7 +1197,7 @@ function updateGhost() {
   var focused  = document.activeElement === input;
   if (ghost) ghost.style.display = empty ? "block" : "none";
   var cur = ghost ? ghost.querySelector(".t-cursor") : null;
-  if (cur) cur.style.display = (focused && empty) ? "inline-block" : "none";
+  if (cur) cur.style.visibility = (focused && empty) ? "visible" : "hidden";
   input.style.caretColor = (focused && !empty) ? "#F97316" : "transparent";
   if (mobileSuggestion && isMobile) mobileSuggestion.style.display = (empty && !focused) ? "block" : "none";
 }
@@ -1690,6 +1690,7 @@ window.acceptSuggestion = function() {
 };
 welcome();
 initMap();
+resizeInput();
 updateGhost();
 // Focus only when user scrolls to the demo section, not on page load
 
