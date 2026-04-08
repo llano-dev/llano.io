@@ -310,7 +310,7 @@ h2, .page-section h2, .hero h2, section h2 {
   border: 1px solid #2e3140;
   border-radius: 8px;
   overflow: hidden;
-  min-height: 0;
+  height: 420px;
 }
 .terminal-chrome {
   background: #1a1c22;
@@ -549,7 +549,7 @@ h2, .page-section h2, .hero h2, section h2 {
   grid-template-columns: 1fr 1fr;
   gap: 2.5rem;
   margin-top: 2.5rem;
-  align-items: stretch;
+  align-items: start;
 }
 @media (max-width: 700px) { .docs-grid { grid-template-columns: 1fr; } }
 @media (max-width: 600px) { #example .page-section > div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; } }
@@ -589,7 +589,16 @@ h2, .page-section h2, .hero h2, section h2 {
 .c-cm { color: #8b8fa8; font-style: italic; }
 .c-key { color: #06B6D4; }
 
-.docs-fields { display: flex; flex-direction: column; gap: 1.1rem; overflow-y: auto; }
+.docs-fields { display: flex; flex-direction: column; gap: 1.1rem; }
+.docs-fields-wrap { position: relative; }
+.docs-fields-wrap::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 4rem;
+  background: linear-gradient(to bottom, transparent, #0f1117);
+  pointer-events: none;
+}
 .docs-field { display: grid; grid-template-columns: auto 1fr; gap: .5rem 1rem; align-items: baseline; }
 .docs-field-name { font-size: .8em; color: #F97316; font-weight: 600; white-space: nowrap; }
 .docs-field-type { font-size: .72em; color: #8b8fa8; grid-column: 1; }
@@ -1109,7 +1118,8 @@ best <span class="c-kw">&lt;-</span> resp[[1]]   <span class="c-cm"># sorted saf
 <span class="c-fn">cat</span>(<span class="c-str">"dynamic mult:"</span>, best$dynamic_mult, <span class="c-str">"\n"</span>)</code></pre>
       </div>
 
-      <div class="docs-fields">
+      <div class="docs-fields-wrap">
+      <div class="docs-fields" style="max-height:32rem;overflow:hidden;">
         <div style="font-size:.78em;color:#F97316;margin-bottom:1rem;letter-spacing:.06em">ROUTER AGNOSTIC</div>
         <div style="font-size:.82em;color:#8b8fa8;line-height:1.7;margin-bottom:1.5rem">
           Pass your PC*Miler, TomTom, or HERE API key and we'll call your router on your behalf. Or send raw coordinates, or let Llano route from scratch. The scored response is identical either way.
@@ -1155,6 +1165,8 @@ best <span class="c-kw">&lt;-</span> resp[[1]]   <span class="c-cm"># sorted saf
           <span class="docs-field-type">string</span>
           <span class="docs-field-desc">Human-readable route name inferred from major roads (e.g. "I-35 N through Austin").</span>
         </div>
+      </div>
+      <div style="font-size:.78em;color:#5a5f72;margin-top:.5rem;">...and more. Full reference at <a href="#docs" style="color:#8b8fa8;">api.llano.io/docs</a>.</div>
       </div>
     </div>
   </div>
