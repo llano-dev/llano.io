@@ -267,18 +267,31 @@ h2, .page-section h2, .hero h2, section h2 {
   border-top: 1px solid #1e2026;
   flex-shrink: 0;
 }
-.t-prompt-sym { color: #F97316; font-size: .8em; user-select: none; }
+.t-prompt-sym { color: #F97316; user-select: none; }
 #cmd-input {
   flex: 1;
   background: transparent;
   border: none;
   outline: none;
-  color: #e2e4e9;
-  font-family: 'Sora', sans-serif;
+  color: transparent;
+  font-family: 'JetBrains Mono', monospace;
   font-size: .8em;
   caret-color: #F97316;
+  position: relative;
+  z-index: 1;
 }
 #cmd-input::placeholder { color: #3a3d4a; }
+#cmd-hl {
+  position: absolute;
+  left: 0; top: 50%;
+  transform: translateY(-50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .8em;
+  color: #e2e4e9;
+  pointer-events: none;
+  white-space: pre;
+  z-index: 0;
+}
 .demo-hint {
   font-size: .73em;
   color: #3a3d4a;
@@ -781,10 +794,11 @@ main.content.column-page { border: none !important; box-shadow: none !important;
         </div>
         <div class="terminal-output" id="term-output"></div>
         <div class="terminal-input-row">
-          <span class="t-prompt-sym">$</span>
+          <span class="t-prompt-sym">llano&gt;</span>
           <div style="position:relative;flex:1;display:flex;align-items:center;">
-            <span id="cmd-ghost" style="position:absolute;left:0;top:50%;transform:translateY(-50%);color:#3a3d4a;font-family:'JetBrains Mono',monospace;font-size:.8em;pointer-events:none;white-space:nowrap;overflow:hidden;width:100%">llano score --from "San Antonio" --to "Round Rock, TX"</span>
-            <input id="cmd-input" type="text" autocomplete="off" spellcheck="false" style="background:transparent;position:relative;z-index:1;"/>
+            <span id="cmd-hl"></span>
+            <span id="cmd-ghost" style="position:absolute;left:0;top:50%;transform:translateY(-50%);color:#3a3d4a;font-family:'JetBrains Mono',monospace;font-size:.8em;pointer-events:none;white-space:nowrap;overflow:hidden;width:100%">score --from "San Antonio" --to "Round Rock, TX"</span>
+            <input id="cmd-input" type="text" autocomplete="off" spellcheck="false" style="width:100%;border:none;outline:none;position:relative;z-index:1;"/>
           </div>
         </div>
         <div id="mobile-suggestion" style="display:none;padding:.45rem .6rem .1rem;">
@@ -1076,11 +1090,20 @@ var hotspotControl = null;
 // ── DOM ───────────────────────────────────────────────────────────────────────
 var output      = document.getElementById("term-output");
 var input       = document.getElementById("cmd-input");
-var placeholder = document.getElementById("map-placeholder");
 var ghost       = document.getElementById("cmd-ghost");
-var SUGGESTION  = 'llano score --from "San Antonio" --to "Round Rock, TX"';
+var cmdHl       = document.getElementById("cmd-hl");
+var SUGGESTION  = 'score --from "San Antonio" --to "Round Rock, TX"';
+
+function hlInput(val) {
+  if (!cmdHl) return;
+  if (!val) { cmdHl.innerHTML = ""; return; }
+  var html = val.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  html = html.replace(/(--\w[\w-]*)/g, '<span style="color:#5a5f72">$1</span>');
+  cmdHl.innerHTML = html;
+}
 
 function updateGhost() {
+  hlInput(input.value);
   if (ghost && !isMobile) ghost.style.display = input.value === "" ? "block" : "none";
   if (mobileSuggestion && isMobile) mobileSuggestion.style.display = input.value === "" ? "block" : "none";
 }
