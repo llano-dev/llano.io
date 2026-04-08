@@ -882,7 +882,7 @@ main.content.column-page { border: none !important; box-shadow: none !important;
           <div style="position:relative;flex:1;display:flex;align-items:center;">
             <span id="t-cursor"></span>
             <span id="cmd-hl"></span>
-            <span id="cmd-ghost" style="position:absolute;left:0;top:50%;transform:translateY(-50%);color:#3a3d4a;font-family:'JetBrains Mono',monospace;font-size:.8em;pointer-events:none;white-space:nowrap;overflow:hidden;width:100%">score --from "San Antonio" --to "Round Rock, TX"</span>
+            <span id="cmd-ghost" style="position:absolute;left:5px;top:50%;transform:translateY(-50%);color:#3a3d4a;font-family:'JetBrains Mono',monospace;font-size:.8em;pointer-events:none;white-space:nowrap;overflow:hidden;width:100%">score --from "San Antonio" --to "Round Rock, TX"</span>
             <input id="cmd-input" type="text" autocomplete="off" spellcheck="false" style="width:100%;border:none;outline:none;position:relative;z-index:1;">
           </div>
         </div>
@@ -1189,7 +1189,7 @@ function updateGhost() {
   var empty    = input.value === "";
   var focused  = document.activeElement === input;
   if (ghost) ghost.style.display = (empty && (!isMobile || !focused)) ? "block" : "none";
-  if (tCursor) tCursor.style.display = (empty && focused) ? "block" : "none";
+  if (tCursor) tCursor.style.display = empty ? "block" : "none";
   if (mobileSuggestion && isMobile) mobileSuggestion.style.display = (empty && !focused) ? "block" : "none";
 }
 
@@ -1606,7 +1606,8 @@ function execute(cmd) {
     })
     .finally(function() {
       input.disabled = false;
-      input.focus();
+      if (!isMobile) input.focus();
+      updateGhost();
     });
 }
 
