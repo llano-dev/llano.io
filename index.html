@@ -364,7 +364,7 @@ h2, .page-section h2, .hero h2, section h2 {
   font-family: 'JetBrains Mono', monospace;
   font-size: .8em;
   line-height: 1.5;
-  caret-color: #F97316;
+  caret-color: transparent;
   position: relative;
   z-index: 1;
   resize: none;
@@ -373,6 +373,7 @@ h2, .page-section h2, .hero h2, section h2 {
   margin: 0;
   display: block;
 }
+#cmd-input:focus { caret-color: #F97316; }
 #cmd-input::placeholder { color: #3a3d4a; }
 #cmd-hl {
   position: absolute;
