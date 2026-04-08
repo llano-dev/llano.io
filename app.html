@@ -508,6 +508,7 @@
       border-collapse: collapse;
       width: 100%;
       max-width: 800px;
+      table-layout: fixed;
     }
     .result-table th {
       font-size: .75em;
@@ -517,11 +518,16 @@
       border-bottom: 1px solid var(--border);
       font-weight: 400;
       letter-spacing: .04em;
+      overflow: hidden;
     }
+    .result-table th:first-child { width: 32%; }
     .result-table td {
       padding: 6px 16px 6px 0;
       font-size: .82em;
       border-bottom: 1px solid #1e2130;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .result-table tr.selected td { background: #1e2130; }
     .result-table tr.selected { box-shadow: inset 2px 0 0 var(--orange); }
@@ -5020,11 +5026,16 @@ var ROUTE_COLORS = ["#F97316", "#06B6D4", "#22c55e", "#facc15", "#e879f9"];
       allLatLngs = allLatLngs.concat(latlngs);
     });
 
-    // Origin / destination markers from first route's waypoints
-    var wp = sortedRoutes[0] && sortedRoutes[0].waypoints;
-    if (wp && wp.length >= 2) {
-      mapMarkers.push(L.marker([wp[0][1], wp[0][0]],                   { icon: markerIcon("#F97316") }).addTo(appMap));
-      mapMarkers.push(L.marker([wp[wp.length-1][1], wp[wp.length-1][0]], { icon: markerIcon("#F97316") }).addTo(appMap));
+    // Origin / destination markers — derived from route geometry so coords match polyline
+    var firstGeom = null;
+    for (var gi = 0; gi < sortedRoutes.length; gi++) {
+      var _c = sortedRoutes[gi].route && sortedRoutes[gi].route.coordinates;
+      if (_c && _c.length) { firstGeom = _c; break; }
+    }
+    if (firstGeom) {
+      var _o = firstGeom[0], _d = firstGeom[firstGeom.length - 1];
+      mapMarkers.push(L.marker([_o[1], _o[0]], { icon: markerIcon("#F97316") }).addTo(appMap));
+      mapMarkers.push(L.marker([_d[1], _d[0]], { icon: markerIcon("#F97316") }).addTo(appMap));
     }
 
     if (fitView && allLatLngs.length) {

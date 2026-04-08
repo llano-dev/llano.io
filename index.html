@@ -350,7 +350,7 @@ h2, .page-section h2, .hero h2, section h2 {
   border-top: 1px solid #1e2026;
   flex-shrink: 0;
 }
-.t-prompt-sym { color: #F97316; user-select: none; }
+.t-prompt-sym { color: #F97316; user-select: none; font-family: 'JetBrains Mono', monospace; font-size: .8em; }
 #cmd-input {
   flex: 1;
   background: transparent;
@@ -896,11 +896,6 @@ main.content.column-page { border: none !important; box-shadow: none !important;
 
     </div>
 
-    <div class="demo-hint">
-      Flags: &nbsp;<span>--from</span> &nbsp;<span>--to</span> &nbsp;<span>--via</span>
-      &nbsp;<span>--arrive "YYYY-MM-DD HH:MM"</span> &nbsp;<span>--depart "YYYY-MM-DD HH:MM"</span>
-      &nbsp;·&nbsp; <span>→</span> to accept suggestion &nbsp;·&nbsp; <span>⇥</span> to reset
-    </div>
   </div>
 </section>
 
@@ -1181,7 +1176,7 @@ function hlInput(val) {
   if (!cmdHl) return;
   if (!val) { cmdHl.innerHTML = ""; return; }
   var html = val.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-  html = html.replace(/(--\w[\w-]*)/g, '<span style="color:#5a5f72">$1</span>');
+  html = html.replace(/(--\w[\w-]*)/g,'<span style="color:#5a5f72">$1</span>');
   cmdHl.innerHTML = html;
 }
 
@@ -1533,14 +1528,20 @@ function execute(cmd) {
   cmd = cmd.trim();
   if (!cmd) return;
 
-  output.innerHTML = "";
-  lineHTML('<span style="color:#F97316">$</span> <span style="color:#e2e4e9">' + cmd.replace(/</g,"&lt;") + '</span>');
+  // Strip optional "llano " prefix so both "score ..." and "llano score ..." work
+  var bare = cmd.replace(/^llano\s+/, "");
 
-  if (cmd === "clear" || cmd === "llano clear") {
+  output.innerHTML = "";
+  function hlEcho(s) {
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+            .replace(/(--\w[\w-]*)/g,'<span style="color:#5a5f72">$1</span>');
+  }
+  lineHTML('<span style="color:#F97316;font-family:\'JetBrains Mono\',monospace">llano&gt;</span> <span style="color:#e2e4e9">' + hlEcho(bare) + '</span>');
+
+  if (bare === "clear") {
     output.innerHTML = "";
     input.value = "";
     updateGhost();
-    if (placeholder) placeholder.style.opacity = "1";
     leafMap.eachLayer(function(layer) {
       if (!(layer instanceof L.TileLayer)) leafMap.removeLayer(layer);
     });
@@ -1549,13 +1550,13 @@ function execute(cmd) {
     return;
   }
 
-  if (!cmd.startsWith("llano score")) {
-    line("Unknown command. Try: llano score --from \"San Antonio, TX\" --to \"Round Rock, TX\"", "t-out-err");
+  if (!bare.startsWith("score")) {
+    line("Unknown command. Try: score --from \"San Antonio, TX\" --to \"Round Rock, TX\"", "t-out-err");
     blank();
     return;
   }
 
-  var flags = parseFlags(cmd);
+  var flags = parseFlags(bare);
   if (!flags.from) { line("Error: --from is required", "t-out-err"); blank(); return; }
   if (!flags.to)   { line("Error: --to is required",   "t-out-err"); blank(); return; }
   if (flags.depart && flags.arrive) {
