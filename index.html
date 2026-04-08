@@ -863,7 +863,7 @@ main.content.column-page { border: none !important; box-shadow: none !important;
   <div class="page-section wide">
     <div class="section-label">LIVE DEMO</div>
     <h2 class="anchored">Try It — Texas Routes</h2>
-    <p class="section-sub">Type a <code style="color:#e2e4e9;background:#1a1c22;padding:.1em .4em;border-radius:3px">llano score</code> command below. Geocoding and routing are live.</p>
+    <p class="section-sub">Enter a route below. Geocoding and routing are live.</p>
 
     <div class="demo-split">
 
@@ -873,7 +873,7 @@ main.content.column-page { border: none !important; box-shadow: none !important;
           <div class="t-dot t-dot-r"></div>
           <div class="t-dot t-dot-y"></div>
           <div class="t-dot t-dot-g"></div>
-          <span class="chrome-title"><span class="chrome-brand">|:|</span> llano</span>
+          <span class="chrome-title"><span class="chrome-brand">|<span style="display:inline-block;transform:translateY(0) scaleY(0.45)">|</span>|</span> llano</span>
         </div>
         <div class="terminal-output" id="term-output"></div>
         <div class="terminal-input-row">
@@ -885,7 +885,10 @@ main.content.column-page { border: none !important; box-shadow: none !important;
           </div>
         </div>
         <div id="mobile-suggestion" style="display:none;padding:.45rem .6rem .1rem;">
-          <button onclick="acceptSuggestion()" style="background:#1a1d24;border:1px solid #2e3140;border-radius:4px;color:#3a3d4a;font-family:'JetBrains Mono',monospace;font-size:.72em;padding:.35rem .7rem;cursor:pointer;text-align:left;width:100%;">llano score --from "San Antonio" --to "Round Rock, TX" <span style="color:#5a5f72;float:right;">tap to try →</span></button>
+          <button onclick="acceptSuggestion()" style="background:#1a1d24;border:1px solid #2e3140;border-radius:4px;color:#8b8fa8;font-family:'JetBrains Mono',monospace;font-size:.78em;padding:.5rem .9rem;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:space-between;">
+            <span><span style="color:#e2e4e9">San Antonio</span> <span style="color:#5a5f72">→</span> <span style="color:#e2e4e9">Round Rock, TX</span></span>
+            <span style="color:#F97316;margin-left:.75rem;">Tap to score →</span>
+          </button>
         </div>
       </div>
 
@@ -1228,7 +1231,7 @@ function welcome() {
   var sub = document.createElement("div");
   sub.className = "t-out-line";
   sub.style.cssText = "text-align:center;color:#8b8fa8;margin-top:.4em";
-  sub.textContent = "route intelligence · try a command below";
+  sub.textContent = "route intelligence";
   output.appendChild(sub);
   blank();
 }
@@ -1655,15 +1658,14 @@ window.docsTab = function(lang, btn) {
 var isMobile = window.innerWidth < 769;
 var mobileSuggestion = document.getElementById("mobile-suggestion");
 if (isMobile) {
-  input.placeholder = 'llano score --from "..." --to "..."';
+  input.placeholder = 'score --from "..." --to "..."';
   if (ghost) ghost.style.display = "none";
   if (mobileSuggestion) mobileSuggestion.style.display = "block";
 }
 
 window.acceptSuggestion = function() {
-  input.value = SUGGESTION;
   if (mobileSuggestion) mobileSuggestion.style.display = "none";
-  input.focus();
+  execute(SUGGESTION);
 };
 welcome();
 initMap();
