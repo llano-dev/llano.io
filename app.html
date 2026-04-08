@@ -1238,10 +1238,22 @@
       outline: none;
       font-family: var(--font);
       font-size: 13px;
-      color: var(--text);
+      color: transparent;
       caret-color: var(--orange);
+      position: relative;
+      z-index: 1;
     }
     #cmd-input::placeholder { color: var(--dim); }
+    #cmd-hl {
+      position: absolute;
+      top: 0; left: 0;
+      font-family: var(--font);
+      font-size: 13px;
+      color: var(--text);
+      white-space: pre;
+      pointer-events: none;
+      z-index: 0;
+    }
     #cmd-ghost {
       position: absolute;
       top: 0; left: 0;
@@ -1419,6 +1431,7 @@
       <div id="input-bar">
         <span id="input-prompt">llano&gt;</span>
         <div id="input-wrap">
+          <span id="cmd-hl"></span>
           <span id="cmd-ghost"></span>
           <input id="cmd-input" type="text"
                  autocomplete="off" spellcheck="false"
@@ -1813,31 +1826,35 @@
     return id;
   }
   function persistTrips() {
-    function slimPayload(payload) {
+    function stripPayload(payload, keepGeom) {
       if (!payload || !payload.sorted) return payload;
       return Object.assign({}, payload, {
         sorted: payload.sorted.map(function(r) {
-          // Strip heavy geometry — keep everything needed for table display + rescore
           var s = Object.assign({}, r);
-          if (s.route) s.route = { type: s.route.type, coordinates: s.route.coordinates };
+          if (!keepGeom) delete s.route;
           delete s.hotspots; delete s.scores_raw;
           return s;
         })
       });
     }
-    var full = trips.slice(0, 100).map(function(t) {
-      var c = Object.assign({}, t); delete c.tables; return c;
-    });
-    try {
-      localStorage.setItem("llano_trips", JSON.stringify(full));
-    } catch(e) {
-      // Quota exceeded — retry with geometry stripped from payloads
-      try {
-        var thin = full.map(function(t) {
-          return Object.assign({}, t, { payload: slimPayload(t.payload) });
-        });
-        localStorage.setItem("llano_trips", JSON.stringify(thin));
-      } catch(e2) {}
+    // Build serialisable trip list; tables are always stripped (in-memory only)
+    function build(maxTrips, geomTrips) {
+      return trips.slice(0, maxTrips).map(function(t, i) {
+        var c = Object.assign({}, t);
+        delete c.tables;
+        if (i >= geomTrips) c.payload = stripPayload(t.payload, false);
+        return c;
+      });
+    }
+    // Try increasingly aggressive compression until one fits
+    var attempts = [
+      function() { return build(100, 100); }, // all trips, full geometry
+      function() { return build(100, 15);  }, // all trips, geometry for 15 most recent
+      function() { return build(50,  10);  }, // 50 trips,  geometry for 10 most recent
+      function() { return build(20,  5);   }, // 20 trips,  geometry for 5  most recent
+    ];
+    for (var ai = 0; ai < attempts.length; ai++) {
+      try { localStorage.setItem("llano_trips", JSON.stringify(attempts[ai]())); return; } catch(e) {}
     }
   }
   function loadPersistedTrips() {
@@ -1914,14 +1931,23 @@
   setTimeout(loadTripsFromApi, 500); // after auth/me resolves
 
   // ── Terminal session persistence ──
+  // null  = key never set (save failed or first visit) → fallback to most recent trip
+  // "[]"  = user explicitly cleared                   → show empty
+  // "[…]" = normal restore
+  var _termRaw = localStorage.getItem("llano_terminal");
   var terminalTripIds = [];
-  try { terminalTripIds = JSON.parse(localStorage.getItem("llano_terminal") || "[]"); } catch(e) {}
+  if (_termRaw !== null) { try { terminalTripIds = JSON.parse(_termRaw); } catch(e) {} }
   function persistTerminal() {
     try { localStorage.setItem("llano_terminal", JSON.stringify(terminalTripIds)); } catch(e) {}
   }
   function restoreTerminal() {
     var ids = terminalTripIds.slice();
     terminalTripIds = [];
+    // If the key was never saved (save failed / fresh install), fall back to most recent trip
+    if (!ids.length && localStorage.getItem("llano_terminal") === null) {
+      var recent = trips.find(function(t) { return t.payload && t.payload.sorted && t.payload.sorted.length; });
+      if (recent) ids = [recent.id];
+    }
     ids.forEach(function(id) { loadTrip(id); });
   }
   var activeTags = [];
@@ -2760,7 +2786,6 @@
 
       var serverTripId = trip2 && trip2.trip_id;
       var n = (origRoutes && origRoutes.length) || 1;
-      console.log("[refresh] serverTripId=" + serverTripId + " n=" + n + " tid2=" + tid2);
 
       function applyRoutes(routes) {
         var sc = function(v) { return Array.isArray(v) ? v[0] : v; };
@@ -3150,6 +3175,8 @@
     record.tripId = trip.id;
     trips.unshift(trip);
     persistTrips();
+    // Register in terminal immediately — before any post-render code can throw
+    if (terminalTripIds.indexOf(trip.id) === -1) { terminalTripIds.push(trip.id); persistTerminal(); }
     renderSidebar();
     return trip.id;
   }
@@ -3656,7 +3683,7 @@
     if (!raw) return;
     input.value = "";
     histIdx = -1; histDraft = "";
-    if (typeof cmdHistory !== "undefined") { cmdHistory.push(raw); if (cmdHistory.length > 200) cmdHistory.shift(); }
+    cmdHistory.push(raw); if (cmdHistory.length > 200) cmdHistory.shift(); persistHistory();
     if (typeof updateGhost === "function") updateGhost();
 
     // Normalise smart/curly quotes before any processing
@@ -3686,6 +3713,28 @@
 
     if (cmd === "clear") {
       clearTerminal();
+      return;
+    }
+
+    if (cmd === "debug") {
+      appendLine('<span class="t-prompt">llano&gt; </span><span class="t-cmd">debug</span>');
+      try {
+        var dbgRaw  = localStorage.getItem("llano_trips");
+        var dbgTerm = localStorage.getItem("llano_terminal");
+        var dbgSaved = dbgRaw ? JSON.parse(dbgRaw) : [];
+        appendLine('<span class="t-muted">  localStorage trips:   ' + dbgSaved.length + ' entries, ' + ((dbgRaw||"").length/1024).toFixed(1) + ' KB</span>');
+        dbgSaved.forEach(function(t, i) {
+          var hasPl = t.payload && t.payload.sorted && t.payload.sorted.length;
+          var hasGeom = hasPl && t.payload.sorted.some(function(r) { return r.route && r.route.coordinates && r.route.coordinates.length; });
+          appendLine('<span class="t-muted">    [' + i + '] ' + escHtml(t.from||"?") + ' → ' + escHtml(t.to||"?") + ' | id=' + t.id + ' | payload=' + (hasPl?"✓":"✗") + ' geom=' + (hasGeom?"✓":"✗") + '</span>');
+        });
+        appendLine('<span class="t-muted">  terminal ids (stored): ' + escHtml(dbgTerm||"[]") + '</span>');
+        appendLine('<span class="t-muted">  trips in memory:       ' + trips.length + '</span>');
+        appendLine('<span class="t-muted">  terminal ids (memory): ' + escHtml(JSON.stringify(terminalTripIds)) + '</span>');
+      } catch(dbgErr) {
+        appendLine('<span class="t-warn">  debug error: ' + escHtml(String(dbgErr)) + '</span>');
+      }
+      appendLine('');
       return;
     }
 
@@ -4049,7 +4098,6 @@
       wrapper.dataset.tripId = tripId;
       tagZoneEl.dataset.tripId = tripId;
       renderTagZone(tagZoneEl, tripId);
-      if (terminalTripIds.indexOf(tripId) === -1) { terminalTripIds.push(tripId); persistTerminal(); }
       delBtn.onclick = (function(tid, tbid) {
         return function(e) { e.stopPropagation(); deleteTable(tid, tbid); };
       })(tripId, tableId);
@@ -4378,9 +4426,21 @@
   var SUGGESTION = 'score --from "Austin" --to "Round Rock"';
   var cmdInput = document.getElementById("cmd-input");
   var cmdGhost = document.getElementById("cmd-ghost");
+  var cmdHl    = document.getElementById("cmd-hl");
   var cmdHistory = [], histIdx = -1, histDraft = "";
+  try { var _h = localStorage.getItem("llano_cmd_history"); if (_h) cmdHistory = JSON.parse(_h); } catch(e) {}
+  function persistHistory() { try { localStorage.setItem("llano_cmd_history", JSON.stringify(cmdHistory.slice(-200))); } catch(e) {} }
+
+  function hlInput(val) {
+    if (!val) { cmdHl.innerHTML = ""; return; }
+    // Highlight --flag tokens in soft orange; everything else stays default
+    var html = val.replace(/(&)/g, "&amp;").replace(/(<)/g, "&lt;").replace(/(>)/g, "&gt;");
+    html = html.replace(/(--\w[\w-]*)/g, '<span style="color:var(--dim)">$1</span>');
+    cmdHl.innerHTML = html;
+  }
 
   function updateGhost() {
+    hlInput(cmdInput.value);
     if (cmdInput.value === "") {
       cmdGhost.textContent = SUGGESTION;
       cmdGhost.style.left = "0px";
