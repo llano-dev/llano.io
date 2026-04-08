@@ -795,7 +795,6 @@ main.content.column-page { border: none !important; box-shadow: none !important;
       <!-- Map (always visible) -->
       <div class="demo-map-wrap">
         <div id="demo-map"></div>
-        <div class="map-placeholder" id="map-placeholder">enter a route to see it mapped</div>
       </div>
 
     </div>
