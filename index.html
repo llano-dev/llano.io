@@ -352,6 +352,8 @@ h2, .page-section h2, .hero h2, section h2 {
   flex-shrink: 0;
 }
 .t-prompt-sym { color: #F97316; user-select: none; font-family: 'JetBrains Mono', monospace; font-size: .8em; }
+@keyframes t-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+#t-cursor { display: none; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 2px; height: .85em; background: #F97316; animation: t-blink 1s step-end infinite; pointer-events: none; }
 #cmd-input {
   flex: 1;
   background: transparent;
@@ -878,6 +880,7 @@ main.content.column-page { border: none !important; box-shadow: none !important;
         <div class="terminal-input-row">
           <span class="t-prompt-sym">llano&gt;</span>
           <div style="position:relative;flex:1;display:flex;align-items:center;">
+            <span id="t-cursor"></span>
             <span id="cmd-hl"></span>
             <span id="cmd-ghost" style="position:absolute;left:0;top:50%;transform:translateY(-50%);color:#3a3d4a;font-family:'JetBrains Mono',monospace;font-size:.8em;pointer-events:none;white-space:nowrap;overflow:hidden;width:100%">score --from "San Antonio" --to "Round Rock, TX"</span>
             <input id="cmd-input" type="text" autocomplete="off" spellcheck="false" style="width:100%;border:none;outline:none;position:relative;z-index:1;">
@@ -1169,6 +1172,7 @@ var hotspotControl = null;
 var output      = document.getElementById("term-output");
 var input       = document.getElementById("cmd-input");
 var ghost       = document.getElementById("cmd-ghost");
+var tCursor     = document.getElementById("t-cursor");
 var cmdHl       = document.getElementById("cmd-hl");
 var SUGGESTION  = 'score --from "San Antonio" --to "Round Rock, TX"';
 
@@ -1182,8 +1186,11 @@ function hlInput(val) {
 
 function updateGhost() {
   hlInput(input.value);
-  if (ghost && !isMobile) ghost.style.display = input.value === "" ? "block" : "none";
-  if (mobileSuggestion && isMobile) mobileSuggestion.style.display = input.value === "" ? "block" : "none";
+  var empty    = input.value === "";
+  var focused  = document.activeElement === input;
+  if (ghost) ghost.style.display = (empty && (!isMobile || !focused)) ? "block" : "none";
+  if (tCursor) tCursor.style.display = (empty && focused) ? "block" : "none";
+  if (mobileSuggestion && isMobile) mobileSuggestion.style.display = (empty && !focused) ? "block" : "none";
 }
 
 // ── Map init (always visible, Texas overview) ─────────────────────────────────
@@ -1344,13 +1351,15 @@ function renderResults(routes, flags) {
   var tbl = document.createElement("table");
   tbl.className = "route-table";
   var thead = tbl.createTHead(), hrow = thead.insertRow();
-  ["","Route","Time","+Time",timeColHdr,"Relative Risk","Safety"].forEach(function(h) {
+  ["","Route","Miles","Time","+Time",timeColHdr,"Relative Risk","Absolute Risk"].forEach(function(h) {
     var th = document.createElement("th"); th.textContent = h; hrow.appendChild(th);
   });
   var tbody = tbl.createTBody();
   ranked.forEach(function(r, i) {
     var tpc  = scalar(r.trips_per_crash) || 0;
     var dur  = scalar(r.duration) || scalar(r.duration_secs) || 0;
+    var dist = scalar(r.distance_mi) || scalar(r.distance);
+    var distStr = dist ? Math.round(dist) + " mi" : "\u2014";
     var lbl  = scalar(r.name) || scalar(r.label) || ("Route " + (i+1));
     var extra = dur - fastestDur;
     var isBest = i === 0;
@@ -1370,6 +1379,7 @@ function renderResults(routes, flags) {
     [
       { text: isBest ? "\u2605" : String(i+1), cls: "td-rank" },
       { text: lbl, color: COLORS[i % COLORS.length] },
+      { text: distStr, cls: "td-muted" },
       { text: fmtDur(dur) },
       { text: extra > 0 ? "+" + fmtDur(extra) : "", cls: "td-muted" },
       { text: routeTimeStr, cls: "td-muted" },
@@ -1635,6 +1645,8 @@ input.addEventListener("keydown", function(e) {
   }
 });
 input.addEventListener("input", updateGhost);
+input.addEventListener("focus", updateGhost);
+input.addEventListener("blur",  updateGhost);
 
 // ── Docs tabs ─────────────────────────────────────────────────────────────────
 window.docsTab = function(lang, btn) {
@@ -1651,7 +1663,7 @@ window.docsTab = function(lang, btn) {
 var isMobile = window.innerWidth < 769;
 var mobileSuggestion = document.getElementById("mobile-suggestion");
 if (isMobile) {
-  if (mobileSuggestion) mobileSuggestion.style.display = "block";
+  mobileSuggestion.style.display = "block";
 }
 
 window.acceptSuggestion = function() {
