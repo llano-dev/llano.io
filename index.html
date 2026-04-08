@@ -1199,17 +1199,20 @@ function lineHTML(html) {
 
 // ── Welcome ───────────────────────────────────────────────────────────────────
 function welcome() {
-  var o = '#F97316', m = '#8b8fa8', b = '#2e3140';
-  var dot = '<span style="color:' + o + ';font-weight:700">\u25cf</span>';
-  function c(html) { lineHTML(html).style.textAlign = 'center'; }
   output.style.justifyContent = 'center';
-  blank();
-  c('<span style="color:' + b + '">|</span>             <span style="color:' + b + '">|</span>');
-  c('<span style="color:' + b + '">|</span>      ' + dot + '      <span style="color:' + b + '">|</span>');
-  c('<span style="color:' + b + '">|</span>             <span style="color:' + b + '">|</span>');
-  c('<span style="color:' + b + '">|</span>      ' + dot + '      <span style="color:' + b + '">|</span>');
-  c('<span style="color:' + b + '">|</span>             <span style="color:' + b + '">|</span>');
-  c('<span style="color:' + m + '">route intelligence</span>');
+  var pre = document.createElement("pre");
+  pre.style.cssText = "color:#F97316;line-height:1.55;background:none;margin:0.5em auto 0;font-family:inherit;font-size:1em;text-align:left;display:inline-block";
+  pre.textContent = " _______________________\n|                       |_ _\\_\n|         LLANO         || |  L_\n|_.====._________.====._||_|__._]\n  (_)(_)         (_)(_)  = =(_)";
+  var wrap = document.createElement("div");
+  wrap.className = "t-out-line";
+  wrap.style.textAlign = "center";
+  wrap.appendChild(pre);
+  output.appendChild(wrap);
+  var sub = document.createElement("div");
+  sub.className = "t-out-line";
+  sub.style.cssText = "text-align:center;color:#8b8fa8;margin-top:.4em";
+  sub.textContent = "route intelligence · try a command below";
+  output.appendChild(sub);
   blank();
 }
 

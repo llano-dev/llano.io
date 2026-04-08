@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Llano — App</title>
   <link rel="icon" href="favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
@@ -744,6 +747,7 @@
       width: 11px; height: 11px; border-radius: 50%;
       background: #ff2d55; border: 2px solid rgba(255,255,255,.25);
       animation: hs-pulse 1.8s ease-in-out infinite;
+      transform-origin: 50% 50%;
     }
     .leaflet-container { background: #0f1117; }
 
@@ -1349,12 +1353,12 @@
 
       <div id="terminal">
         <div class="banner-line" style="display:flex;flex-direction:column;align-items:center;padding:20vh 0 2em;gap:0">
-          <div class="t-line"><span class="t-muted">  ────────────────────────────────────</span></div>
-          <div class="t-line"><span class="t-muted">  |    |    /\    |\  |   /--\ </span></div>
-          <div class="t-line"><span class="t-muted">  |    |   /  \   | \ |  /    \</span></div>
-          <div class="t-line"><span class="t-muted">  |__  |__/____\  |  \|  \____/</span></div>
-          <div class="t-line" style="color:var(--dim)">        route intelligence</div>
-          <div class="t-line"><span class="t-muted">  ────────────────────────────────────</span></div>
+          <pre style="color:var(--orange);line-height:1.6;background:none;margin:0;font-family:var(--font);font-size:1em"> _______________________
+|                       |_ _\_
+|         LLANO         || |  L_
+|_.====._________.====._||_|__._]
+  (_)(_)         (_)(_)  = =(_)</pre>
+          <div class="t-line" style="margin-top:.6em;color:var(--dim);font-size:.8em">  route intelligence · type a command below</div>
         </div>
 
         <div id="demo-section" style="display:none">
@@ -1767,22 +1771,24 @@
 
 <!-- Auth gate — shown when unauthenticated or link expired -->
 <div id="auth-gate" style="display:none;position:fixed;inset:0;background:var(--bg);
-  flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;">
+  flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;
+  font-family:'Sora','Segoe UI',system-ui,sans-serif;">
   <img src="logo-composite5.svg" style="height:72px;width:auto;" alt="Llano" />
   <div id="gate-msg" style="color:var(--muted);font-size:.85em;max-width:320px;text-align:center;">
     Sign in to continue.
   </div>
   <div id="gate-form" style="display:flex;flex-direction:column;gap:8px;width:260px;">
     <input id="gate-email" type="email" placeholder="your@email.com" autocomplete="email"
+      autocorrect="off" autocapitalize="off" spellcheck="false"
       style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;
-        padding:8px 10px;color:var(--text);font-family:var(--font);font-size:.85em;outline:none;
+        padding:8px 10px;color:var(--text);font-family:'Sora','Segoe UI',system-ui,sans-serif;font-size:.85em;outline:none;
         transition:border-color .15s;"
       onfocus="this.style.borderColor='var(--orange)'"
       onblur="this.style.borderColor='var(--border)'"
       onkeydown="if(event.key==='Enter')requestGateAccess()" />
     <button onclick="requestGateAccess()"
       style="padding:8px;background:var(--orange);border:none;border-radius:4px;
-        color:#000;font-family:var(--font);font-size:.85em;font-weight:700;cursor:pointer;
+        color:#000;font-family:'Sora','Segoe UI',system-ui,sans-serif;font-size:.85em;font-weight:700;cursor:pointer;
         transition:opacity .15s;"
       onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
       Send magic link
@@ -1807,12 +1813,32 @@
     return id;
   }
   function persistTrips() {
-    try {
-      var slim = trips.slice(0, 100).map(function(t) {
-        var c = Object.assign({}, t); delete c.tables; return c; // keep payload, drop live tables
+    function slimPayload(payload) {
+      if (!payload || !payload.sorted) return payload;
+      return Object.assign({}, payload, {
+        sorted: payload.sorted.map(function(r) {
+          // Strip heavy geometry — keep everything needed for table display + rescore
+          var s = Object.assign({}, r);
+          if (s.route) s.route = { type: s.route.type, coordinates: s.route.coordinates };
+          delete s.hotspots; delete s.scores_raw;
+          return s;
+        })
       });
-      localStorage.setItem("llano_trips", JSON.stringify(slim));
-    } catch(e) {}
+    }
+    var full = trips.slice(0, 100).map(function(t) {
+      var c = Object.assign({}, t); delete c.tables; return c;
+    });
+    try {
+      localStorage.setItem("llano_trips", JSON.stringify(full));
+    } catch(e) {
+      // Quota exceeded — retry with geometry stripped from payloads
+      try {
+        var thin = full.map(function(t) {
+          return Object.assign({}, t, { payload: slimPayload(t.payload) });
+        });
+        localStorage.setItem("llano_trips", JSON.stringify(thin));
+      } catch(e2) {}
+    }
   }
   function loadPersistedTrips() {
     try {
@@ -2742,18 +2768,47 @@
         var sorted = routes.slice().sort(function(a, b) { return (sc(b.trips_per_crash)||0) - (sc(a.trips_per_crash)||0); });
         var fd = Math.min.apply(null, sorted.map(function(r) { return sc(r.duration_secs) || Infinity; }));
         var bi = 0; for (; bi < sorted.length; bi++) { if ((sc(sorted[bi].duration_secs)||Infinity) - fd <= 30) break; }
-        record.sorted = sorted; record.fastestDur = fd; record.baselineIdx = bi;
-        record.baselineTpc = sc(sorted[bi].trips_per_crash) || 1;
-        record.routeNames = sorted.map(function(r, i) { return (record.routeNames && record.routeNames[i]) || ("Route " + (i+1)); });
+
         var curWrapper = wrapperRef || rb.closest(".table-block");
         var tid = curWrapper ? curWrapper.dataset.tripId : null;
         var trip = tid ? trips.find(function(t) { return t.id === tid; }) : null;
-        if (trip && trip.payload && trip.payload.id === record.id) {
-          trip.payload.sorted = sorted; trip.payload.fastestDur = fd;
-          trip.payload.baselineIdx = bi; trip.payload.baselineTpc = record.baselineTpc;
+
+        // Build a completely fresh record (new id) so the DOM block is fully rebuilt
+        var newRecord = {
+          id:          "tbl-" + Math.random().toString(36).slice(2, 10),
+          from:        record.from,
+          to:          record.to,
+          via:         record.via   || [],
+          depart:      record.depart || "",
+          arrive:      record.arrive || "",
+          sorted:      sorted,
+          fastestDur:  fd,
+          baselineIdx: bi,
+          baselineTpc: sc(sorted[bi].trips_per_crash) || 1,
+          routeNames:  sorted.map(function(r, i) {
+                         return (record.routeNames && record.routeNames[i]) || ("Route " + (i+1));
+                       }),
+          selectedRoute: 0,
+          hdrRoute:    record.hdrRoute,
+          hdrTime:     record.hdrTime,
+          createdAt:   record.createdAt || (trip && trip.createdAt) || Date.now()
+        };
+        newRecord.tripId = tid;
+
+        // Update trip in-place: refresh timestamp + replace tables/payload with rescored data
+        if (trip) {
+          trip.refreshedAt = Date.now();
+          trip.tables = [newRecord];
+          trip.payload = Object.assign({}, trip.payload, {
+            sorted:      sorted,
+            routeNames:  newRecord.routeNames,
+            fastestDur:  fd,
+            baselineIdx: bi,
+            baselineTpc: newRecord.baselineTpc
+          });
         }
-        if (trip) trip.refreshedAt = Date.now();
-        // Save rescored routes as a new DB trip record
+
+        // POST rescored routes to DB → update trip_id for stable future rescores
         if (trip && trip.from && trip.to) {
           fetch("/trips", {
             method: "POST", credentials: "include",
@@ -2764,13 +2819,20 @@
           }).catch(function() {});
         }
         persistTrips();
-        var newBlock = buildTableBlock(record, tid);
-        var oldTbl = curWrapper ? curWrapper.querySelector("table.result-table") : null;
-        var newTbl = newBlock.querySelector("table.result-table");
-        if (oldTbl && newTbl) oldTbl.parentNode.replaceChild(newTbl, oldTbl);
+
+        // Replace the entire DOM block with a freshly built one
+        var newBlock = buildTableBlock(newRecord, tid);
+        if (curWrapper && curWrapper.parentNode) {
+          curWrapper.parentNode.replaceChild(newBlock, curWrapper);
+        }
         rb.classList.remove("spinning"); rb.disabled = false;
+
+        // Refresh sidebar to show updated "refreshed X ago" timestamp
+        if (typeof renderSidebar === "function") renderSidebar();
+
+        // Update map with fresh route geometry (don't rezoom)
         if (typeof updateMap === "function") updateMap(sorted, false);
-        if (typeof highlightRoute === "function") highlightRoute(record.selectedRoute || 0);
+        if (typeof highlightRoute === "function") highlightRoute(0);
       }
 
       function onError(err) {
@@ -3026,17 +3088,15 @@
     var w = document.createElement("div");
     w.className = "banner-line";
     w.style.cssText = "display:flex;flex-direction:column;align-items:center;padding:20vh 0 2em;gap:0";
-    [
-      '<span class="t-muted">  ────────────────────────────────────</span>',
-      '<span class="t-muted">  |    |    /\\    |\\  |   /--\\ </span>',
-      '<span class="t-muted">  |    |   /  \\   | \\ |  /    \\</span>',
-      '<span class="t-muted">  |__  |__/____\\  |  \\|  \\____/</span>',
-      '<span style="color:var(--dim)">        route intelligence</span>',
-      '<span class="t-muted">  ────────────────────────────────────</span>'
-    ].forEach(function(h) {
-      var d = document.createElement("div"); d.className = "t-line"; d.innerHTML = h;
-      w.appendChild(d);
-    });
+    var pre = document.createElement("pre");
+    pre.style.cssText = "color:var(--orange);line-height:1.6;background:none;margin:0;font-family:var(--font);font-size:1em";
+    pre.textContent = " _______________________\n|                       |_ _\\_\n|         LLANO         || |  L_\n|_.====._________.====._||_|__._]\n  (_)(_)         (_)(_)  = =(_)";
+    w.appendChild(pre);
+    var sub = document.createElement("div");
+    sub.className = "t-line";
+    sub.style.cssText = "margin-top:.6em;color:var(--dim);font-size:.8em";
+    sub.textContent = "  route intelligence · type a command below";
+    w.appendChild(sub);
     terminal.appendChild(w);
     if (cursor) terminal.appendChild(cursor);
     else { var cl = document.createElement("div"); cl.id = "cursor-line"; terminal.appendChild(cl); }
@@ -3125,8 +3185,8 @@
     if (typeof updateGhost === "function") updateGhost();
     var last = tables[tables.length - 1];
     if (typeof updateMap === "function" && last.sorted && last.sorted.length) {
-      updateMap(last.sorted, true); highlightRoute(last.selectedRoute || 0);
       if (mapCollapsed) expandMap();
+      updateMap(last.sorted, true); highlightRoute(last.selectedRoute || 0);
     }
     switchView("terminal");
     setTimeout(function() { document.getElementById("cmd-input").focus(); }, 50);
@@ -4909,11 +4969,10 @@ var ROUTE_COLORS = ["#F97316", "#06B6D4", "#22c55e", "#facc15", "#e879f9"];
 
     if (fitView && allLatLngs.length) {
       appMap.invalidateSize();
-      // Defer fitBounds until after any map-pane expand transition (250ms) settles
       setTimeout(function() {
         appMap.invalidateSize();
         appMap.fitBounds(allLatLngs, { padding: [40, 40], maxZoom: 13 });
-      }, 260);
+      }, 400);
     }
   }
 
