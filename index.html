@@ -351,10 +351,7 @@ h2, .page-section h2, .hero h2, section h2 {
   border-top: 1px solid #1e2026;
   flex-shrink: 0;
 }
-.t-prompt-sym { padding-top: .1em; }
-.t-prompt-sym { color: #F97316; user-select: none; font-family: 'JetBrains Mono', monospace; font-size: .8em; }
-@keyframes t-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-.t-cursor { display: inline-block; width: 2px; height: .8em; background: #F97316; animation: t-blink 1s step-end infinite; vertical-align: middle; margin-right: 1px; visibility: hidden; }
+.t-prompt-sym { color: #F97316; user-select: none; font-family: 'JetBrains Mono', monospace; font-size: .8em; padding-top: .1em; }
 #cmd-input {
   width: 100%;
   background: transparent;
@@ -364,7 +361,7 @@ h2, .page-section h2, .hero h2, section h2 {
   font-family: 'JetBrains Mono', monospace;
   font-size: .8em;
   line-height: 1.5;
-  caret-color: transparent;
+  caret-color: #F97316;
   position: relative;
   z-index: 1;
   resize: none;
@@ -890,7 +887,7 @@ main.content.column-page { border: none !important; box-shadow: none !important;
           <span class="t-prompt-sym">llano&gt;</span>
           <div style="position:relative;flex:1;">
             <span id="cmd-hl"></span>
-            <span id="cmd-ghost" style="position:absolute;left:0;top:0;color:#3a3d4a;font-family:'JetBrains Mono',monospace;font-size:.8em;line-height:1.5;pointer-events:none;white-space:pre-wrap;word-wrap:break-word;width:100%"><span class="t-cursor"></span>score --from "San Antonio" --to "Round Rock, TX"</span>
+            <span id="cmd-ghost" style="position:absolute;left:0;top:0;color:#3a3d4a;font-family:'JetBrains Mono',monospace;font-size:.8em;line-height:1.5;pointer-events:none;white-space:pre-wrap;word-wrap:break-word;width:100%">score --from "San Antonio" --to "Round Rock, TX"</span>
             <textarea id="cmd-input" rows="1" autocomplete="off" spellcheck="false" style="width:100%;border:none;outline:none;position:relative;z-index:1;"></textarea>
           </div>
         </div>
@@ -1193,12 +1190,9 @@ function hlInput(val) {
 
 function updateGhost() {
   hlInput(input.value);
-  var empty    = input.value === "";
-  var focused  = document.activeElement === input;
+  var empty   = input.value === "";
+  var focused = document.activeElement === input;
   if (ghost) ghost.style.display = empty ? "block" : "none";
-  var cur = ghost ? ghost.querySelector(".t-cursor") : null;
-  if (cur) cur.style.visibility = (focused && empty) ? "visible" : "hidden";
-  input.style.caretColor = (focused && !empty) ? "#F97316" : "transparent";
   if (mobileSuggestion && isMobile) mobileSuggestion.style.display = (empty && !focused) ? "block" : "none";
 }
 
