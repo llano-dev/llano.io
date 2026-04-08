@@ -885,10 +885,7 @@ main.content.column-page { border: none !important; box-shadow: none !important;
           </div>
         </div>
         <div id="mobile-suggestion" style="display:none;padding:.45rem .6rem .1rem;">
-          <button onclick="acceptSuggestion()" style="background:#1a1d24;border:1px solid #2e3140;border-radius:4px;color:#8b8fa8;font-family:'JetBrains Mono',monospace;font-size:.78em;padding:.5rem .9rem;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:space-between;">
-            <span><span style="color:#e2e4e9">San Antonio</span> <span style="color:#5a5f72">→</span> <span style="color:#e2e4e9">Round Rock, TX</span></span>
-            <span style="color:#F97316;margin-left:.75rem;">Tap to score →</span>
-          </button>
+          <button onclick="acceptSuggestion()" style="background:#1a1d24;border:1px solid #2e3140;border-radius:4px;color:#F97316;font-family:'JetBrains Mono',monospace;font-size:.78em;padding:.5rem .9rem;cursor:pointer;width:100%;text-align:center;">Tap to score →</button>
         </div>
       </div>
 
@@ -1438,9 +1435,6 @@ function routeSubseg(lngs, lats, frac, half) {
 }
 
 function renderMap(ranked) {
-  // Hide placeholder
-  if (placeholder) placeholder.style.opacity = "0";
-
   // Clear existing layers (keep the tile layer)
   leafMap.eachLayer(function(layer) {
     if (!(layer instanceof L.TileLayer)) leafMap.removeLayer(layer);
@@ -1529,11 +1523,6 @@ function execute(cmd) {
   var bare = cmd.replace(/^llano\s+/, "");
 
   output.innerHTML = "";
-  function hlEcho(s) {
-    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
-            .replace(/(--\w[\w-]*)/g,'<span style="color:#5a5f72">$1</span>');
-  }
-  lineHTML('<span style="color:#F97316;font-family:\'JetBrains Mono\',monospace">llano&gt;</span> <span style="color:#e2e4e9">' + hlEcho(bare) + '</span>');
 
   if (bare === "clear") {
     output.innerHTML = "";
@@ -1626,7 +1615,6 @@ input.addEventListener("keydown", function(e) {
     output.innerHTML = "";
     input.value = "";
     updateGhost();
-    if (placeholder) placeholder.style.opacity = "1";
     leafMap.eachLayer(function(layer) {
       if (!(layer instanceof L.TileLayer)) leafMap.removeLayer(layer);
     });
@@ -1663,16 +1651,12 @@ window.docsTab = function(lang, btn) {
 var isMobile = window.innerWidth < 769;
 var mobileSuggestion = document.getElementById("mobile-suggestion");
 if (isMobile) {
-  input.placeholder = 'score --from "..." --to "..."';
-  if (ghost) ghost.style.display = "none";
   if (mobileSuggestion) mobileSuggestion.style.display = "block";
 }
 
 window.acceptSuggestion = function() {
   if (mobileSuggestion) mobileSuggestion.style.display = "none";
-  input.value = SUGGESTION;
-  updateGhost();
-  input.focus();
+  execute(SUGGESTION);
 };
 welcome();
 initMap();
