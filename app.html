@@ -1835,6 +1835,12 @@
     for (var i = 0; i < 6; i++) id += chars[Math.floor(Math.random() * chars.length)];
     return id;
   }
+  // ── Per-user localStorage scoping ──
+  var currentUserEmail = null;
+  function lsKey(name) {
+    return "llano_" + name + (currentUserEmail ? "_" + currentUserEmail : "_anon");
+  }
+
   function persistTrips() {
     function stripPayload(payload, keepGeom) {
       if (!payload || !payload.sorted) return payload;
@@ -1864,24 +1870,24 @@
       function() { return build(20,  5);   }, // 20 trips,  geometry for 5  most recent
     ];
     for (var ai = 0; ai < attempts.length; ai++) {
-      try { localStorage.setItem("llano_trips", JSON.stringify(attempts[ai]())); return; } catch(e) {}
+      try { localStorage.setItem(lsKey("trips"), JSON.stringify(attempts[ai]())); return; } catch(e) {}
     }
   }
   function loadPersistedTrips() {
     try {
-      var raw = localStorage.getItem("llano_trips");
+      var raw = localStorage.getItem(lsKey("trips"));
       if (raw) trips = JSON.parse(raw);
     } catch(e) {}
   }
   function getHiddenTripIds() {
-    try { return JSON.parse(localStorage.getItem("llano_hidden_trip_ids") || "[]"); } catch(e) { return []; }
+    try { return JSON.parse(localStorage.getItem(lsKey("hidden_ids")) || "[]"); } catch(e) { return []; }
   }
   function addHiddenTripIds(ids) {
     try {
       var existing = getHiddenTripIds();
       var merged = existing.concat(ids.filter(function(id) { return existing.indexOf(id) === -1; }));
       if (merged.length > 1000) merged = merged.slice(merged.length - 1000);
-      localStorage.setItem("llano_hidden_trip_ids", JSON.stringify(merged));
+      localStorage.setItem(lsKey("hidden_ids"), JSON.stringify(merged));
     } catch(e) {}
   }
 
@@ -1937,24 +1943,20 @@
       .catch(function() {}); // silent — user may not be logged in yet
   }
   var trips = [];
-  loadPersistedTrips();
-  setTimeout(loadTripsFromApi, 500); // after auth/me resolves
 
   // ── Terminal session persistence ──
   // null  = key never set (save failed or first visit) → fallback to most recent trip
   // "[]"  = user explicitly cleared                   → show empty
   // "[…]" = normal restore
-  var _termRaw = localStorage.getItem("llano_terminal");
   var terminalTripIds = [];
-  if (_termRaw !== null) { try { terminalTripIds = JSON.parse(_termRaw); } catch(e) {} }
   function persistTerminal() {
-    try { localStorage.setItem("llano_terminal", JSON.stringify(terminalTripIds)); } catch(e) {}
+    try { localStorage.setItem(lsKey("terminal"), JSON.stringify(terminalTripIds)); } catch(e) {}
   }
   function restoreTerminal() {
     var ids = terminalTripIds.slice();
     terminalTripIds = [];
     // If the key was never saved (save failed / fresh install), fall back to most recent trip
-    if (!ids.length && localStorage.getItem("llano_terminal") === null) {
+    if (!ids.length && localStorage.getItem(lsKey("terminal")) === null) {
       var recent = trips.find(function(t) { return t.payload && t.payload.sorted && t.payload.sorted.length; });
       if (recent) ids = [recent.id];
     }
@@ -1974,7 +1976,7 @@
 
   const API = "";
 
-  renderSidebar(); // render immediately from localStorage — don't wait for API
+  renderSidebar(); // render empty sidebar immediately — trips load after auth resolves
 
   // Enter on bulk tag input
   document.getElementById("bulk-tag-input") && document.getElementById("bulk-tag-input").addEventListener("keydown", function(e) {
@@ -2091,6 +2093,9 @@
         function s(v) { return Array.isArray(v) ? v[0] : v; }
         me = data;
         var email   = s(data.email);
+
+        // Scope all localStorage keys to this user — must be set before any persist/load calls
+        currentUserEmail = email;
         var role    = s(data.role);
         var domain  = s(data.org.domain);
         var plan    = s(data.org.plan);
@@ -2105,7 +2110,7 @@
 
         document.getElementById("sf-org").textContent   = displayOrg;
         document.getElementById("sf-org").style.display = displayOrg ? "" : "none";
-        var displayName = localStorage.getItem("llano_display_name") || email.split("@")[0];
+        var displayName = localStorage.getItem(lsKey("display_name")) || email.split("@")[0];
         document.getElementById("sf-name").textContent   = displayName;
         document.getElementById("sf-avatar").textContent = displayName[0] || "?";
         document.getElementById("credit-count").textContent = fmtBal(credits);
@@ -2120,7 +2125,7 @@
         }
 
         // Members table — current user row
-        var namePart = localStorage.getItem("llano_display_name") || email.split("@")[0];
+        var namePart = localStorage.getItem(lsKey("display_name")) || email.split("@")[0];
         document.getElementById("me-name").textContent = namePart;
         var meEmailEl = document.getElementById("me-email");
         meEmailEl.textContent = email;
@@ -2131,6 +2136,17 @@
         if (msub) msub.textContent = (isPersonal ? "" : domain + " · ") + "roles control access to billing, dispatch, and reports.";
 
         document.getElementById("cp-credits-remaining").textContent = fmtBal(credits);
+
+        // Load this user's cached trips then sync from API
+        loadPersistedTrips();
+        renderSidebar();
+        loadTripsFromApi();
+
+        // Load terminal session state for this user
+        try {
+          var _termRaw = localStorage.getItem(lsKey("terminal"));
+          if (_termRaw !== null) { try { terminalTripIds = JSON.parse(_termRaw); } catch(e) {} }
+        } catch(e) {}
 
         document.getElementById("layout").style.display = "flex";
         document.getElementById("cmd-input").focus();
@@ -2205,7 +2221,7 @@
 
   function applyDisplayName(name) {
     if (!name) return;
-    localStorage.setItem("llano_display_name", name);
+    localStorage.setItem(lsKey("display_name"), name);
     document.getElementById("sf-name").textContent   = name;
     document.getElementById("sf-avatar").textContent = name[0];
   }
@@ -2238,10 +2254,10 @@
 
   // ── Saved addresses & truck profiles ──
   function getSavedAddresses() {
-    try { return JSON.parse(localStorage.getItem("llano_saved_addresses") || "[]"); } catch(e) { return []; }
+    try { return JSON.parse(localStorage.getItem(lsKey("saved_addresses")) || "[]"); } catch(e) { return []; }
   }
   function getSavedTrucks() {
-    try { return JSON.parse(localStorage.getItem("llano_saved_trucks") || "[]"); } catch(e) { return []; }
+    try { return JSON.parse(localStorage.getItem(lsKey("saved_trucks")) || "[]"); } catch(e) { return []; }
   }
   function renderSavedAddresses() {
     var list = document.getElementById("saved-addresses-list");
@@ -2285,7 +2301,7 @@
     if (!name || !value) return;
     var items = getSavedAddresses();
     items.push({ name: name, value: value });
-    localStorage.setItem("llano_saved_addresses", JSON.stringify(items));
+    localStorage.setItem(lsKey("saved_addresses"), JSON.stringify(items));
     document.getElementById("saved-addr-name").value  = "";
     document.getElementById("saved-addr-value").value = "";
     renderSavedAddresses();
@@ -2321,7 +2337,7 @@
     });
     var items = getSavedTrucks();
     items.push({ name: name, type: currentVehicleType, flags: currentVehicleType === "truck" ? flags : {} });
-    localStorage.setItem("llano_saved_trucks", JSON.stringify(items));
+    localStorage.setItem(lsKey("saved_trucks"), JSON.stringify(items));
     document.getElementById("saved-truck-name").value = "";
     TRUCK_FLAGS.forEach(function(f) { document.getElementById(f.id).checked = false; });
     setVehicleType("passenger");
@@ -2329,28 +2345,28 @@
   }
   function deleteSavedAddress(i) {
     var items = getSavedAddresses(); items.splice(i, 1);
-    localStorage.setItem("llano_saved_addresses", JSON.stringify(items));
+    localStorage.setItem(lsKey("saved_addresses"), JSON.stringify(items));
     renderSavedAddresses();
   }
   function deleteSavedTruck(i) {
     var items = getSavedTrucks(); items.splice(i, 1);
-    localStorage.setItem("llano_saved_trucks", JSON.stringify(items));
+    localStorage.setItem(lsKey("saved_trucks"), JSON.stringify(items));
     // Clear default if it was this profile
-    var def = localStorage.getItem("llano_default_profile") || "";
+    var def = localStorage.getItem(lsKey("default_profile")) || "";
     if (def && !items.find(function(t) { return t.name === def; }))
-      localStorage.removeItem("llano_default_profile");
+      localStorage.removeItem(lsKey("default_profile"));
     renderSavedTrucks();
   }
   function setDefaultProfile(name) {
-    if (name) localStorage.setItem("llano_default_profile", name);
-    else localStorage.removeItem("llano_default_profile");
+    if (name) localStorage.setItem(lsKey("default_profile"), name);
+    else localStorage.removeItem(lsKey("default_profile"));
     var hint = document.getElementById("default-profile-hint");
     if (hint) hint.textContent = name ? "applied automatically when no --profile flag is used" : "";
   }
   function renderDefaultProfileSelect() {
     var sel = document.getElementById("default-profile-select");
     if (!sel) return;
-    var def = localStorage.getItem("llano_default_profile") || "";
+    var def = localStorage.getItem(lsKey("default_profile")) || "";
     var trucks = getSavedTrucks();
     sel.innerHTML = '<option value="">None</option>';
     trucks.forEach(function(t) {
@@ -3567,10 +3583,10 @@
   function addBoardRow(entry) {
     renderBoardRow(entry);
     try {
-      var stored = JSON.parse(localStorage.getItem("llano_board") || "[]");
+      var stored = JSON.parse(localStorage.getItem(lsKey("board")) || "[]");
       stored.unshift(entry);
       if (stored.length > 500) stored.length = 500;
-      localStorage.setItem("llano_board", JSON.stringify(stored));
+      localStorage.setItem(lsKey("board"), JSON.stringify(stored));
     } catch(e) {}
   }
 
@@ -3578,7 +3594,7 @@
 
   function loadBoardFromStorage() {
     try {
-      var stored = JSON.parse(localStorage.getItem("llano_board") || "[]");
+      var stored = JSON.parse(localStorage.getItem(lsKey("board")) || "[]");
       stored.forEach(function(e) { renderBoardRow(e); });
     } catch(e) {}
   }
@@ -3729,8 +3745,8 @@
     if (cmd === "debug") {
       appendLine('<span class="t-prompt">llano&gt; </span><span class="t-cmd">debug</span>');
       try {
-        var dbgRaw  = localStorage.getItem("llano_trips");
-        var dbgTerm = localStorage.getItem("llano_terminal");
+        var dbgRaw  = localStorage.getItem(lsKey("trips"));
+        var dbgTerm = localStorage.getItem(lsKey("terminal"));
         var dbgSaved = dbgRaw ? JSON.parse(dbgRaw) : [];
         appendLine('<span class="t-muted">  localStorage trips:   ' + dbgSaved.length + ' entries, ' + ((dbgRaw||"").length/1024).toFixed(1) + ' KB</span>');
         dbgSaved.forEach(function(t, i) {
@@ -3815,7 +3831,7 @@
 
     // Resolve --profile flag (or default profile) → saved truck profile flags
     var profileFlags = {};
-    var profileName = args["profile"] || localStorage.getItem("llano_default_profile") || "";
+    var profileName = args["profile"] || localStorage.getItem(lsKey("default_profile")) || "";
     if (profileName) {
       var trucks = getSavedTrucks();
       var prof = trucks.find(function(t) { return t.name === profileName.toLowerCase(); });
@@ -4438,8 +4454,8 @@
   var cmdGhost = document.getElementById("cmd-ghost");
   var cmdHl    = document.getElementById("cmd-hl");
   var cmdHistory = [], histIdx = -1, histDraft = "";
-  try { var _h = localStorage.getItem("llano_cmd_history"); if (_h) cmdHistory = JSON.parse(_h); } catch(e) {}
-  function persistHistory() { try { localStorage.setItem("llano_cmd_history", JSON.stringify(cmdHistory.slice(-200))); } catch(e) {} }
+  try { var _h = localStorage.getItem(lsKey("cmd_history")); if (_h) cmdHistory = JSON.parse(_h); } catch(e) {}
+  function persistHistory() { try { localStorage.setItem(lsKey("cmd_history"), JSON.stringify(cmdHistory.slice(-200))); } catch(e) {} }
 
   function hlInput(val) {
     if (!val) { cmdHl.innerHTML = ""; return; }
