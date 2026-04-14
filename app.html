@@ -14,6 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     ::selection { background: transparent; }
@@ -385,8 +386,30 @@
     .tb-btn.primary:hover { background: var(--orange); color: #000; }
 
     /* ── Views ── */
-    #view-terminal, #view-board { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
-    #view-board { display: none; }
+    #view-terminal, #view-board, #view-ai { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+    #view-board, #view-ai { display: none; }
+    #ai-messages::-webkit-scrollbar { width: 4px; }
+    #ai-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .ai-msg { max-width: 680px; line-height: 1.55; font-size: .83em; }
+    .ai-msg.user { align-self: flex-end; background: var(--orange); color: #fff; border-radius: 12px 12px 2px 12px; padding: 8px 12px; }
+    .ai-msg.assistant { align-self: flex-start; background: var(--bg2); border: 1px solid var(--border); border-radius: 2px 12px 12px 12px; padding: 10px 14px; }
+    .ai-msg.assistant p { margin: 0 0 .6em; }
+    .ai-msg.assistant p:last-child { margin-bottom: 0; }
+    .ai-msg.assistant h1,.ai-msg.assistant h2,.ai-msg.assistant h3 { font-size: .95em; font-weight: 600; margin: .8em 0 .3em; color: var(--text); }
+    .ai-msg.assistant ul,.ai-msg.assistant ol { padding-left: 1.4em; margin: .4em 0; }
+    .ai-msg.assistant li { margin-bottom: .2em; }
+    .ai-msg.assistant code { background: var(--bg); border: 1px solid var(--border); border-radius: 3px; padding: 1px 4px; font-family: monospace; font-size: .9em; }
+    .ai-msg.assistant pre { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 8px 10px; overflow-x: auto; margin: .5em 0; }
+    .ai-msg.assistant pre code { background: none; border: none; padding: 0; }
+    .ai-msg.assistant blockquote { border-left: 2px solid var(--border); padding-left: 10px; color: var(--dim); margin: .4em 0; }
+    .ai-msg.assistant table { border-collapse: collapse; font-size: .9em; margin: .6em 0; width: 100%; }
+    .ai-msg.assistant th { background: var(--bg); color: var(--muted); font-weight: 600; text-align: left; padding: 5px 10px; border: 1px solid var(--border); }
+    .ai-msg.assistant td { padding: 4px 10px; border: 1px solid var(--border); }
+    .ai-msg.assistant tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+    .ai-msg.assistant strong { font-weight: 600; color: var(--text); }
+    .ai-msg.assistant hr { border: none; border-top: 1px solid var(--border); margin: .6em 0; }
+    .ai-msg.thinking { align-self: flex-start; color: var(--dim); font-style: italic; font-size: .78em; padding: 4px 0; }
+    .ai-msg.error { align-self: flex-start; color: #e55; font-size: .78em; }
 
     /* ── Terminal ── */
     #terminal {
@@ -1364,6 +1387,7 @@
       <div id="topbar-actions">
         <button class="tb-btn" id="btn-terminal" onclick="switchView('terminal')">⌨ Sandbox</button>
         <button class="tb-btn" id="btn-board"    onclick="switchView('board')">⊞ Board</button>
+        <button class="tb-btn" id="btn-ai"       onclick="switchView('ai')">✦ AI</button>
         <button class="tb-btn primary" onclick="showCertify()">✦ Certify Route</button>
       </div>
     </div>
@@ -1499,6 +1523,29 @@
       </div>
     </div><!-- /view-board -->
 
+    <!-- AI view -->
+    <div id="view-ai" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+      <div id="ai-conv-bar" style="display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0;">
+        <span style="font-size:.78em;color:var(--dim)">Conversation:</span>
+        <select id="ai-conv-select" style="flex:1;background:var(--bg2);border:1px solid var(--border);color:var(--fg);border-radius:4px;padding:3px 6px;font-size:.78em;" onchange="aiSelectConversation(this.value)">
+          <option value="">New conversation</option>
+        </select>
+        <button onclick="aiNewConversation()" style="font-size:.72em;padding:3px 8px;background:none;border:1px solid var(--border);border-radius:4px;color:var(--dim);cursor:pointer;">+ New</button>
+        <select id="ai-model-select" style="background:var(--bg2);border:1px solid var(--border);color:var(--dim);border-radius:4px;padding:3px 6px;font-size:.72em;" onchange="aiSaveModel(this.value)" title="Model">
+          <option value="claude-sonnet-4-6">Sonnet</option>
+          <option value="claude-opus-4-6">Opus</option>
+        </select>
+      </div>
+      <div id="ai-messages" style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;"></div>
+      <div id="ai-input-row" style="padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;">
+        <textarea id="ai-input" rows="2" placeholder="Ask about past trips, optimize a route, analyze your last month…"
+          style="flex:1;background:var(--bg2);border:1px solid var(--border);color:var(--fg);border-radius:6px;padding:8px 10px;font-family:var(--font);font-size:.82em;resize:none;line-height:1.4;"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();aiSend();}"></textarea>
+        <button onclick="aiSend()" id="ai-send-btn"
+          style="align-self:flex-end;padding:8px 16px;background:var(--orange);color:#fff;border:none;border-radius:6px;font-family:var(--font);font-size:.82em;cursor:pointer;white-space:nowrap;">Send</button>
+      </div>
+    </div><!-- /view-ai -->
+
     <!-- Settings view -->
     <div id="view-settings">
 
@@ -1510,7 +1557,7 @@
         <!-- Section nav -->
         <div class="settings-nav">
           <div class="settings-nav-item active" onclick="showSettingsSection('profile',this)">Profile</div>
-          <div class="settings-nav-item" onclick="showSettingsSection('keys',this)">API Keys</div>
+          <div class="settings-nav-item" onclick="showSettingsSection('keys',this)">Llano Keys</div>
           <div class="settings-nav-item" onclick="showSettingsSection('integrations',this)">Integrations</div>
           <div class="settings-nav-item" onclick="showSettingsSection('usage',this)">Usage</div>
           <div class="settings-nav-item" onclick="showSettingsSection('members',this)">Members</div>
@@ -1572,10 +1619,10 @@
           </div>
         </div>
 
-        <!-- ── API Keys ── -->
+        <!-- ── Llano Keys ── -->
         <div class="settings-pane" id="spane-keys" style="display:none">
           <div class="settings-section">
-            <h2>API Keys</h2>
+            <h2>Llano Keys</h2>
             <div class="settings-sub">Keys are tied to your org (<span id="settings-org-domain">—</span>) and share the same credit pool. Shown once on creation.</div>
             <div class="key-reveal" id="key-reveal">
               <div class="key-reveal-value" id="key-reveal-value" onclick="copyRevealedKey(this)" title="Click to copy"></div>
@@ -1841,43 +1888,10 @@
     return "llano_" + name + (currentUserEmail ? "_" + currentUserEmail : "_anon");
   }
 
-  function persistTrips() {
-    function stripPayload(payload, keepGeom) {
-      if (!payload || !payload.sorted) return payload;
-      return Object.assign({}, payload, {
-        sorted: payload.sorted.map(function(r) {
-          var s = Object.assign({}, r);
-          if (!keepGeom) delete s.route;
-          delete s.hotspots; delete s.scores_raw;
-          return s;
-        })
-      });
-    }
-    // Build serialisable trip list; tables are always stripped (in-memory only)
-    function build(maxTrips, geomTrips) {
-      return trips.slice(0, maxTrips).map(function(t, i) {
-        var c = Object.assign({}, t);
-        delete c.tables;
-        if (i >= geomTrips) c.payload = stripPayload(t.payload, false);
-        return c;
-      });
-    }
-    // Try increasingly aggressive compression until one fits
-    var attempts = [
-      function() { return build(100, 100); }, // all trips, full geometry
-      function() { return build(100, 15);  }, // all trips, geometry for 15 most recent
-      function() { return build(50,  10);  }, // 50 trips,  geometry for 10 most recent
-      function() { return build(20,  5);   }, // 20 trips,  geometry for 5  most recent
-    ];
-    for (var ai = 0; ai < attempts.length; ai++) {
-      try { localStorage.setItem(lsKey("trips"), JSON.stringify(attempts[ai]())); return; } catch(e) {}
-    }
-  }
+  // Trip list is server-authoritative — no localStorage persistence
+  function persistTrips() {}
   function loadPersistedTrips() {
-    try {
-      var raw = localStorage.getItem(lsKey("trips"));
-      if (raw) trips = JSON.parse(raw);
-    } catch(e) {}
+    try { localStorage.removeItem(lsKey("trips")); } catch(e) {}
   }
   function getHiddenTripIds() {
     try { return JSON.parse(localStorage.getItem(lsKey("hidden_ids")) || "[]"); } catch(e) { return []; }
@@ -1892,48 +1906,38 @@
   }
 
   function loadTripsFromApi() {
-    var hiddenIds = getHiddenTripIds();
     fetch("/trips", { credentials: "include" })
       .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
       .then(function(serverTrips) {
-        var changed = false;
-        serverTrips.forEach(function(st) {
-          if (hiddenIds.indexOf(st.trip_id) !== -1) return; // hidden by a prior clear or delete
-          var existing = trips.find(function(t) { return t.trip_id && t.trip_id === st.trip_id; });
-          // Fallback: match local trip that never got a trip_id (auth resolved after scoring)
-          if (!existing) {
-            var approxTime = st.created_at ? new Date(st.created_at).getTime() : 0;
-            existing = trips.find(function(t) {
-              return !t.trip_id &&
-                     (t.from || "").trim().toLowerCase() === (st.from || "").trim().toLowerCase() &&
-                     (t.to   || "").trim().toLowerCase() === (st.to   || "").trim().toLowerCase() &&
-                     Math.abs((t.createdAt || 0) - approxTime) < 300000; // 5 min window
-            });
-            if (existing) { existing.trip_id = st.trip_id; changed = true; }
-          }
-          if (existing) {
-            var sTags = (st.tags || []).filter(function(t) { return t && !/^\{/.test(t); });
-            existing.tags      = sTags.length ? sTags : (existing.tags || []);
-            existing.certified = st.certified;
-          } else {
-            trips.push({
-              id:        genLnoId(),
-              trip_id:   st.trip_id,
-              from:      st.from || "",
-              to:        st.to   || "",
-              createdAt: st.created_at ? new Date(st.created_at).getTime() : 0,
-              tags:      (st.tags || []).filter(function(t) { return t && !/^\{/.test(t); }),
-              certified: st.certified || false,
-              tables:    [],
-              payload:   null
-            });
-            changed = true;
-          }
+        // Build an index of in-memory trips by trip_id to preserve payload/tables
+        var memById = {};
+        trips.forEach(function(t) { if (t.trip_id) memById[t.trip_id] = t; });
+
+        // Unwrap R's length-1 array serialization e.g. [5] → 5
+        function sc(v) { return Array.isArray(v) ? v[0] : v; }
+
+        // Replace trip list entirely from server; carry over in-memory payload/tables
+        trips = serverTrips.map(function(st) {
+          var tid = sc(st.trip_id);
+          var mem = memById[tid];
+          return {
+            id:          (mem && mem.id) || genLnoId(),
+            trip_id:     tid,
+            from:        sc(st.from) || "",
+            to:          sc(st.to)   || "",
+            createdAt:   sc(st.created_at) ? new Date(sc(st.created_at)).getTime() : 0,
+            tags:        (st.tags || []).map(sc).filter(function(t) { return t && !/^\{/.test(t); }),
+            certified:   !!sc(st.certified),
+            lineage:     st.lineage      || [],
+            lineage_type: sc(st.lineage_type) || null,
+            departure_at: sc(st.departure_at) || null,
+            tables:      (mem && mem.tables)  || [],
+            payload:     (mem && mem.payload) || null
+          };
         });
+
         trips.sort(function(a, b) { return (b.createdAt||0) - (a.createdAt||0); });
-        if (changed) persistTrips();
         renderSidebar();
-        // Re-render any tag zones already open in the terminal
         trips.forEach(function(trip) {
           document.querySelectorAll('.tag-zone[data-trip-id="' + trip.id + '"]').forEach(function(z) {
             renderTagZone(z, trip.id);
@@ -2137,9 +2141,8 @@
 
         document.getElementById("cp-credits-remaining").textContent = fmtBal(credits);
 
-        // Load this user's cached trips then sync from API
-        loadPersistedTrips();
-        renderSidebar();
+        // Load trips from server — sidebar is always API-authoritative
+        loadPersistedTrips(); // clears any legacy localStorage trips
         loadTripsFromApi();
 
         // Load terminal session state for this user
@@ -2184,9 +2187,12 @@
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: email })
-    }).then(function() {
-      document.getElementById("gate-form").style.display = "none";
-      document.getElementById("gate-msg").textContent = "Check your email — magic link sent to " + email + ".";
+    }).then(function(r) {
+      return r.json().then(function(data) {
+        if (!r.ok || !data.ok) throw new Error();
+        document.getElementById("gate-form").style.display = "none";
+        document.getElementById("gate-msg").textContent = "Check your email — magic link sent to " + email + ".";
+      });
     }).catch(function() {
       btn.textContent = "Send magic link";
       btn.disabled = false;
@@ -2200,11 +2206,14 @@
     currentView = v;
     document.getElementById("view-terminal").style.display = v === "terminal" ? "flex" : "none";
     document.getElementById("view-board").style.display    = v === "board"    ? "flex" : "none";
+    document.getElementById("view-ai").style.display       = v === "ai"       ? "flex" : "none";
     document.getElementById("view-settings").style.display = v === "settings" ? "block" : "none";
     document.getElementById("btn-terminal").style.color    = v === "terminal" ? "var(--orange)" : "";
     document.getElementById("btn-terminal").style.borderColor = v === "terminal" ? "var(--orange)" : "";
     document.getElementById("btn-board").style.color       = v === "board"    ? "var(--orange)" : "";
     document.getElementById("btn-board").style.borderColor = v === "board"    ? "var(--orange)" : "";
+    document.getElementById("btn-ai").style.color          = v === "ai"       ? "var(--orange)" : "";
+    document.getElementById("btn-ai").style.borderColor    = v === "ai"       ? "var(--orange)" : "";
     if (v === "settings") {
       document.getElementById("settings-credits").textContent = fmtBal(credits);
       renderSavedAddresses();
@@ -2212,6 +2221,140 @@
       loadKeys();
       if (typeof loadIntegrations === "function") loadIntegrations();
     }
+    if (v === "ai") aiOnOpen();
+  }
+
+  // ── AI chat ──
+  var aiConversationId = null;
+  var aiConversations  = [];
+  var aiSending        = false;
+
+  function aiOnOpen() {
+    if (aiConversations.length === 0) aiLoadConversations();
+    var saved = localStorage.getItem("llano_ai_model") || "claude-sonnet-4-6";
+    document.getElementById("ai-model-select").value = saved;
+  }
+
+  function aiSaveModel(val) {
+    localStorage.setItem("llano_ai_model", val);
+  }
+
+  function aiCurrentModel() {
+    return document.getElementById("ai-model-select").value || "claude-sonnet-4-6";
+  }
+
+  function aiLoadConversations() {
+    fetch("/ai/conversations", { credentials: "include" })
+      .then(function(r) { return r.ok ? r.json() : []; })
+      .then(function(convs) {
+        aiConversations = Array.isArray(convs) ? convs : [];
+        var sel = document.getElementById("ai-conv-select");
+        sel.innerHTML = '<option value="">New conversation</option>';
+        aiConversations.forEach(function(c) {
+          var opt = document.createElement("option");
+          opt.value = c.id;
+          opt.textContent = c.title || ("Conversation " + c.id);
+          sel.appendChild(opt);
+        });
+      })
+      .catch(function() {});
+  }
+
+  function aiSelectConversation(id) {
+    if (!id) { aiNewConversation(); return; }
+    aiConversationId = parseInt(id);
+    fetch("/ai/conversations/" + id, { credentials: "include" })
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(data) {
+        if (!data) return;
+        var box = document.getElementById("ai-messages");
+        box.innerHTML = "";
+        (data.messages || []).forEach(function(m) {
+          aiAppendMessage(m.role, m.text);
+        });
+      })
+      .catch(function() {});
+  }
+
+  function aiNewConversation() {
+    aiConversationId = null;
+    document.getElementById("ai-messages").innerHTML = "";
+    document.getElementById("ai-conv-select").value = "";
+  }
+
+  function aiAppendMessage(role, text) {
+    var box = document.getElementById("ai-messages");
+    var div = document.createElement("div");
+    div.className = "ai-msg " + role;
+    if (role === "assistant" && typeof marked !== "undefined") {
+      div.innerHTML = marked.parse(text || "");
+    } else {
+      div.textContent = text;
+    }
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+    return div;
+  }
+
+  function aiAppendThinking(text) {
+    var box = document.getElementById("ai-messages");
+    var div = document.createElement("div");
+    div.className = "ai-msg thinking";
+    div.textContent = text;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+    return div;
+  }
+
+  function aiSend() {
+    if (aiSending) return;
+    var input = document.getElementById("ai-input");
+    var text  = (input.value || "").trim();
+    if (!text) return;
+
+    input.value = "";
+    aiSending = true;
+    document.getElementById("ai-send-btn").disabled = true;
+    document.getElementById("ai-send-btn").textContent = "…";
+
+    aiAppendMessage("user", text);
+    var thinking = aiAppendThinking("Thinking…");
+
+    fetch("/ai/chat", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message:         text,
+        model:           aiCurrentModel(),
+        conversation_id: aiConversationId || undefined
+      })
+    })
+    .then(function(r) { return r.ok ? r.json() : Promise.reject(r.status); })
+    .then(function(data) {
+      thinking.remove();
+      if (data.conversation_id && !aiConversationId) {
+        aiConversationId = data.conversation_id;
+        aiLoadConversations();
+        // Select the new conversation in the dropdown once loaded
+        setTimeout(function() {
+          document.getElementById("ai-conv-select").value = aiConversationId;
+        }, 600);
+      }
+      aiAppendMessage("assistant", data.message || "");
+    })
+    .catch(function(err) {
+      thinking.remove();
+      var div = document.createElement("div");
+      div.className = "ai-msg error";
+      div.textContent = "Request failed (" + err + "). Try again.";
+      document.getElementById("ai-messages").appendChild(div);
+    })
+    .finally(function() {
+      aiSending = false;
+      document.getElementById("ai-send-btn").disabled = false;
+      document.getElementById("ai-send-btn").textContent = "Send";
+    });
   }
 
   function toggleSettings() {
@@ -3223,6 +3366,79 @@
     }
 
     if (!tables || !tables.length) {
+      if (trip.trip_id) {
+        switchView("terminal");
+        appendLine('<span class="t-muted" id="trip-load-msg-' + trip.id + '">  Loading route data…</span>');
+        if (terminalTripIds.indexOf(id) === -1) { terminalTripIds.push(id); persistTerminal(); }
+        fetch("/trips/" + trip.trip_id, { credentials: "include" })
+          .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+          .then(function(data) {
+            var msgEl = document.getElementById("trip-load-msg-" + trip.id);
+            if (msgEl) msgEl.remove();
+            var routes = data.routes || [];
+            if (!routes.length) throw new Error("empty");
+            function sc(v) { return Array.isArray(v) ? v[0] : v; }
+            var sorted = routes.slice().sort(function(a, b) {
+              return (sc(b.trips_per_crash)||0) - (sc(a.trips_per_crash)||0);
+            });
+            var fd = Math.min.apply(null, sorted.map(function(r) { return sc(r.duration_secs)||Infinity; }));
+            var bi = 0;
+            for (; bi < sorted.length; bi++) {
+              if ((sc(sorted[bi].duration_secs)||Infinity) - fd <= 30) break;
+            }
+            var rNames = sorted.map(function(r, i) {
+              var lbl = sc(r.label);
+              return (typeof lbl === "string" && lbl) ? lbl : ("Route " + (i + 1));
+            });
+            // Convert UTC departure_at to local datetime string for fmtClock
+            var dep = null;
+            if (data.departure_at) {
+              var _d = new Date(data.departure_at);
+              var _p = function(n) { return n < 10 ? "0"+n : ""+n; };
+              dep = _d.getFullYear()+"-"+_p(_d.getMonth()+1)+"-"+_p(_d.getDate())+
+                    "T"+_p(_d.getHours())+":"+_p(_d.getMinutes())+":00";
+            }
+            var tableId = "tbl-" + Math.random().toString(36).slice(2, 10);
+            var fromLbl = data.from || trip.from || "";
+            var toLbl   = data.to   || trip.to   || "";
+            var hdrRoute = '<span class="t-prompt">llano&gt; </span><span class="t-cmd">score --from "' +
+                           escHtml(fromLbl) + '" --to "' + escHtml(toLbl) + '"</span>';
+            var timeLabel = dep ? "departs" : "";
+            var timeVal   = dep ? (function() {
+              var _d2 = new Date(data.departure_at);
+              return _d2.toLocaleString([], {month:"long",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"});
+            })() : "";
+            var hdrTime = dep ? '<span class="t-muted">' + timeLabel + " " + timeVal + "</span>" : "";
+            var record = {
+              id: tableId,
+              hdrRoute: hdrRoute, hdrTime: hdrTime, timeVal: timeVal,
+              sorted: sorted, fastestDur: fd, baselineIdx: bi,
+              baselineTpc: sc(sorted[bi].trips_per_crash) || 1,
+              routeNames: rNames,
+              depart: dep, arrive: null,
+              from: fromLbl, to: toLbl, via: [],
+              selectedRoute: 0
+            };
+            trip.tables = [record];
+            appendNode(buildTableBlock(record, trip.id));
+            if (typeof updateGhost === "function") updateGhost();
+            if (typeof updateMap === "function" && sorted.length) {
+              if (mapCollapsed) expandMap();
+              updateMap(sorted, true); highlightRoute(0);
+            }
+            setTimeout(function() { document.getElementById("cmd-input").focus(); }, 50);
+          })
+          .catch(function() {
+            var msgEl = document.getElementById("trip-load-msg-" + trip.id);
+            if (msgEl) msgEl.innerHTML = '<span class="t-muted">  Route data unavailable — rescore to restore.</span>';
+            if (trip.from && trip.to) {
+              var cmd = 'score --from "' + trip.from + '" --to "' + trip.to + '"';
+              var input = document.getElementById("cmd-input");
+              if (input) { input.value = cmd; input.focus(); }
+            }
+          });
+        return;
+      }
       switchView("terminal");
       appendLine('<span class="t-muted">  Route data unavailable — rescore to restore.</span>');
       if (trip.from && trip.to) {
@@ -4013,6 +4229,14 @@
           return name + " " + String.fromCharCode(65 + letters[name]++);
         });
       })();
+
+      // Capture implicit departure time so re-renders show correct arrival (not current time)
+      if (!depart && !arrive) {
+        var _now = new Date();
+        var _p2 = function(n) { return n < 10 ? "0" + n : "" + n; };
+        depart = _now.getFullYear() + "-" + _p2(_now.getMonth()+1) + "-" + _p2(_now.getDate()) +
+                 "T" + _p2(_now.getHours()) + ":" + _p2(_now.getMinutes()) + ":00";
+      }
 
       // Build record for session storage and re-render
       var record = {

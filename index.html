@@ -628,7 +628,7 @@ h2, .page-section h2, .hero h2, section h2 {
 .cta-inner h2 { font-size: 1.9em; margin-bottom: .4rem; }
 .cta-inner > p { color: #8b8fa8; font-size: .95em; }
 .cta-actions { display: flex; flex-direction: column; gap: .4rem; width: 100%; }
-.waitlist-form { display: flex; gap: .5rem; align-items: center; width: 100%; }
+.waitlist-form { display: flex; gap: .5rem; align-items: center; width: 100%; min-height: 40px; }
 .waitlist-input {
   background: #1a1d24;
   border: 1px solid #2e3140;
@@ -1623,7 +1623,7 @@ function execute(cmd) {
           waypoints:    coords,
           timestamp:    flags.depart ? flags.depart.replace(" ","T") : null,
           arrive:       flags.arrive ? flags.arrive.replace(" ","T") : null,
-          alternatives: parseInt(flags.alts || flags.alternatives || 2, 10),
+          alternatives: parseInt(flags.alts || flags.alternatives || 0, 10),
           origin_label: addresses[0],
           dest_label:   addresses[addresses.length - 1]
         })
@@ -1728,10 +1728,9 @@ updateGhost();
 
 // ── Waitlist ───────────────────────────────────────────────────────────────────
 function submitWaitlist() {
-  var emailEl  = document.getElementById("waitlist-email");
-  var formEl   = document.getElementById("waitlist-form");
-  var thanksEl = document.getElementById("waitlist-thanks");
-  var email    = emailEl ? emailEl.value.trim() : "";
+  var emailEl = document.getElementById("waitlist-email");
+  var formEl  = document.getElementById("waitlist-form");
+  var email   = emailEl ? emailEl.value.trim() : "";
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     if (emailEl) { emailEl.focus(); emailEl.style.borderColor = "#ef4444"; }
     return;
@@ -1740,9 +1739,13 @@ function submitWaitlist() {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: email })
-  }).catch(function() {});  // fail silently — show thanks regardless
-  if (formEl)   formEl.style.display   = "none";
-  if (thanksEl) thanksEl.style.display = "inline";
+  }).catch(function() {});
+  // Replace form content in-place — min-height keeps layout stable
+  if (formEl) {
+    formEl.innerHTML = '<span style="color:#22C55E;font-size:.85em;">Check your email ✓</span>';
+    var hint = formEl.parentNode && formEl.parentNode.querySelector('span[style*="5a5f72"]');
+    if (hint) hint.style.display = 'none';
+  }
 }
 </script>
 
