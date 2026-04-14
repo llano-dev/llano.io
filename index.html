@@ -1626,7 +1626,7 @@ function execute(cmd) {
           waypoints:    coords,
           timestamp:    flags.depart ? flags.depart.replace(" ","T") : null,
           arrive:       flags.arrive ? flags.arrive.replace(" ","T") : null,
-          alternatives: parseInt(flags.alts || flags.alternatives || 0, 10),
+          alternatives: parseInt(flags.alts || flags.alternatives || 2, 10),
           origin_label: addresses[0],
           dest_label:   addresses[addresses.length - 1]
         })
